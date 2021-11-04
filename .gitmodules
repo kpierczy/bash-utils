@@ -1,0 +1,3 @@
+[submodule "dep/shpec"]
+	path = dep/shpec
+	url = https://github.com/rylnd/shpec
