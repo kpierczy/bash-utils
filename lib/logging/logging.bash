@@ -3,7 +3,7 @@
 # @file     logging.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:08:34 am
-# @modified Thursday, 4th November 2021 6:03:28 pm
+# @modified Friday, 5th November 2021 7:37:09 pm
 # @project  BashUtils
 # @brief
 #    
@@ -58,6 +58,9 @@ var_set_default LOG_TIME_FORMAT ''
 # Configuration of the colout scheme
 var_set_default LOG_COLOUR_WHOLE 0
 
+# Enable switch for printing logs on stdout
+var_set_default LOG_ENABLE_STDOUT 1
+
 # ============================================================ Functions =========================================================== #
 
 # -------------------------------------------------------------------
@@ -72,6 +75,57 @@ _log_exception() {
 
     log error "Logging Exception: ${@}";
 }
+
+# -------------------------------------------------------------------
+# @Enables logging to stdout
+# -------------------------------------------------------------------
+enable_stdout_logs() {
+    LOG_ENABLE_STDOUT=1
+}
+
+# -------------------------------------------------------------------
+# @Disables logging to stdout
+# -------------------------------------------------------------------
+disable_stdout_logs() {
+    LOG_ENABLE_STDOUT=0
+}
+
+# -------------------------------------------------------------------
+# @Enables logging to stdout
+# -------------------------------------------------------------------
+enable_stdout_logs() {
+    LOG_ENABLE_STDOUT=1
+}
+
+# -------------------------------------------------------------------
+# @Disables logging to stdout
+# -------------------------------------------------------------------
+disable_stdout_logs() {
+    LOG_ENABLE_STDOUT=0
+}
+
+# -------------------------------------------------------------------
+# @brief Prints @c 1 to stdout if logging to stdout is enabled or
+#    @c 0 otherwise
+# -------------------------------------------------------------------
+get_stdout_logs_status() {
+    [[ $LOG_ENABLE_STDOUT == "0" ]] && echo "0" || echo "1"
+}
+
+# -------------------------------------------------------------------
+# @brief Sets status of the stdout logs
+# @param status
+#    if @c 0, stdout logs are disabled; otherwise logs are enabled
+# -------------------------------------------------------------------
+set_stdout_logs_status() {
+
+    # Arguments
+    local status=$1
+
+    # Set logs status
+    [[ "$status" == "0" ]] && LOG_ENABLE_STDOUT=0 || LOG_ENABLE_STDOUT=1
+}
+
 
 # -------------------------------------------------------------------
 # @brief Logs a @p msg message with @level log level to the stdout
@@ -118,7 +172,7 @@ _log_exception() {
 #
 # -------------------------------------------------------------------
 log() {
-
+    
     # Arguments
     local level=$1
     local context=''
@@ -213,11 +267,11 @@ log() {
     fi;
 
     # ------------------- Console log --------------------
-    
-    # If log level too high, return
-    if [[ $log_severity -gt $LOG_LEVEL ]]; then
+            
+    # If log level too high or stdout log disabled, return
+    [[ "$LOG_ENABLE_STDOUT" == "1"  ]] && 
+    [[ $log_severity -le $LOG_LEVEL ]] ||
         return
-    fi
     
     # Prepare colours
     local default_colour="${LOG_COLOURS[DEFAULT]}";
@@ -324,3 +378,15 @@ log_warn() {
 log_error() {
     log error "${@}"
 }
+
+# ============================================================= Aliases ============================================================ #
+
+
+# Alias for printing debug log with context provided by LOG_CONTEXT variable
+alias logc_debug='log_debug "$LOG_CONTEXT"'
+# Alias for printing info log with context provided by LOG_CONTEXT variable
+alias logc_info='log_info "$LOG_CONTEXT"'
+# Alias for printing warning log with context provided by LOG_CONTEXT variable
+alias logc_warn='log_warn "$LOG_CONTEXT"'
+# Alias for printing error log with context provided by LOG_CONTEXT variable
+alias logc_error='log_error "$LOG_CONTEXT"'

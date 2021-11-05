@@ -3,7 +3,7 @@
 # @file     download_and_extract.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Friday, 5th November 2021 4:13:38 pm
-# @modified Friday, 5th November 2021 5:38:15 pm
+# @modified Friday, 5th November 2021 7:02:20 pm
 # @project  BashUtils
 # @brief
 #    
@@ -38,13 +38,18 @@ describe download_and_extract
         download_and_extract -v "$URL" "$DDIR" "$EDIR"
         assert equal 0 $?
         # Check if file was downloaded properly
-        [[ -f $DDIR/$(basename $URL) ]]
+        declare ARCHIEVE_NAME=$(basename $URL)
+        declare ARCHIEVE_PATH=$DDIR/$(basename $URL)
+        [[ -f $ARCHIEVE_PATH ]]
         assert equal 0 $?
         # Check if file was downloaded properly
-        declare ARCHIEVE_NAME=$(basename $URL)
         declare ARCHIEVE_PATH=$EDIR/${ARCHIEVE_NAME%.tar.gz}
         [[ -d "$ARCHIEVE_PATH" ]]
         assert equal 0 $?
+
+        # Cleanup
+        rm /tmp/cmake-3.22.0-rc2.tar.gz
+        rm -rf $ARCHIEVE_PATH
 
     ti
 

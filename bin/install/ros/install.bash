@@ -3,7 +3,7 @@
 # @file     install.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Friday, 5th November 2021 5:47:46 pm
+# @modified Friday, 5th November 2021 6:59:50 pm
 # @project  BashUtils
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
@@ -53,7 +53,7 @@ declare -a ROS2_SUPPORTED_DISTROS=(
 )
 
 # Script's log context
-ROS2_LOG_CONTEXT="ros2"
+LOG_CONTEXT="ros2"
 
 # ========================================================== Configruation ========================================================= #
 
@@ -125,7 +125,7 @@ install_ros_bin() {
     install_packages -yv --su -U dependencies_
     
     # Install python dependencies
-    log_info "$ROS2_LOG_CONTEXT" "Installing additional ROS2 python dependencies"
+    logc_info "Installing additional ROS2 python dependencies"
     echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | map pip_install_upgrade_package
 
     # --------------------------- Installation ---------------------------
@@ -137,7 +137,7 @@ install_ros_bin() {
     mkdir -p "$ROS2_INSTALLATION_PATH_DIR"
 
     # Download and extract ROS2-Foxy binaries
-    LOG_CONTEXT=$ROS2_LOG_CONTEXT LOG_TARGET="ROS2 binaries" download_and_extract -v \
+    LOG_CONTEXT=$LOG_CONTEXT LOG_TARGET="ROS2 binaries" download_and_extract -v \
         $(get_ros_bin_url) $(dirname $ROS2_BIN_DOWNLOAD_PATH) $ROS2_INSTALLATION_PATH_DIR || return 1
 
     # Rename destination directory
@@ -145,9 +145,9 @@ install_ros_bin() {
 
     # Remove sources
     if [[ $BASH_UTILS_RM_DOWNLOADED -eq "1" ]]; then
-        log_info "$ROS2_LOG_CONTEXT" "Deleting downloaded sources..."
+        logc_info "Deleting downloaded sources..."
         rm -rf $ROS2_BIN_DOWNLOAD_PATH
-        log_info "$ROS2_LOG_CONTEXT" "Sources deleted"
+        logc_info "Sources deleted"
     fi
     
 }
@@ -206,7 +206,7 @@ install_ros() {
             
             # If the dirst uncompatibile setting detected, print error
             if [[ valid_locale == "0" ]]; then
-                log_error "$ROS2_LOG_CONTEXT" "Locales does not fully support UTF-8 encodeing:"
+                logc_error "Locales does not fully support UTF-8 encodeing:"
                 valid_locale=0
             fi
             # Print incompatibile line to the user
@@ -237,18 +237,18 @@ install_ros() {
     sudo apt update && install_packages -yv --su dependencies
 
     # Install python dependencies
-    log_info "$ROS2_LOG_CONTEXT" "Installing ROS2 python dependencies"
+    logc_info "Installing ROS2 python dependencies"
     echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | map pip_install_upgrade_package
     
     # -------------------------------- Installation ---------------------------------
 
-    log_info "$ROS2_LOG_CONTEXT" "Installing ROS2 to $ROS2_DEFAULT_INSTALLATION_PATH..."
+    logc_info "Installing ROS2 to $ROS2_DEFAULT_INSTALLATION_PATH..."
     
     # Install ROS2 package (desktop-version)
     [[ $src == "pkg" ]] && install_ros_pkg ||
     [[ $src == "bin" ]] && install_ros_bin
 
-    log_info "$ROS2_LOG_CONTEXT" "ROS2 installed"
+    logc_info "ROS2 installed"
 
     # --------------------------- `rosdep` configuration ----------------------------
 
@@ -256,11 +256,11 @@ install_ros() {
     export ROS_PYTHON_VERSION=3
     
     # Initialize rosdep
-    log_info "$ROS2_LOG_CONTEXT" "Updating rosdep..."
+    logc_info "Updating rosdep..."
     [[ -f $ROS2_ROSDEP_DEFAULT_CONFIG_PATH ]] || sudo rosdep init
     rosdep update
     # Install rosdep dependencies
-    log_info "$ROS2_LOG_CONTEXT" "Installing ROS2-rosdep dependencies."
+    logc_info "Installing ROS2-rosdep dependencies."
     rosdep install                                   \
         --rosdistro=$ROS2_DISTRO                     \
         --from-paths $ROS2_INSTALLATION_PATH/share   \
@@ -317,19 +317,19 @@ main() {
     [[ $#      == "2"                                 ]] &&
     [[ $action == "install" || $action == "uninstall" ]] &&
     [[ $src    == "bin"     || $src    == "pkg"       ]] || { 
-        log_error "$ROS2_LOG_CONTEXT" "Usage error"
+        logc_error "Usage error"
         echo $usage
         return 1
     }
 
     # Verify distro
     is_one_of "$ROS2_DISTRO" ROS2_SUPPORTED_DISTROS || {
-        log_error "$ROS2_LOG_CONTEXT" "Unsupported distro given ($(print_var ROS2_DISTRO))"
+        logc_error "Unsupported distro given ($(print_var ROS2_DISTRO))"
         return 1
     }
 
     # Change lgo context
-    ROS2_LOG_CONTEXT="$ROS2_LOG_CONTEXT-$ROS2_DISTRO"
+    LOG_CONTEXT="$LOG_CONTEXT-$ROS2_DISTRO"
 
     # Check usage
     if [[ $action == 'install' ]]; then

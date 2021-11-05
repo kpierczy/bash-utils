@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified Friday, 5th November 2021 5:06:13 am
+# @modified Friday, 5th November 2021 7:29:01 pm
 # @project  Winder
 # @brief
 #    
@@ -66,10 +66,13 @@ colbuild() {
     # Set list of packages as positional arguments
     set -- "${_packages_[@]}"
 
+    # Enable/disable logs
+    is_var_set options[verbose] 
+
     # Set verbosity level
-    local verbose_log=0
+    local INIT_LOGS_STATE=$(get_stdout_logs_status)
     local verbose_compilation=0
-    [[ options[full_verbose] -eq "1" || options[verbose] -eq "1" ]] && verbose_log=1
+    [[ options[full_verbose] -eq "1" || options[verbose] -eq "1" ]] && enable_stdout_logs || disable_stdout_logs
     [[ options[full_verbose] -eq "1"                             ]] && verbose_compilation=1
     
     # Check for dependencies
@@ -86,7 +89,7 @@ colbuild() {
     is_var_set options[up_to] && build_type="--packages-up-to"
 
     # Log initial message
-    [[ verbose_log == 1 ]] && log_info "ros" "Building package(s)"
+    log_info "ros" "Building package(s)"
     # If no packages' names given, build the whole directory
     if [[ $# -eq 0 ]]; then
         colcon build --base-paths "$_src_dir_" $build_flags
@@ -98,16 +101,20 @@ colbuild() {
             # Build package
             if colcon build --base-paths "$_src_dir_" $build_type $package $build_flags; then
 
-                [[ verbose_log == 1 ]] && log_error "ros" "Failed to build \'$package\' package"
+                log_error "ros" "Failed to build \'$package\' package"
+                set_stdout_logs_status "$INIT_LOGS_STATE"
                 return 1
                 
             else
-                [[ verbose_log == 1 ]] && log_info "ros" "\'$package\' package built"
+                log_info "ros" "\'$package\' package built"
             fi
             
         done
     fi
 
+    # Restore logs state
+    set_stdout_logs_status "$INIT_LOGS_STATE"
+    
 }
 
 # -------------------------------------------------------------------

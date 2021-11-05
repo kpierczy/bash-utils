@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Friday, 5th November 2021 1:52:25 am
+# @modified Friday, 5th November 2021 7:26:06 pm
 # @project  BashUtils
 # @brief
 #    
@@ -71,7 +71,11 @@ install_pkg() {
     
     # Arguments
     local package_=$posargs
-    
+
+    # Enable/disable logs
+    local INIT_LOGS_STATE=$(get_stdout_logs_status)
+    is_var_set options[verbose] && enable_stdout_logs || disable_stdout_logs
+
     # Prepare apt context
     local su_command=''
     is_var_set options[superuser] && su_command+='sudo'
@@ -84,14 +88,15 @@ install_pkg() {
     if ! is_pkg_installed $package_; then
 
         # Log info, if verbose
-        is_var_set options[verbose] && log_info "Installing $package_ ..."
+        log_info "Installing $package_ ..."
         # Install package
         ${su_command} apt install ${apt_flags} $package_
         # If package could not be installed, return error
         if $?; then
-            is_var_set options[verbose] && log_info "$package_ installed"
+            log_info "$package_ installed"
         else
-            is_var_set options[verbose] && log_error "$package_ could not be installed"
+            log_error "$package_ could not be installed"
+            set_stdout_logs_status "$INIT_LOGS_STATE"
             return 1
         fi
         
@@ -99,6 +104,9 @@ install_pkg() {
     elif is_var_set options[verbose_installed]; then
         log_info "$package_ already installed"
     fi
+    
+    # Restore logs state
+    set_stdout_logs_status "$INIT_LOGS_STATE"
 
 }
 
@@ -140,6 +148,10 @@ install_packages() {
     local -n packages_=$posargs
     local package
     
+    # Enable/disable logs
+    local INIT_LOGS_STATE=$(get_stdout_logs_status)
+    is_var_set options[verbose] && enable_stdout_logs || disable_stdout_logs
+
     # Prepare apt context
     local su_command=''
     is_var_set options[superuser] && su_command+='sudo'
@@ -158,13 +170,14 @@ install_packages() {
         if ! is_pkg_installed $package; then
 
             # Log info, if verbose
-            is_var_set options[verbose] && log_info "Installing $package ..."
+            log_info "Installing $package ..."
             # Install package
             if ${su_command} apt ${apt_cmd} ${apt_flags} $package; then
-                is_var_set options[verbose] && log_info "$package installed"
+                log_info "$package installed"
             else
                 echo "Goodbye"
-                is_var_set options[verbose] && log_error "$package could not be installed"
+                log_error "$package could not be installed"
+                set_stdout_logs_status "$INIT_LOGS_STATE"
                 return 1
             fi
             
@@ -172,6 +185,10 @@ install_packages() {
         elif is_var_set options[verbose_installed]; then
             log_info "$package already installed"
         fi
+
     done
+
+    # Restore logs status
+    set_stdout_logs_status "$INIT_LOGS_STATE"
 
 }

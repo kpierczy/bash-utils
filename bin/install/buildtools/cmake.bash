@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Friday, 5th November 2021 5:05:18 pm
+# @modified Friday, 5th November 2021 7:40:11 pm
 # @project  BashUtils
 # @brief
 #    
@@ -11,7 +11,6 @@
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
-
 
 # Source BashUitils library
 source $BASH_UTILS_HOME/source_me.bash
@@ -45,12 +44,11 @@ END
 # ============================================================ Constants =========================================================== #
 
 # Logging context of the script
-CONTEXT="cmake"
+LOG_CONTEXT="cmake"
 
 # ========================================================== Configruation ========================================================= #
 
 # Installation directory for the CMake
-
 var_set_default CMAKE_INSTALL_DIR '/opt/cmake'
 # Version of the CMake to be installed
 var_set_default CMAKE_VERSION ''
@@ -63,41 +61,41 @@ var_set_default CMAKE_BIN_URL "https://github.com/Kitware/CMake/releases/downloa
 
 cmake_install_source() {
 
-    log_info "$CONTEXT" "Building CMake..."
+    logc_info "Building CMake..."
     pushd $CMAKE_EXTRACTED_PATH
 
     # Bootstrap CMake
     if ! ./bootstrap --prefix=$CMAKE_INSTALL_DIR; then
         popd
-        log_error "$CONTEXT" "Failed to configure CMake"
+        logc_error "Failed to configure CMake"
         return 1
     fi
     # Build CMake
     if ! make; then
         popd
-        log_error "$CONTEXT" "Failed to build CMake"
+        logc_error "Failed to build CMake"
         return 1
     fi
 
-    log_info "$CONTEXT" "CMake built"
+    logc_info "CMake built"
 
     # Install CMake
     mkdir -p $CMAKE_INSTALL_DIR
     if ! make install; then
         popd
-        log_error "$CONTEXT" "Failed to install CMake"
+        logc_error "Failed to install CMake"
         return 1
     fi
 
     popd
-    log_info "$CONTEXT" "CMake installed"
+    logc_info "CMake installed"
 
     # Remove sources
     if [[ $BASH_UTILS_RM_DOWNLOADED -eq "1" ]]; then
-        log_info "$CONTEXT" "Deleting downloaded sources..."
+        logc_info "Deleting downloaded sources..."
         rm -rf $CMAKE_ARCHIEVE_PATH
         rm -rf $CMAKE_SOURCE_PATH
-        log_info "$CONTEXT" "Sources deleted"
+        logc_info "Sources deleted"
     fi
 
 }
@@ -105,9 +103,9 @@ cmake_install_source() {
 cmake_install_bin() {
 
     # Install CMake
-    log_info "$CONTEXT" "Installing CMake to $CMAKE_INSTALL_DIR"
+    logc_info "Installing CMake to $CMAKE_INSTALL_DIR"
     mv $CMAKE_EXTRACTED_PATH $CMAKE_INSTALL_DIR
-    log_info "$CONTEXT" "Cmake installed"
+    logc_info "Cmake installed"
 
 }
 
@@ -135,12 +133,15 @@ main() {
         return 0
     }
 
+    # Set positional arguments
+    set -- ${posargs[@]}
+
     # Parse arguments
     installation_type=${1:-}
 
     # Verify arguments
     [[ $installation_type == "source" || $installation_type == "bin" ]] || {
-        log_error "$CONTEXT" "Invalid installation type ($installation_type)"
+        logc_error "Invalid installation type ($installation_type)"
         echo $usage
         return 1
     }
@@ -167,7 +168,7 @@ main() {
 
     # Check if CMake version was given
     is_var_set CMAKE_VERSION || {
-        log_error "$CONTEXT" "No CMake version given. Please export CMAKE_VERSION before running the script "
+        logc_error "No CMake version given. Please export CMAKE_VERSION before running the script "
         return 1
     }
 
@@ -178,7 +179,7 @@ main() {
     sudo apt update && install_packages -yv --su dependencies
 
     # Download and extract CMake
-    LOG_CONTEXT=$CONTEXT LOG_TARGET="CMake" download_and_extract -v \
+    LOG_CONTEXT=$LOG_CONTEXT LOG_TARGET="CMake" download_and_extract -v \
         $CMAKE_URL $CMAKE_DOWNLOAD_DIR $CMAKE_DOWNLOAD_DIR || return 1
 
     # Install CMake

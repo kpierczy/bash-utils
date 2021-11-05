@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Friday, 5th November 2021 5:37:50 pm
+# @modified Friday, 5th November 2021 7:22:38 pm
 # @project  BashUtils
 # @brief
 #    
@@ -123,6 +123,10 @@ download_and_extract() {
     ddir_="$2"
     edir_="$3"
 
+    # Enable/disable logs
+    local INIT_LOGS_STATE=$(get_stdout_logs_status)
+    is_var_set options[verbose] && enable_stdout_logs || disable_stdout_logs
+
     # Parse environment
     local CONTEXT_=${LOG_CONTEXT:-}
     local TARGET_=${LOG_TARGET:-"files"}
@@ -135,13 +139,14 @@ download_and_extract() {
     is_var_set options[verbose] || curl_flags+=" -s"
 
     # Download URL
-    is_var_set options[verbose] && log_info "$CONTEXT_" "Downloading $TARGET_ to $ddir_..."
+    log_info "$CONTEXT_" "Downloading $TARGET_ to $ddir_..."
     curl $curl_flags || {
-        is_var_set options[verbose] && log_error "$CONTEXT_" "Failed to download $TARGET_"
+        log_error "$CONTEXT_" "Failed to download $TARGET_"
+        set_stdout_logs_status "$INIT_LOGS_STATE"
         return 1
     }
     
-    is_var_set options[verbose] && log_info "$CONTEXT_" "${TARGET_^} downloaded"
+    log_info "$CONTEXT_" "${TARGET_^} downloaded"
 
     # Get archieve's extension
     local ext_=${ARCHIEVE_PATH_##*.}
@@ -152,7 +157,8 @@ download_and_extract() {
         gz  ) decompression_flag_='-z';;
         bz2 ) decompression_flag_='-j';;
         *   )
-            is_var_set options[verbose] && log_info "$CONTEXT_" "Unknown compression format ($ext_)"
+            log_info "$CONTEXT_" "Unknown compression format ($ext_)"
+            set_stdout_logs_status "$INIT_LOGS_STATE"
             return 1
     esac
 
@@ -160,15 +166,19 @@ download_and_extract() {
     local tar_flags="--directory="$edir_" -x $decompression_flag_"
     # Prepare extraction command
     local ext_cmd="tar $tar_flags -f $ARCHIEVE_PATH_"
-    is_var_set options[verbose] && ext_cmd="extract_with_progress_bar $tar_flags $ARCHIEVE_PATH_"
+    ext_cmd="extract_with_progress_bar $tar_flags $ARCHIEVE_PATH_"
 
     # Extract files
-    is_var_set options[verbose] && log_info "$CONTEXT_" "Extracting $TARGET_ to $edir_ ..."
+    log_info "$CONTEXT_" "Extracting $TARGET_ to $edir_ ..."
     $ext_cmd || {
-        is_var_set options[verbose] && log_error "$CONTEXT_" "Failed to extract $TARGET_"
+        log_error "$CONTEXT_" "Failed to extract $TARGET_"
+        set_stdout_logs_status "$INIT_LOGS_STATE"
         return 1
     }
     
-    is_var_set options[verbose] && log_info "$CONTEXT_" "${TARGET_^} extracted"
+    log_info "$CONTEXT_" "${TARGET_^} extracted"
+
+    # Restore logs state
+    set_stdout_logs_status "$INIT_LOGS_STATE"
     
 }
