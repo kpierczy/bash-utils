@@ -6,6 +6,6 @@
 5. [Bash regex](https://linuxconfig.org/advanced-bash-regex-with-examples)
 
 # Libraries
-1. [bash-lib (cyberark)](https://github.com/cyberark/bash-lib/blob/master/logging/lib)
+1. [bash-lib (cyberark)](https://github.com/cyberark/bash-lib)
 3. [bash-lib (aks)](https://github.com/aks/bash-lib)
 2. [bashlog](https://github.com/Zordrak/bashlog)

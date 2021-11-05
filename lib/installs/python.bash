@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified Thursday, 4th November 2021 12:03:25 am
+# @modified Friday, 5th November 2021 12:53:06 am
 # @project  BashUtils
 # @brief
 #    
@@ -21,7 +21,7 @@
 #    informing user about already met requirements
 # -------------------------------------------------------------------
 _pip_trim_log_output() {
-    grep -v 'Requirement already satisfied' | grep -v 'Requirement already up-to-date'
+    ! grep -v 'Requirement already satisfied' | grep -v 'Requirement already up-to-date'
 }
 
 # ============================================================ Functions =========================================================== #
@@ -58,9 +58,7 @@ get_pip_package_version() {
     local package=$1
     
     # Check if installed
-    package_spec="$(python3 -m pip list | grep "$package")"
-    [[ $? ]] || return 1
-
+    package_spec="$(python3 -m pip list | grep "$package")" || return
     
     # Parse and print package's specification
     echo $(echo "$package_spec" | awk '{print $2}')
@@ -82,7 +80,9 @@ pip_install_package() {
     local package=$1
 
     # Install package
-    python3 -m pip install $package | _pip_trim_log_output
+    ! python3 -m pip install $package | _pip_trim_log_output
+
+    return
 }
 
 # -------------------------------------------------------------------
@@ -94,13 +94,15 @@ pip_install_package() {
 # @param package
 #    name of the package to be upgraded
 # -------------------------------------------------------------------
-pip_upgrade_package() {
+pip_install_upgrade_package() {
 
     # Arguments
     local package=$1
-
+    
     # Upgrade package
-    python3 -m pip install -U $package | _pip_trim_log_output
+    ! python3 -m pip install -U $package | _pip_trim_log_output
+ 
+    return 0
 }
 
 # -------------------------------------------------------------------
@@ -118,5 +120,7 @@ pip_install_requirements() {
     local requirements=$1
 
     # Upgrade package
-    python3 -m pip install -r $requirements | _pip_trim_log_output
+    ! python3 -m pip install -r $requirements | _pip_trim_log_output
+
+    return
 }

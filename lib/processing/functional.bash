@@ -3,7 +3,7 @@
 # @file     functional.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 6:14:24 pm
-# @modified Thursday, 4th November 2021 12:03:34 am
+# @modified Thursday, 4th November 2021 11:23:14 pm
 # @project  BashUtils
 # @brief
 #    

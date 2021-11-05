@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Thursday, 4th November 2021 12:02:50 am
+# @modified Friday, 5th November 2021 5:37:50 pm
 # @project  BashUtils
 # @brief
 #    
@@ -65,4 +65,110 @@ add_to_bashrc() {
         add_to_file "$FILE" "$string" "$comment"
 
     fi
+}
+
+# -------------------------------------------------------------------
+# @brief Downloads @p url from the online server and extracts it's
+#   content to @p dir directory performing decompression based on 
+#   the @p url's extension
+#
+# @param url
+#    URL to be downloaded
+# @param ddir
+#    directory where file should be downloaded
+# @param edir
+#    directory where file should be extracted
+#
+# @returns
+#    @c 0 on success \n
+#    @c 1 on error
+#
+# @options
+#
+#    -v  prints verbose log
+#
+# @environment
+#
+#    LOG_CONTEXT log context to be used when -v option passed
+#    LOG_TARGET  name of the target used in logs when -v option 
+#                passed
+#
+# -------------------------------------------------------------------
+download_and_extract() {
+
+    # Arguments
+    local url_
+    local ddir_
+    local edir_
+
+    # Options
+    local defs=(
+        '-v',verbose,f
+    )
+
+    # Parsed options
+    local -A options
+    local -a posargs
+
+    # Parse options
+    local IFS
+    enable_word_splitting
+    parseopts "$*" defs options posargs
+
+    # Set positional arguments
+    set -- ${posargs[@]}
+
+    # Parse arguments
+    url_="$1"
+    ddir_="$2"
+    edir_="$3"
+
+    # Parse environment
+    local CONTEXT_=${LOG_CONTEXT:-}
+    local TARGET_=${LOG_TARGET:-"files"}
+
+    # Prepare paths
+    local ARCHIEVE_PATH_=$ddir_/$(basename $url_)
+
+    # Prepare curl
+    local curl_flags="-L -C - $url_ -o $ARCHIEVE_PATH_"
+    is_var_set options[verbose] || curl_flags+=" -s"
+
+    # Download URL
+    is_var_set options[verbose] && log_info "$CONTEXT_" "Downloading $TARGET_ to $ddir_..."
+    curl $curl_flags || {
+        is_var_set options[verbose] && log_error "$CONTEXT_" "Failed to download $TARGET_"
+        return 1
+    }
+    
+    is_var_set options[verbose] && log_info "$CONTEXT_" "${TARGET_^} downloaded"
+
+    # Get archieve's extension
+    local ext_=${ARCHIEVE_PATH_##*.}
+    # Select a valid decompression flag
+    local compression_flag_=''
+    case "$ext_" in
+        tar ) decompression_flag_='';;
+        gz  ) decompression_flag_='-z';;
+        bz2 ) decompression_flag_='-j';;
+        *   )
+            is_var_set options[verbose] && log_info "$CONTEXT_" "Unknown compression format ($ext_)"
+            return 1
+    esac
+
+    # Prepare tar flags
+    local tar_flags="--directory="$edir_" -x $decompression_flag_"
+    # Prepare extraction command
+    local ext_cmd="tar $tar_flags -f $ARCHIEVE_PATH_"
+    is_var_set options[verbose] && ext_cmd="extract_with_progress_bar $tar_flags $ARCHIEVE_PATH_"
+
+    # Extract files
+    is_var_set options[verbose] && log_info "$CONTEXT_" "Extracting $TARGET_ to $edir_ ..."
+    $ext_cmd || {
+        is_var_set options[verbose] && log_error "$CONTEXT_" "Failed to extract $TARGET_"
+        return 1
+    }
+    
+    is_var_set options[verbose] && log_info "$CONTEXT_" "${TARGET_^} extracted"
+    
 }

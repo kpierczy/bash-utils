@@ -3,7 +3,7 @@
 # @file     strict_mode_test.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 1:58:55 am
-# @modified Wednesday, 3rd November 2021 11:29:20 pm
+# @modified Thursday, 4th November 2021 4:35:19 pm
 # @project  Winder
 # @brief
 #    
@@ -12,11 +12,8 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Get path to the librarie's home
-LIB_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")/.."
-
 # Source testing helpers
-source $LIB_HOME/lib/test/shpec_support.bash
+source $BASH_UTILS_HOME/lib/test/shpec_support.bash
 
 # Enable macros' expansion
 shopt -s expand_aliases
@@ -24,7 +21,7 @@ shopt -s expand_aliases
 # =========================================================== Test cases =========================================================== #
 
 # Source tested module
-source $LIB_HOME/lib/scripting/strict_mode.bash
+source $BASH_UTILS_HOME/lib/scripting/strict_mode.bash
 # Disable treating unset variable as error
 set -o nounset
 

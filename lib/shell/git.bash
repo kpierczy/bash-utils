@@ -2,7 +2,7 @@
 # @file     git.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:39:47 pm
-# @modified Thursday, 4th November 2021 12:39:57 am
+# @modified Thursday, 4th November 2021 10:39:44 pm
 # @project  BashUtils
 # @brief
 #    
@@ -11,15 +11,12 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Get path to the librarie's home
-LIB_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")/../.."
-
 # Source logging helper
-source $LIB_HOME/lib/logging/logging.bash
+source $BASH_UTILS_HOME/lib/logging/logging.bash
 # Source general scripting helpers
-source $LIB_HOME/lib/scripting/general.bash
+source $BASH_UTILS_HOME/lib/scripting/general.bash
 # Source variables-related helpers
-source $LIB_HOME/lib/scripting/variables.bash
+source $BASH_UTILS_HOME/lib/scripting/variables.bash
 
 # ============================================================ Functions =========================================================== #
 
@@ -47,6 +44,10 @@ gitaddm() {
     local defs=(
         '-b',branch
     )
+
+    # Enable words-splitting locally
+    local IFS
+    enable_word_splitting
 
     # Parse options
     local -A options

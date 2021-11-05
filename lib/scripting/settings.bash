@@ -3,7 +3,7 @@
 # @file     settings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
-# @modified Thursday, 4th November 2021 12:04:11 am
+# @modified Friday, 5th November 2021 2:58:29 pm
 # @project  BashUtils
 # @brief
 #    
@@ -36,7 +36,7 @@ set_aliases_expansion() {
 #   can be ommittes without separating content of the expression
 #   based on the spaces.
 # -------------------------------------------------------------------
-disale_word_splitting() {
+disable_word_splitting() {
     IFS=''
 }
 
@@ -79,4 +79,18 @@ enable_word_splitting() {
 # -------------------------------------------------------------------
 set_word_splitting_record() {
     IFS=$'\037'
+}
+
+# -------------------------------------------------------------------
+# @brief Enables globbing
+# -------------------------------------------------------------------
+enable_globbing() {
+    shopt -s extglob
+}
+
+# -------------------------------------------------------------------
+# @brief Disables globbing
+# -------------------------------------------------------------------
+disable_globbing() {
+    shopt -u extglob
 }

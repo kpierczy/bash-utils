@@ -3,7 +3,7 @@
 # @file     logging.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:08:34 am
-# @modified Thursday, 4th November 2021 12:03:30 am
+# @modified Thursday, 4th November 2021 6:03:28 pm
 # @project  BashUtils
 # @brief
 #    
@@ -12,11 +12,8 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Get path to the librarie's home
-LIB_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")/../.."
-
 # Source variables helper
-source $LIB_HOME/lib/scripting/variables.bash
+source $BASH_UTILS_HOME/lib/scripting/variables.bash
 
 # ============================================================ Constants =========================================================== #
 
@@ -46,7 +43,7 @@ declare -A LOG_COLOURS=(
 # ========================================================== Configuration ========================================================= #
 
 # Current logging level
-var_set_default LOG_LEVEL $WARN_LEVEL
+var_set_default LOG_LEVEL $INFO_LEVEL
 # Optional log files
 var_set_default LOG_FILE      ''
 var_set_default LOG_JSON_FILE ''

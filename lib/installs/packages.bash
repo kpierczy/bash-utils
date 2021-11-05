@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Thursday, 4th November 2021 1:07:13 am
+# @modified Friday, 5th November 2021 1:52:25 am
 # @project  BashUtils
 # @brief
 #    
@@ -12,15 +12,12 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Get path to the librarie's home
-LIB_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")/../.."
-
 # Source logging helper
-source $LIB_HOME/lib/logging/logging.bash
+source $BASH_UTILS_HOME/lib/logging/logging.bash
 # Source general scripting helpers
-source $LIB_HOME/lib/scripting/general.bash
+source $BASH_UTILS_HOME/lib/scripting/general.bash
 # Source general variables helpers
-source $LIB_HOME/lib/scripting/variables.bash
+source $BASH_UTILS_HOME/lib/scripting/variables.bash
 
 # ============================================================ Functions =========================================================== #
 
@@ -64,12 +61,16 @@ install_pkg() {
         '-y',non_interactive,f
     )
 
+    # Enable words-splitting locally
+    local IFS
+    enable_word_splitting
+
     # Parse options
     local -A options
     parseopts "$*" defs options posargs
-
+    
     # Arguments
-    local -n package_=$posargs
+    local package_=$posargs
     
     # Prepare apt context
     local su_command=''
@@ -96,7 +97,7 @@ install_pkg() {
         
     # If 'verbose installed' option passed, log info
     elif is_var_set options[verbose_installed]; then
-        log_info "$package already installed"
+        log_info "$package_ already installed"
     fi
 
 }
@@ -113,28 +114,38 @@ install_pkg() {
 #    -y     installs packages in non-interactive mode
 #    -v     print verbose log
 #    --vi   print verbose log if package is already installed
+#    -U     use `apt upgrade` to isntall packages
 #
 # -------------------------------------------------------------------
 install_packages() {
-
+    
     # Function's options
-    declare -a defs=(
+    local -a defs=(
         '--su',superuser,f
         '-v',verbose,f
         '--vi',verbose_installed,f
         '-y',non_interactive,f
+        '-U',upgrade,f
     )
 
+    # Enable words-splitting locally
+    local IFS
+    enable_word_splitting
+    
     # Parse options
     local -A options
     parseopts "$*" defs options posargs
 
     # Arguments
     local -n packages_=$posargs
+    local package
     
     # Prepare apt context
     local su_command=''
     is_var_set options[superuser] && su_command+='sudo'
+    # Prepare apt command
+    local apt_cmd='install'
+    is_var_set options[upgrade] && local apt_cmd='upgrade'
     # Prepare apt flags
     local apt_flags=''
     is_var_set options[non_interactive] && apt_flags+='-y '
@@ -142,18 +153,17 @@ install_packages() {
     
     # Iterate over packages
     for package in "${packages_[@]}"; do
-
+        
         # If package not isntalled, install
         if ! is_pkg_installed $package; then
 
             # Log info, if verbose
             is_var_set options[verbose] && log_info "Installing $package ..."
             # Install package
-            ${su_command} apt install ${apt_flags} $package
-            # If package could not be installed, return error
-            if $?; then
+            if ${su_command} apt ${apt_cmd} ${apt_flags} $package; then
                 is_var_set options[verbose] && log_info "$package installed"
             else
+                echo "Goodbye"
                 is_var_set options[verbose] && log_error "$package could not be installed"
                 return 1
             fi

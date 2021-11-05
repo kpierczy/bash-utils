@@ -3,7 +3,7 @@
 # @file     self_inspection.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Thursday, 4th November 2021 12:55:01 am
+# @modified Thursday, 4th November 2021 4:36:50 pm
 # @project  BashUtils
 # @brief
 #    
@@ -54,12 +54,32 @@ get_script_dir_sym() {
 }
 
 # -------------------------------------------------------------------
+# @brief Check whether the calling script was executed by sourcing
+# @param depth (optionl, default: 0)
+#    if given, expresses depth of the call stack that should be
+#    checked; e.g. by passing @c 1 the calling script can check 
+#    whether the script that executed it was sourced.
+#    This feature comes handy if one implements script's templates.
+#    In such a case, the template script needs to return if it's
+#    caller was sourced (assuming the script should be executed
+#    only by running)
+# 
 # @returns 
 #     @c 0 if calling script was sourced \n
 #     @c 1 otherwise
 # -------------------------------------------------------------------
 is_sourced() {
-    [[ ${FUNCNAME[1]} == source ]]
+
+    # Arguments
+    local -i depth=${1:-0};
+
+    # Check if a valid depth was given
+    if (( ${#FUNCNAME} == $depth + 1 )); then
+        return 0
+    fi
+
+    # Check if script was sourced
+    [[ ${FUNCNAME[$depth + 1]} == source ]]
 }
 
 # -------------------------------------------------------------------

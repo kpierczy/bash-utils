@@ -2,7 +2,7 @@
 # @file     docker.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:31:34 pm
-# @modified Thursday, 4th November 2021 12:21:51 am
+# @modified Thursday, 4th November 2021 4:34:52 pm
 # @project  BashUtils
 # @brief
 #    
@@ -11,13 +11,10 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Get path to the librarie's home
-LIB_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")/../.."
-
 # Source logging helper
-source $LIB_HOME/lib/logging/logging.bash
+source $BASH_UTILS_HOME/lib/logging/logging.bash
 # Source general scripting helpers
-source $LIB_HOME/lib/scripting/variables.bash
+source $BASH_UTILS_HOME/lib/scripting/variables.bash
 
 # ========================================================== Configuration ========================================================= #
 

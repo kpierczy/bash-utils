@@ -3,7 +3,7 @@
 # @file     general.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
-# @modified Thursday, 4th November 2021 12:03:39 am
+# @modified Thursday, 4th November 2021 10:29:13 pm
 # @project  BashUtils
 # @brief
 #    
@@ -237,6 +237,8 @@ wrap_getopt () {
 #
 #    # Parse options
 #    local -A options
+#    # @note Wor-spliiting needs to be enabled!
+#    enable_word_splitting
 #    parseopts "$*" defs options posargs
 #
 #    # Use 'options' and 'posargs' to examine parsed options
