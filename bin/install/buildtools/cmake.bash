@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Friday, 5th November 2021 7:40:11 pm
+# @modified Saturday, 6th November 2021 3:56:46 pm
 # @project  BashUtils
 # @brief
 #    
@@ -62,7 +62,7 @@ var_set_default CMAKE_BIN_URL "https://github.com/Kitware/CMake/releases/downloa
 cmake_install_source() {
 
     logc_info "Building CMake..."
-    pushd $CMAKE_EXTRACTED_PATH
+    pushd $EXTRACTED_PATH
 
     # Bootstrap CMake
     if ! ./bootstrap --prefix=$CMAKE_INSTALL_DIR; then
@@ -93,8 +93,8 @@ cmake_install_source() {
     # Remove sources
     if [[ $BASH_UTILS_RM_DOWNLOADED -eq "1" ]]; then
         logc_info "Deleting downloaded sources..."
-        rm -rf $CMAKE_ARCHIEVE_PATH
-        rm -rf $CMAKE_SOURCE_PATH
+        rm -rf $ARCHIEVE_PATH
+        rm -rf $EXTRACTED_PATH
         logc_info "Sources deleted"
     fi
 
@@ -104,7 +104,8 @@ cmake_install_bin() {
 
     # Install CMake
     logc_info "Installing CMake to $CMAKE_INSTALL_DIR"
-    mv $CMAKE_EXTRACTED_PATH $CMAKE_INSTALL_DIR
+    mkdir -p $(dirname $CMAKE_INSTALL_DIR)
+    mv $EXTRACTED_PATH $CMAKE_INSTALL_DIR
     logc_info "Cmake installed"
 
 }
@@ -120,21 +121,7 @@ main() {
     )
 
     # Parsed options
-    declare -A options
-
-    # Parse options
-    enable_word_splitting
-    parseopts "$*" defs options posargs
-    disable_word_splitting
-
-    # Display usage, if requested
-    is_var_set options[help] && {
-        echo $usage
-        return 0
-    }
-
-    # Set positional arguments
-    set -- ${posargs[@]}
+    parse_argumants
 
     # Parse arguments
     installation_type=${1:-}
@@ -149,15 +136,17 @@ main() {
     enable_globbing
     
     # Download URL
-    local CMAKE_URL
-    [[ $installation_type == "source" ]] && var_set_default CMAKE_URL "$CMAKE_SRC_URL" || 
-    [[ $installation_type == "bin"    ]] && var_set_default CMAKE_URL "$CMAKE_BIN_URL"
+    local URL
+    is_var_set_non_empty CMAKE_URL       && URL=$CMAKE_URL     ||
+    [[ $installation_type == "source" ]] && URL=$CMAKE_SRC_URL || 
+    [[ $installation_type == "bin"    ]] && URL=$CMAKE_BIN_URL
     # CMake download directory
-    local CMAKE_DOWNLOAD_DIR="/tmp"
-    # CMake download directory
-    local CMAKE_ARCHIEVE_PATH="$CMAKE_DOWNLOAD_DIR/${CMAKE_URL##*/}"
+    local DOWNLOAD_DIR="/tmp"
+
+    # Prepare names for downloaded archieve
+    prepare_names_for_downloaded_archieve
     # Path to the extracted CMake files
-    local CMAKE_EXTRACTED_PATH="${CMAKE_ARCHIEVE_PATH%.tar.gz}"
+    local EXTRACTED_PATH=$DOWNLOAD_DIR/$EXTRACTED_NAME
 
     # Dependencies of the script
     local -a dependencies=(
@@ -167,7 +156,7 @@ main() {
     )
 
     # Check if CMake version was given
-    is_var_set CMAKE_VERSION || {
+    is_var_set_non_empty CMAKE_VERSION || {
         logc_error "No CMake version given. Please export CMAKE_VERSION before running the script "
         return 1
     }
@@ -179,8 +168,8 @@ main() {
     sudo apt update && install_packages -yv --su dependencies
 
     # Download and extract CMake
-    LOG_CONTEXT=$LOG_CONTEXT LOG_TARGET="CMake" download_and_extract -v \
-        $CMAKE_URL $CMAKE_DOWNLOAD_DIR $CMAKE_DOWNLOAD_DIR || return 1
+    CURL_FLAGS='-C -' LOG_CONTEXT=$LOG_CONTEXT LOG_TARGET="CMake" download_and_extract -v \
+        $URL $DOWNLOAD_DIR $DOWNLOAD_DIR || return 1
 
     # Install CMake
     [[ $installation_type == "source" ]] && cmake_install_source || 

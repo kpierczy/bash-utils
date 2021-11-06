@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 5:36:08 pm
-# @modified Thursday, 4th November 2021 6:52:32 pm
+# @modified Saturday, 6th November 2021 3:54:48 pm
 # @project  BashUtils
 # @brief
 #    

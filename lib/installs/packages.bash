@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Friday, 5th November 2021 7:26:06 pm
+# @modified Saturday, 6th November 2021 4:38:29 pm
 # @project  BashUtils
 # @brief
 #    
@@ -142,7 +142,8 @@ install_packages() {
     
     # Parse options
     local -A options
-    parseopts "$*" defs options posargs
+    local -a posargs
+    parseopts "$*" defs options posargs || return 1
 
     # Arguments
     local -n packages_=$posargs
@@ -170,20 +171,20 @@ install_packages() {
         if ! is_pkg_installed $package; then
 
             # Log info, if verbose
-            log_info "Installing $package ..."
+            logc_info "Installing $package ..."
             # Install package
             if ${su_command} apt ${apt_cmd} ${apt_flags} $package; then
-                log_info "$package installed"
+                logc_info "$package installed"
             else
                 echo "Goodbye"
-                log_error "$package could not be installed"
+                logc_error "$package could not be installed"
                 set_stdout_logs_status "$INIT_LOGS_STATE"
                 return 1
             fi
             
         # If 'verbose installed' option passed, log info
         elif is_var_set options[verbose_installed]; then
-            log_info "$package already installed"
+            logc_info "$package already installed"
         fi
 
     done

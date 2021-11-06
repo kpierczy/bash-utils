@@ -3,7 +3,7 @@
 # @file     miktex.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Friday, 5th November 2021 6:40:39 pm
-# @modified Friday, 5th November 2021 7:51:26 pm
+# @modified Saturday, 6th November 2021 1:43:27 pm
 # @project  BashUtils
 # @brief
 #    
@@ -19,11 +19,21 @@ source $BASH_UTILS_HOME/source_me.bash
 
 get_heredoc usage <<END
     Description: Installs MiKTeX
-    Usage: miktex.bash TYPE
+    Usage: miktex.bash CMD
+
+    Arguments:
+
+        CMD action to be performed by the script
+              'install'  installas MiKTeX
+               'update'  updades current installation of the MiKTeX; if 
+                         MiKTeX is not installed, installs it
+              'upgrade'  upgrades current installation of the MiKTeX to the 
+                         full version (installs all packages)
 
     Options:
       
-            -U  installs MiKTeX for the user
+            -U  installs/upgrade MiKTeX for the user (by default, script
+                operates on the system-wide installation of miktex)
         --help  displays this usage message
 
 END
@@ -33,35 +43,12 @@ END
 # Logging context of the script
 LOG_CONTEXT="miktex"
 
-# ========================================================== Configruation ========================================================= #
+# ============================================================ Functions =========================================================== #
 
+install_miktex() {
 
-# ============================================================== Main ============================================================== #
-
-main() {
-
-    # Options
-    local defs=(
-        '--help',help,f
-        '-U',user,f
-    )
-
-    # Parsed options
-    declare -A options
-
-    # Parse options
-    enable_word_splitting
-    parseopts "$*" defs options posargs
-    disable_word_splitting
-
-    # Display usage, if requested
-    is_var_set options[help] && {
-        echo $usage
-        return 0
-    }
-
-    # Set positional arguments
-    set -- ${posargs[@]}
+    # Check if MiKTeX already installed
+    which miktex-pdflatex> /dev/null && return
 
     # Source of the MiKTeX package
     local MIKTEX_APT_SOURCE="deb http://miktex.org/download/ubuntu focal universe"
@@ -103,13 +90,79 @@ main() {
 
     # Enable automatic package installation
     is_var_set options[user] && 
-        initexmf --set-config-value [MPM]AutoInstall=1 || 
+             initexmf         --set-config-value [MPM]AutoInstall=1 || 
         sudo initexmf --admin --set-config-value [MPM]AutoInstall=1 || 
     {
         logc_error "Could not enable automatic package installation"
         return 1
     }
-        
+    
+}
+
+update_miktex() {
+    
+    # Check if MiKTeX was already installed
+    which miktex-pdflatex> /dev/null || {
+        install_miktex
+        return
+    }
+
+    # Otherwise, update MiKTeX
+    sudo apt update && sudo apt upgrade miktex
+
+}
+
+upgrade_miktex() {
+    
+    # Upgrade MiKTeX
+    logc_info "Upgrading MiKTeX ..."
+    is_var_set options[user] &&
+             mpm         --verbose --package-level=complete --upgrade
+        sudo mpm --admin --verbose --package-level=complete --upgrade ||
+    logc_info "MiKTeX upgraded.."
+
+}
+
+# ============================================================== Main ============================================================== #
+
+main() {
+
+    # Arguments
+    local cmd
+
+    # Commands
+    local COMMANDS=(
+        install
+        update
+        upgrade
+    )
+
+    # Options
+    local defs=(
+        '--help',help,f
+        '-U',user,f
+    )
+
+    # Parsed options
+    parse_argumants
+
+    # Parse argument
+    cmd=${$1:-}
+
+    # Validate argument
+    is_one_of $cmd COMMANDS || {
+        logc_error "Invalid usage"
+        echo $usage
+        return 1
+    }
+    
+    # Perform corresponding routine
+    case $cmd in
+        install ) install_miktex;;
+        update  ) update_miktex;;
+        upgrade ) upgrade_miktex;;
+    esac
+    
 }
 
 # ============================================================= Script ============================================================= #

@@ -3,7 +3,7 @@
 # @file     general.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
-# @modified Thursday, 4th November 2021 10:29:13 pm
+# @modified Saturday, 6th November 2021 5:37:24 pm
 # @project  BashUtils
 # @brief
 #    
@@ -187,8 +187,8 @@ wrap_getopt () {
     ! result=$(getopt -o "$short" ${long:+-l} $long -n $0 -- $args)
     # Depending on the getopt's result, return expression to be evaluated
     case $? in
-        0 ) echo '_err_=1; return';;
-        * ) echo "set -- $result" ;;
+        0 ) echo "$result"; return 1;;
+        * ) echo "$result"; return 0;;
     esac
 }
 
@@ -268,8 +268,12 @@ parseopts () {
     set -- $args_
 
     # Call getopt
-    is_enhanced_getopt && \
-        eval $(wrap_getopt "$*" "${getopts_[short]}" "${getopts_[long]}")
+    local result
+    is_enhanced_getopt && result=$(wrap_getopt "$*" "${getopts_[short]}" "${getopts_[long]}")
+    [[ $? == "0" ]] || return 1
+
+    # Set positional arguments
+    eval "set -- $result"
 
     # Iterate over @p args_ as long as an option is seen
     while [[ ${1:-} == -?* ]]; do
@@ -372,3 +376,69 @@ print_heredoc() {
     # Print result
     echo "$doc"
 }
+
+# ============================================================= Aliases ============================================================ #
+
+# -------------------------------------------------------------------
+# @brief Common idiom for parsing script's cmd-line arguments. 
+#    Alias provides a hash array @a options containing set of 
+#    parsed options. It also sets positional arguments of the script
+#    to @a posargs array returned by @fun parseopts function
+#
+# @environment
+#
+#       defs  array containing options' definition 
+#      usage  usage heredoc string
+#    ARG_NUM  number of required positional arguments (not verified
+#             if undefined)
+#
+# @declared_variabled
+#
+#    options  hash array of parsed options
+#
+# -------------------------------------------------------------------
+alias parse_argumants='
+# Parsed options
+declare -A options
+
+# Parse options
+enable_word_splitting
+parseopts "$*" defs options posargs || {
+    disable_word_splitting
+    logc_error "Invalid usage"
+    echo $usage
+    return 1
+}
+disable_word_splitting
+
+# Display usage, if requested
+is_var_set options[help] && {
+    echo $usage
+    return 0
+}
+
+# Set positional arguments
+set -- ${posargs[@]}
+
+# Verify number of given arguments
+is_var_set_non_empty ARG_NUM && (( $# >= $ARG_NUM )) || {
+    logc_error "Too few arguments"
+    echo $usage
+    return 1
+}
+'
+
+# -------------------------------------------------------------------
+# @brief Checks if required number of arguments was given to the 
+#    script and exits when not
+#
+# @environment
+#
+#    ARG_NUM required number of arguments
+# -------------------------------------------------------------------
+alias check_args_num='
+is_var_set_non_empty ARG_NUM && [[ "$#" = "$ARG_NUM" ]] || {
+    echo $usage
+    return 1
+}
+'

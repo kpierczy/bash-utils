@@ -3,7 +3,7 @@
 # @file     strings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 9:31:13 pm
-# @modified Thursday, 4th November 2021 9:35:30 pm
+# @modified Saturday, 6th November 2021 5:35:34 pm
 # @project  BashUtils
 # @brief
 #    

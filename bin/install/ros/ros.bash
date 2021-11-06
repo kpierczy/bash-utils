@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     install.bash
+# @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Friday, 5th November 2021 6:59:50 pm
+# @modified Saturday, 6th November 2021 1:43:07 pm
 # @project  BashUtils
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
@@ -293,21 +293,7 @@ main() {
     )
 
     # Parsed options
-    declare -A options
-
-    # Parse options
-    enable_word_splitting
-    parseopts "$*" defs options posargs
-    disable_word_splitting
-
-    # Display usage, if requested
-    is_var_set options[help] && {
-        echo $usage
-        return 0
-    }
-
-    # Set positional parameters
-    set -- ${posargs[@]}
+    parse_argumants
 
     # Parse arguments
     action=${1:-}
