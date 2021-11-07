@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Saturday, 6th November 2021 4:38:29 pm
+# @modified Sunday, 7th November 2021 5:20:26 pm
 # @project  BashUtils
 # @brief
 #    
@@ -192,4 +192,25 @@ install_packages() {
     # Restore logs status
     set_stdout_logs_status "$INIT_LOGS_STATE"
 
+}
+
+# -------------------------------------------------------------------
+# @brief Prints a list of current apt sources to te stdout
+# -------------------------------------------------------------------
+get_apt_soruces() {
+    find /etc/apt/ -name *.list | xargs cat | grep  "^[[:space:]]*deb[-src]*"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints a list of current apt sources to te stdout
+# -------------------------------------------------------------------
+get_apt_bin_soruces() {
+    find /etc/apt/ -name *.list | xargs cat | grep  "^[[:space:]]*deb"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints a list of current apt sources to te stdout
+# -------------------------------------------------------------------
+get_apt_src_soruces() {
+    find /etc/apt/ -name *.list | xargs cat | grep  "^[[:space:]]*deb-src"
 }

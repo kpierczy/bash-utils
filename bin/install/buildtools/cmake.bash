@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Saturday, 6th November 2021 3:56:46 pm
+# @modified Sunday, 7th November 2021 5:12:45 pm
 # @project  BashUtils
 # @brief
 #    
@@ -121,7 +121,7 @@ main() {
     )
 
     # Parsed options
-    parse_argumants
+    parse_arguments
 
     # Parse arguments
     installation_type=${1:-}

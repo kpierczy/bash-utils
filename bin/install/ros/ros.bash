@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Saturday, 6th November 2021 1:43:07 pm
+# @modified Sunday, 7th November 2021 5:12:45 pm
 # @project  BashUtils
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
@@ -293,7 +293,7 @@ main() {
     )
 
     # Parsed options
-    parse_argumants
+    parse_arguments
 
     # Parse arguments
     action=${1:-}

@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Saturday, 6th November 2021 5:03:28 pm
+# @modified Sunday, 7th November 2021 6:42:55 pm
 # @project  BashUtils
 # @brief
 #    

@@ -3,7 +3,7 @@
 # @file     miktex.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Friday, 5th November 2021 6:40:39 pm
-# @modified Saturday, 6th November 2021 1:43:27 pm
+# @modified Sunday, 7th November 2021 5:12:45 pm
 # @project  BashUtils
 # @brief
 #    
@@ -144,7 +144,7 @@ main() {
     )
 
     # Parsed options
-    parse_argumants
+    parse_arguments
 
     # Parse argument
     cmd=${$1:-}

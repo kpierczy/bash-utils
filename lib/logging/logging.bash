@@ -3,7 +3,7 @@
 # @file     logging.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:08:34 am
-# @modified Friday, 5th November 2021 7:37:09 pm
+# @modified Sunday, 7th November 2021 6:06:16 pm
 # @project  BashUtils
 # @brief
 #    
@@ -181,9 +181,9 @@ log() {
     # Parse arguments
     if [[ $# -eq 3 ]]; then
         context=$2
-        msg=$3
+        msg="${@:3}"
     else
-        msg=$2
+        msg="${@:2}"
     fi
 
     # Convert level to uppercase for choosing log colours and checking current log level

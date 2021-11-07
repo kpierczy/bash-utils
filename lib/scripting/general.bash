@@ -3,7 +3,7 @@
 # @file     general.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
-# @modified Saturday, 6th November 2021 5:37:24 pm
+# @modified Sunday, 7th November 2021 7:05:14 pm
 # @project  BashUtils
 # @brief
 #    
@@ -397,7 +397,7 @@ print_heredoc() {
 #    options  hash array of parsed options
 #
 # -------------------------------------------------------------------
-alias parse_argumants='
+alias parse_arguments='
 # Parsed options
 declare -A options
 
@@ -417,13 +417,94 @@ is_var_set options[help] && {
     return 0
 }
 
-# Set positional arguments
+# Set positional arguments (except cmd)
 set -- ${posargs[@]}
 
 # Verify number of given arguments
 is_var_set_non_empty ARG_NUM && (( $# >= $ARG_NUM )) || {
     logc_error "Too few arguments"
     echo $usage
+    return 1
+}
+'
+
+# -------------------------------------------------------------------
+# @brief Common idiom for parsing script's cmd-line arguments for
+#    multi-commands scripts.
+#
+#    Alias provides a hash array @a options containing set of 
+#    parsed options. It also sets positional arguments of the script
+#    to @a posargs array returned by @fun parseopts function (#1 is set
+#    to the first opsitional argument after the command's name)
+#
+# @environment
+#
+#            defs  array containing options' definition 
+#           usage  usage heredoc string
+#        COMMANDS  list of command provided by the script
+#    "$CMD"_usage  usage heredoc string(s) for script's CMD command; if no
+#                  CMD_usage variable exists for the parse command, the
+#                  default 'usage' is assummed
+#  $"CMD"_ARG_NUM  number of required positional arguments required by
+#                  CMD command (not verified if undefined)
+#
+# @provides
+#
+#        cmd  name of the command requested on command line
+#    options  hash array of parsed options
+#
+# @note Alias replaces all "-" in the name of parsed commands to "_"
+#    and so elements of the COMMANDS array has to be in the same 
+#    format
+# -------------------------------------------------------------------
+alias parse_arguments_multicmd='
+# Parsed options
+declare -A options
+
+# Parse options
+enable_word_splitting
+parseopts "$*" defs options posargs || {
+    disable_word_splitting
+    logc_error "Invalid usage"
+    echo $usage
+    return 1
+}
+disable_word_splitting
+
+# Parse command
+local cmd=${1:-}
+
+# Change all "-" to "_" in the name of the command 
+cmd=${cmd//-/_}
+# Get name of the usage string of the command
+local cmd_usage=usage
+[[ "$cmd"_usage != _usage ]] && cmd_usage="$cmd"_usage
+
+# Check if a valid command given
+is_one_of $cmd COMMANDS || is_var_set options[help] || {
+    logc_error "Invalid command given ($cmd)"
+    echo $usage
+    return 1
+}
+
+# Display usage, if requested
+is_var_set options[help] && 
+{
+    is_var_set_non_empty cmd && echo $usage || echo ${!cmd_usage}
+    return 0
+}
+
+# Set positional arguments
+set -- ${posargs[@]:1}
+
+# Set number of arguments required by the command
+local CMD_ARG_NUM_REF="$cmd"_ARG_NUM
+
+# Verify number of given arguments
+! is_var_set_non_empty $CMD_ARG_NUM_REF || (( $# >= ${!CMD_ARG_NUM_REF} )) || {
+    echo $CMD_ARG_NUM_REF
+    logc_error "Too few arguments"
+    echo ${!cmd_usage}
     return 1
 }
 '
