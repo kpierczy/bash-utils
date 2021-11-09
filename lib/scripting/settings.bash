@@ -3,7 +3,7 @@
 # @file     settings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
-# @modified Friday, 5th November 2021 2:58:29 pm
+# @modified Tuesday, 9th November 2021 2:55:38 am
 # @project  BashUtils
 # @brief
 #    
@@ -94,3 +94,11 @@ enable_globbing() {
 disable_globbing() {
     shopt -u extglob
 }
+
+# ============================================================= Aliases ============================================================ #
+
+# -------------------------------------------------------------------
+# @brief Limits changes to the word-splitting settings (@var IFS)
+#    to the current function
+# -------------------------------------------------------------------
+alias limit_word_splitting_settings='local IFS'

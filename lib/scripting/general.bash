@@ -3,7 +3,7 @@
 # @file     general.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
-# @modified Sunday, 7th November 2021 7:05:14 pm
+# @modified Tuesday, 9th November 2021 2:47:23 am
 # @project  BashUtils
 # @brief
 #    
@@ -177,14 +177,14 @@ is_enhanced_getopt() {
 wrap_getopt () {
     
     # Arguments
-    local args="$1"
+    local -n _args_=$1
     local short=$2
     local long=$3
 
     # Declare local variables
     local result
     # Parse 
-    ! result=$(getopt -o "$short" ${long:+-l} $long -n $0 -- $args)
+    ! result=$(getopt -o "$short" ${long:+-l} $long -n $0 -- "${_args_[@]}")
     # Depending on the getopt's result, return expression to be evaluated
     case $? in
         0 ) echo "$result"; return 1;;
@@ -197,7 +197,7 @@ wrap_getopt () {
 #    according to the scheme described in @p defs. 
 # 
 # @param args 
-#    arguments to be parsed
+#    name of the array containing arguments to be parsed
 # @param defs
 #    name of the array holding options to be parsed in shape 
 # 
@@ -248,7 +248,7 @@ wrap_getopt () {
 parseopts () {
     
     # Arguments
-    local args_="$1"
+    local -n args_=$1
     local -n defs_=$2
     local -n opts_=$3
     local -n posargs_=$4
@@ -264,12 +264,9 @@ parseopts () {
     # Parse @p defs to the form taken by getopt utility
     denormopts defs_ names_ flags_ getopts_
 
-    # Set content of @p args as new positional argumets
-    set -- $args_
-
     # Call getopt
     local result
-    is_enhanced_getopt && result=$(wrap_getopt "$*" "${getopts_[short]}" "${getopts_[long]}")
+    is_enhanced_getopt && result=$(wrap_getopt args_ "${getopts_[short]}" "${getopts_[long]}")
     [[ $? == "0" ]] || return 1
 
     # Set positional arguments

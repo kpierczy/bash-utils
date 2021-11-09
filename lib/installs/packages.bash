@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Sunday, 7th November 2021 5:20:26 pm
+# @modified Tuesday, 9th November 2021 3:26:18 am
 # @project  BashUtils
 # @brief
 #    
@@ -135,15 +135,17 @@ install_packages() {
         '-y',non_interactive,f
         '-U',upgrade,f
     )
-
-    # Enable words-splitting locally
-    local IFS
-    enable_word_splitting
     
-    # Parse options
+    # Enable word splitting in the context of the function
+    limit_word_splitting_settings
+    disable_word_splitting
+    
+    local -a args=( "$@" )
     local -A options
-    local -a posargs
-    parseopts "$*" defs options posargs || return 1
+
+    # Parse options
+    enable_word_splitting
+    parseopts args defs options posargs || return 1
 
     # Arguments
     local -n packages_=$posargs

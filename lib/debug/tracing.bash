@@ -3,7 +3,7 @@
 # @file     tracing.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 4:05:49 am
-# @modified Thursday, 4th November 2021 12:02:32 am
+# @modified Tuesday, 9th November 2021 3:04:23 am
 # @project  BashUtils
 # @brief
 #    
@@ -11,6 +11,8 @@
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
+
+# ============================================================ Functions =========================================================== #
 
 # -------------------------------------------------------------------
 # @brief Traceback handler designed to be used at ERR signal's 

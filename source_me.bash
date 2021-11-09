@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Friday, 5th November 2021 2:07:43 pm
+# @modified Tuesday, 9th November 2021 3:23:37 am
 # @project  BashUtils
 # @brief
 #    
@@ -13,8 +13,8 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Check bash version
-if (( BASH_VERSINFO[0] < 4 )); then
+# Check bash version (required >= 4.2)
+if (( BASH_VERSINFO[1] < 2 )) && (( BASH_VERSINFO[0] <= 4 )); then
     echo "Bash Lib requires bash v4 or greater"
     echo "Current Bash Version: ${BASH_VERSION}"
     exit 1
@@ -57,4 +57,4 @@ PATH+=:"$BASH_UTILS_HOME/dep/shpec/bin"
 
 # ============================================================= Cleanup ============================================================ #
 
-unset deps
+unset dependencies
