@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified Friday, 5th November 2021 7:29:01 pm
+# @modified Tuesday, 9th November 2021 7:22:25 pm
 # @project  Winder
 # @brief
 #    
@@ -11,11 +11,6 @@
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
-
-# Source logging helper
-source $BASH_UTILS_HOME/lib/logging/logging.bash
-# Source general scripting helpers
-source $BASH_UTILS_HOME/lib/scripting/general.bash
 
 # ============================================================ Functions =========================================================== #
 

@@ -3,7 +3,7 @@
 # @file     stack.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 11:13:15 pm
-# @modified Tuesday, 9th November 2021 1:02:05 am
+# @modified Tuesday, 9th November 2021 2:43:22 pm
 # @project  BashUtils
 # @brief
 #    
@@ -23,7 +23,7 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # =========================================================== Test cases =========================================================== #
 
-# Test get_archieve_ext function
+# Test stack functions
 describe stack
 
     it "Check pushing & printing (default stack)"

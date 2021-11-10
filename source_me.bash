@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Tuesday, 9th November 2021 3:23:37 am
+# @modified Tuesday, 9th November 2021 7:21:46 pm
 # @project  BashUtils
 # @brief
 #    
@@ -38,7 +38,9 @@ set_aliases_expansion on
 
 # List of dependencies
 declare dependencies=(
-    pv # Progress-monitor
+    pv         # Progress-monitor
+    tar        # Tarball archieves tool
+    p7zip-full # 7z arhieves tool
 )
 
 # Install dependencies

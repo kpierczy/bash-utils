@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Tuesday, 9th November 2021 3:26:18 am
+# @modified Tuesday, 9th November 2021 7:27:53 pm
 # @project  BashUtils
 # @brief
 #    
@@ -12,12 +12,8 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Source logging helper
-source $BASH_UTILS_HOME/lib/logging/logging.bash
-# Source general scripting helpers
-source $BASH_UTILS_HOME/lib/scripting/general.bash
-# Source general variables helpers
-source $BASH_UTILS_HOME/lib/scripting/variables.bash
+# Source dependencies
+source $BASH_UTILS_HOME/lib/scripting/settings.bash
 
 # ============================================================ Functions =========================================================== #
 
@@ -173,20 +169,20 @@ install_packages() {
         if ! is_pkg_installed $package; then
 
             # Log info, if verbose
-            logc_info "Installing $package ..."
+            log_info "Installing $package ..."
             # Install package
             if ${su_command} apt ${apt_cmd} ${apt_flags} $package; then
-                logc_info "$package installed"
+                log_info "$package installed"
             else
                 echo "Goodbye"
-                logc_error "$package could not be installed"
+                log_error "$package could not be installed"
                 set_stdout_logs_status "$INIT_LOGS_STATE"
                 return 1
             fi
             
         # If 'verbose installed' option passed, log info
         elif is_var_set options[verbose_installed]; then
-            logc_info "$package already installed"
+            log_info "$package already installed"
         fi
 
     done

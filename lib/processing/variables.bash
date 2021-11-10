@@ -3,7 +3,7 @@
 # @file     variables.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 2:36:03 am
-# @modified Saturday, 6th November 2021 2:15:05 pm
+# @modified Tuesday, 9th November 2021 7:26:08 pm
 # @project  BashUtils
 # @brief
 #    
@@ -48,7 +48,7 @@ is_var_set_non_empty() {
 # @param default 
 #    default value of the variable
 # -------------------------------------------------------------------
-var_set_default() {
+function var_set_default() {
 
     local var=$1
     local default=$2
@@ -71,40 +71,4 @@ print_var() {
     # Print variable
     echo "$var=${!var}"
     
-}
-
-# -------------------------------------------------------------------
-# @brief Prints array with name passed as @p arr argument
-#
-# @param arr
-#    name fo the array to be printed
-# -------------------------------------------------------------------
-print_array() {
-
-    # Arguments
-    local -n arr=$1
-
-    # Print array
-    for elem in ${arr[@]}; do
-        echo "$elem"
-    done
-
-}
-
-# -------------------------------------------------------------------
-# @brief Prints array with name passed as @p arr argument
-#
-# @param arr
-#    name fo the array to be printed
-# -------------------------------------------------------------------
-print_hash_array() {
-
-    # Arguments
-    local -n arr="$1"
-
-    # Print array
-    for key in "${!arr[@]}"; do 
-        printf "%s=%s\n" "$key" "${arr[$key]}"
-    done
-
 }

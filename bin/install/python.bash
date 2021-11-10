@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 4:29:08 pm
-# @modified Sunday, 7th November 2021 7:17:40 pm
+# @modified Tuesday, 9th November 2021 7:25:29 pm
 # @project  BashUtils
 # @brief
 #    
@@ -161,18 +161,18 @@ install_python_pkg() {
     # Check if package is already installed
     which python$version > /dev/null && return
 
-    logc_info "Installing Python$version ..."
+    log_info "Installing Python$version ..."
 
     # Try to install Python
     sudo apt update && sudo apt install python$version ||
     {
-        logc_error "Failed to install Python$version. If you given a valid version please make sure"     \
+        log_error "Failed to install Python$version. If you given a valid version please make sure"     \
                    "that target oackage reside in the source repository set in apt's soruces. If needed" \
                     "run $0 add-repo to add deadsnakes repository."
         return 1
     }
 
-    logc_info "Python$version installed"
+    log_info "Python$version installed"
 }
 
 # ============================================================ Commands ============================================================ #
@@ -200,7 +200,7 @@ install_python() {
     case $itype in
         src ) install_python_src;;
         pkg ) install_python_pkg;;
-        *   ) logc_error "Invalid installation type given ($itype)"
+        *   ) log_error "Invalid installation type given ($itype)"
               echo $usage
               return 1;;
     esac
@@ -219,7 +219,7 @@ set_python_alternative() {
 
     # Check if existing executable given
     [[ -f $PYTHON_ALT_PATH ]] || {
-        logc_error "Invalid Python executable given ($PYTHON_ALT_PATH)"
+        log_error "Invalid Python executable given ($PYTHON_ALT_PATH)"
         return 1
     }
 
@@ -227,7 +227,7 @@ set_python_alternative() {
     sudo update-alternatives --install \
         $PYTHON_ALT_LINK $PYTHON_ALT_NAME $PYTHON_ALT_PATH ${PYTHON_ALT_FLAGS:-} ||
     {
-        logc_error "Could not set python's alternative"
+        log_error "Could not set python's alternative"
         return 1
     }
     
@@ -259,7 +259,7 @@ main() {
     # ------------------------------------ Processing -----------------------------------
 
     # Parsed options
-    parse_arguments_multicmd
+    parse_arguments_log_multicmd
     
     # Perform corresponding routine
     case $cmd in

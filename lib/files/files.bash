@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Tuesday, 9th November 2021 3:16:25 am
+# @modified Tuesday, 9th November 2021 7:27:46 pm
 # @project  BashUtils
 # @brief
 #    
@@ -12,7 +12,7 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Source dependency
+# Source dependencies
 source $BASH_UTILS_HOME/lib/scripting/settings.bash
 
 # ============================================================ Functions =========================================================== #

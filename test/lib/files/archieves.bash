@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 8:39:00 pm
-# @modified Tuesday, 9th November 2021 3:26:56 am
+# @modified Wednesday, 10th November 2021 5:08:27 am
 # @project  BashUtils
 # @brief
 #    
@@ -23,78 +23,336 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # =========================================================== Test cases =========================================================== #
 
-# Test get_archieve_extension function
-describe get_archieve_extension
+# # Test is_compatibile_archieve_format function
+# describe is_compatibile_archieve_format
 
-    it "Check invalid archieve"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "invalid_archieve_filename")"
-        assert equal $? 1
-        assert equal "$archieve_ext" ""
-    ti
+#     it "Check if 'x' is NOT a valid archieve format"
+#         is_compatibile_archieve_format "x"
+#         assert equal $? 1
+#     ti
 
-    it "Check uncompressed tarball archieve"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "tarball_archieve.tar")"
+#     it "Check if all valid formats are valid"
+#         for format in "${!BASHLIB_SUPPORTED_ARCHIEVES[@]}"; do
+#             is_compatibile_archieve_format "$format"
+#             assert equal $? 0
+#         done
+#     ti
+
+# end_describe
+
+# # Test is_compatibile_archieve_extension function
+# describe is_compatibile_archieve_format
+
+#     it "Check if 'x' is NOT a valid archieve extension"
+#         is_compatibile_archieve_extension "x"
+#         assert equal $? 1
+#     ti
+
+#     it "Check if all valid formats are valid"
+#         for format in "${!BASHLIB_SUPPORTED_ARCHIEVES[@]}"; do
+#             is_compatibile_archieve_format "$format"
+#             assert equal $? 0
+#         done
+#     ti
+
+# end_describe
+
+# # Test get_archieve_format function
+# describe get_archieve_format
+
+#     it "Check if no-extension file is NOT a valid archieve"
+#         archieve_format="$(get_archieve_format "invalid_archieve_filename")"
+#         assert equal $? 1
+#         assert equal "$archieve_ext" ""
+#     ti
+
+#     it "Check if txt-extension file is NOT a valid archieve"
+#         archieve_format="$(get_archieve_format "invalid_archieve_filename.txt")"
+#         assert equal $? 1
+#         assert equal "$archieve_format" ""
+#     ti
+
+#     it "Check all supported archieve extensions"
+        
+#         # Iterate over dictionary of supported archieves' formats
+#         for format in "${!BASHLIB_SUPPORTED_ARCHIEVES[@]}"; do
+
+#             # Iterate over extensions corresponding to the format
+#             for extension in ${BASHLIB_SUPPORTED_ARCHIEVES[$format]}; do
+#                 archieve_format="$(get_archieve_format "filename.${extension}")"
+#                 assert equal $? 0
+#                 assert equal "$archieve_format" "$format"
+
+#             done
+
+#         done
+        
+#     ti
+
+# end_describe
+
+# # Test extract_archieve function
+# describe extract_archieve
+
+#     it "Check if invalid option is parsed as error"
+        
+#         extract_archieve -k "arch.tar" 2> /dev/null
+#         assert equal $? 1
+
+#     ti
+
+#     it "Check if invalid archieve extension is parsed as error"
+        
+#         extract_archieve -k "arch.txt" 2> /dev/null
+#         assert equal $? 1
+
+#     ti
+
+#     # Name of the testfile
+#     declare file="test"
+#     # Basename of the archieve
+#     declare arch_base_name="arch"
+#     # Test content of the archieved file
+#     declare teststring="Hello"
+    
+#     # Commands used archieve the file
+#     declare -A ARCHIEVE_COMMANDS=(
+#             [tar]="tar cf   ${arch_base_name}.tar     %s"
+#          [tar.gz]="tar czf  ${arch_base_name}.tar.gz  %s"
+#         [tar.bz2]="tar cjf  ${arch_base_name}.tar.bz2 %s"
+#          [tar.xz]="tar cJf  ${arch_base_name}.tar.xz  %s"
+#             [tgz]="tar czf  ${arch_base_name}.tgz     %s"
+#             [tbz]="tar cjf  ${arch_base_name}.tbz     %s"
+#             [txz]="tar cJf  ${arch_base_name}.txz     %s"
+#             [zip]="zip      ${arch_base_name}.zip     %s"
+#     )
+
+#     # Flatten values of the dictionary holding <supported_format:corresponding extensions> pairs
+#     # to an array of supported extensions by breaking dictionarie's values on '[:space:]' 
+#     # (thanks to auto word-splitting)
+#     declare -a supported_extensions=( ${BASHLIB_SUPPORTED_ARCHIEVES[@]} )    
+
+#     it "Check if supported archieves are succesfully extracted"
+            
+#         # Jump to the folder of temporary files
+#         cd /tmp
+
+#         # Iterate over valid archieve extensions
+#         for extension in ${supported_extensions[@]}; do
+
+#             # Create temporary file
+#             echo $teststring > $file
+            
+#             # Get a command for creating the archieve
+#             local cmd=$(printf "${ARCHIEVE_COMMANDS[$extension]}" "$(basename "$file")")
+            
+#             # Deduce name of the target archieve
+#             local archname="$arch_base_name.$extension"
+#             rm -f $archname
+
+#             # Create an archieve
+#             $cmd > /dev/null
+#             # Remove source file
+#             rm -f $file
+            
+#             # Extract an archieve
+#             extract_archieve $archname
+
+#             # Test result
+#             local ret=$?
+#             assert equal $ret 0
+#             [[ $ret == 0 ]] || {
+#                 rm -f $archname;
+#                 continue
+#             }
+            
+#             # Test content of the extracted file
+#             assert equal "$(cat "$file")" "$teststring"
+
+#             # Remove temporary files
+#             rm -f $archname
+#             rm -f $file
+
+#         done
+
+#     ti
+
+#     it "Check if supported archieves are succesfully extracted in different directory"
+
+#         # Destination directory
+#         local distdir=dst
+            
+#         # Jump to the folder of temporary files
+#         cd /tmp
+
+#         # Create destination directory 
+#         mkdir -p $distdir
+
+#         # Iterate over valid archieve extensions
+#         for extension in ${supported_extensions[@]}; do
+
+#             # Create temporary file
+#             echo $teststring > $file
+            
+#             # Get a command for creating the archieve
+#             local cmd=$(printf "${ARCHIEVE_COMMANDS[$extension]}" "$(basename "$file")")
+            
+#             # Deduce name of the target archieve
+#             local archname="$arch_base_name.$extension"
+#             rm -f $archname
+
+#             # Create an archieve
+#             $cmd > /dev/null
+#             # Remove source file
+#             rm -f $file
+            
+#             # Extract an archieve
+#             extract_archieve --directory=$distdir $archname
+
+#             # Test result
+#             local ret=$?
+#             assert equal $ret 0
+#             [[ $ret == 0 ]] || {
+#                 rm -f $archname;
+#                 continue
+#             }
+            
+#             # Test content of the extracted file
+#             assert equal "$(cat "$distdir/$file")" "$teststring"
+
+#             # Remove temporary files
+#             rm -f $archname
+#             rm -f $distdir/$file
+
+#         done
+
+#         rm -rf $distdir
+
+#     ti
+    
+#     it "Check if supported archieves are succesfully extracted (forced type)"
+            
+#         # Jump to the folder of temporary files
+#         cd /tmp
+
+#         # Iterate over valid archieve extensions
+#         for extension in ${supported_extensions[@]}; do
+
+#             # Create temporary file
+#             echo $teststring > $file
+            
+#             # Get a command for creating the archieve
+#             local cmd=$(printf "${ARCHIEVE_COMMANDS[$extension]}" "$(basename "$file")")
+            
+#             # Deduce name of the target archieve
+#             local archname="$arch_base_name.$extension"
+#             rm -f $archname
+
+#             # Create an archieve
+#             $cmd > /dev/null
+#             # Remove source file
+#             rm -f $file
+            
+#             # Remove a valid extension from the archieve
+#             mv $archname ${archname%.$extension}
+
+#             # Extract an archieve
+#             extract_archieve --format=$(get_archieve_format "$archname") ${archname%.$extension}
+
+#             # Test result
+#             local ret=$?
+#             assert equal $ret 0
+#             [[ $ret == 0 ]] || {
+#                 rm -f $archname;
+#                 continue
+#             }
+            
+#             # Test content of the extracted file
+#             assert equal "$(cat "$file")" "$teststring"
+
+#             # Remove temporary files
+#             rm -f $archname
+#             rm -f $file
+
+#         done
+
+#     ti
+
+# end_describe
+
+# Test download_and_extract function
+describe download_and_extract
+
+    alias setup="cd /tmp"
+
+    # Example URL to download
+    declare url="https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz"
+    # Archieve default name
+    declare arch_dflt_name=$(basename $url)
+    # Name of the extracted folder
+    declare arch_extracted_name=${arch_dflt_name%.tgz}
+
+    # it "Check if simple archieve can be downloaded and extracted automatically"
+        
+    #     # Download and extract
+    #     download_and_extract $url
+    #     assert equal $? 0
+
+    #     # Assert, that the archieve was downloaded
+    #     [[ -f $arch_dflt_name ]]; assert equal $? 0
+    #     # Assert, that the extracted folder exists
+    #     [[ -d $arch_extracted_name ]]; assert equal $? 0
+    #     # Assert, that the folder was extracted properly
+    #     [[ -f $arch_extracted_name/configure ]]; assert equal $? 0
+        
+    #     # Remove temporaries
+    #     rm -rf $arch_dflt_name
+    #     rm -rf $arch_extracted_name
+
+    # ti
+
+    # it "Check with specified download dir"
+        
+    #     # Download dir
+    #     local download_dir="download"
+
+    #     # Download and extract
+    #     download_and_extract --arch-dir=$download_dir $url
+    #     assert equal $? 0
+
+    #     # Assert, that the archieve was downloaded
+    #     [[ -f $download_dir/$arch_dflt_name ]]; assert equal $? 0
+    #     # Assert, that the extracted folder exists
+    #     [[ -d $arch_extracted_name ]]; assert equal $? 0
+    #     # Assert, that the folder was extracted properly
+    #     [[ -f $arch_extracted_name/configure ]]; assert equal $? 0
+        
+    #     # Remove temporaries
+    #     rm -rf $download_dir
+    #     rm -rf $arch_extracted_name
+
+    # ti
+
+    it "Check with specified download path"
+
+        # Download path 
+        local archieve_path="download/archieve.${arch_dflt_name##*.}"
+        
+        # Download and extract
+        download_and_extract --arch-path=$archieve_path $url
         assert equal $? 0
-        assert equal "$archieve_ext" "tar"
-    ti
 
-    it "Check compressed tarball archieve (.tgz)"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "compressed_tarball_archieve.tgz")"
-        assert equal $? 0
-        assert equal "$archieve_ext" "tar.gz"
-    ti
+        # Assert, that the archieve was downloaded
+        [[ -f $archieve_path ]]; assert equal $? 0
+        # Assert, that the extracted folder exists
+        [[ -d $arch_extracted_name ]]; assert equal $? 0
+        # Assert, that the folder was extracted properly
+        [[ -f $arch_extracted_name/configure ]]; assert equal $? 0
+        
+        # Remove temporaries
+        rm -rf $archieve_path
+        rm -rf $arch_extracted_name
 
-    it "Check compressed tarball archieve (.tbz)"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "compressed_tarball_archieve.tbz")"
-        assert equal $? 0
-        assert equal "$archieve_ext" "tar.bz2"
-    ti
-
-    it "Check compressed tarball archieve (.txz)"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "compressed_tarball_archieve.txz")"
-        assert equal $? 0
-        assert equal "$archieve_ext" "tar.xz"
-    ti
-
-    it "Check zip archieve"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "zip_archieve.zip")"
-        assert equal $? 0
-        assert equal "$archieve_ext" "zip"
-    ti
-
-    it "Check 7z archieve"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "7z_archieve.7z")"
-        assert equal $? 0
-        assert equal "$archieve_ext" "7z"
-    ti
-
-    it "Check compressed tarball archieve (.tar.gz)"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "compressed_tarball_archieve.tar.gz")"
-        assert equal $? 0
-        assert equal "$archieve_ext" "tar.gz"
-    ti
-
-    it "Check compressed tarball archieve (.tar.bz2)"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "compressed_tarball_archieve.tar.bz2")"
-        assert equal $? 0
-        assert equal "$archieve_ext" "tar.bz2"
-    ti
-
-    it "Check compressed tarball archieve (.tar.xz)"
-        local archieve_ext=""
-        archieve_ext="$(get_archieve_extension "compressed_tarball_archieve.tar.xz")"
-        assert equal $? 0
-        assert equal "$archieve_ext" "tar.xz"
     ti
 
 end_describe
-

@@ -3,7 +3,7 @@
 # @file     logging.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:08:34 am
-# @modified Sunday, 7th November 2021 6:06:16 pm
+# @modified Wednesday, 10th November 2021 5:18:50 am
 # @project  BashUtils
 # @brief
 #    
@@ -12,8 +12,8 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Source variables helper
-source $BASH_UTILS_HOME/lib/scripting/variables.bash
+# Source dependencies
+source "$BASH_UTILS_HOME/lib/processing/variables.bash"
 
 # ============================================================ Constants =========================================================== #
 
@@ -143,13 +143,13 @@ set_stdout_logs_status() {
 #       - alert  (LOG_VELEL >= ALERT_LEVEL)
 #       - emerg  (LOG_VELEL >= EMERG_LEVEL)
 #
-# @param context (optional)
-#    context string of the message
 # @param msg
 #    message to be logged
 #
 # @environment
 # 
+#   @var LOG_CONTEXT (string, optional)
+#       context of the log message
 #   @var LOG_LEVEL (integer)
 #       current log level; if lower than @p level, log is not printed to the stdout
 #   @var LOG_FILE (path)
@@ -175,16 +175,7 @@ log() {
     
     # Arguments
     local level=$1
-    local context=''
-    local msg=''
-
-    # Parse arguments
-    if [[ $# -eq 3 ]]; then
-        context=$2
-        msg="${@:3}"
-    else
-        msg="${@:2}"
-    fi
+    local msg="${@:2}"
 
     # Convert level to uppercase for choosing log colours and checking current log level
     local level_upper="$(echo "${level}" | awk '{print toupper($0)}')";
@@ -236,7 +227,7 @@ log() {
         # Append log level info
         file_line+="[${level_upper}";
         # Place context info, if configured
-        [[ -n ${context:-} ]] && log_file_msg+="|${context}] " || log_file_msg+="] "
+        [[ -n ${LOG_CONTEXT:-} ]] && log_file_msg+="|${LOG_CONTEXT}] " || log_file_msg+="] "
         # Append message
         log_file_msg+="${msg}"
 
@@ -290,7 +281,7 @@ log() {
         # Append log level info
         log_msg+="[${level_upper}";
         # Place context info, if configured
-        [[ -n ${context:-} ]] && log_msg+="|${context}] " || log_msg+="] "
+        [[ -n ${LOG_CONTEXT:-} ]] && log_msg+="|${LOG_CONTEXT}] " || log_msg+="] "
         # Append message
         log_msg+="${msg}"
         # Reset shell colour
@@ -303,7 +294,7 @@ log() {
         # Append log level info
         log_msg+="[${colour}${level_upper}${default_colour}";
         # Place context info, if configured
-        [[ -n ${context:-} ]] && log_msg+="|${colour}${context}${default_colour}] " || log_msg+="] "
+        [[ -n ${LOG_CONTEXT:-} ]] && log_msg+="|${colour}${LOG_CONTEXT}${default_colour}] " || log_msg+="] "
         # Append message
         log_msg+="${msg}"
         
@@ -326,12 +317,13 @@ log() {
 # -------------------------------------------------------------------
 # @brief Prints debug log to the stdout
 #
-# @param context (optional)
-#    context of the log message
 # @param msg
 #    message to be printed
 #
-# @see log
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
 # -------------------------------------------------------------------
 log_debug() {
     log debug "${@}"
@@ -340,12 +332,13 @@ log_debug() {
 # -------------------------------------------------------------------
 # @brief Prints info log to the stdout
 #
-# @param context (optional)
-#    context of the log message
 # @param msg
 #    message to be printed
 #
-# @see log
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
 # -------------------------------------------------------------------
 log_info() {
     log info "${@}"
@@ -354,12 +347,13 @@ log_info() {
 # -------------------------------------------------------------------
 # @brief Prints warn log to the stdout
 #
-# @param context (optional)
-#    context of the log message
 # @param msg
 #    message to be printed
 #
-# @see log
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
 # -------------------------------------------------------------------
 log_warn() {
     log warn "${@}"
@@ -368,12 +362,13 @@ log_warn() {
 # -------------------------------------------------------------------
 # @brief Prints error log to the stdout
 #
-# @param context (optional)
-#    context of the log message
 # @param msg
 #    message to be printed
 #
-# @see log
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
 # -------------------------------------------------------------------
 log_error() {
     log error "${@}"
@@ -381,12 +376,12 @@ log_error() {
 
 # ============================================================= Aliases ============================================================ #
 
-
-# Alias for printing debug log with context provided by LOG_CONTEXT variable
-alias logc_debug='log_debug "$LOG_CONTEXT"'
-# Alias for printing info log with context provided by LOG_CONTEXT variable
-alias logc_info='log_info "$LOG_CONTEXT"'
-# Alias for printing warning log with context provided by LOG_CONTEXT variable
-alias logc_warn='log_warn "$LOG_CONTEXT"'
-# Alias for printing error log with context provided by LOG_CONTEXT variable
-alias logc_error='log_error "$LOG_CONTEXT"'
+# -------------------------------------------------------------------
+# @brief Helper macro restoring configuration of the stdout log
+#    status from the top element of the default stack
+# -------------------------------------------------------------------
+alias restore_log_config_from_default_stack='
+local logging_config_
+pop_stack logging_config_
+set_stdout_logs_status $logging_config_
+'

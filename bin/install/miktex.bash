@@ -3,7 +3,7 @@
 # @file     miktex.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Friday, 5th November 2021 6:40:39 pm
-# @modified Sunday, 7th November 2021 5:12:45 pm
+# @modified Tuesday, 9th November 2021 7:25:29 pm
 # @project  BashUtils
 # @brief
 #    
@@ -66,34 +66,34 @@ install_miktex() {
     [[ -f $MIKTEX_APT_SOURCE_FILE ]] ||
         echo $MIKTEX_APT_SOURCE | sudo tee $MIKTEX_APT_SOURCE_FILE
 
-    logc_info "Installing MiKTeX ..."
+    log_info "Installing MiKTeX ..."
 
     # Install MiKTeX
     sudo apt update && sudo apt install -y miktex || {
-        logc_error "Could not install MiKTeX"
+        log_error "Could not install MiKTeX"
         return 1
     }
 
-    logc_info "MiKTeX installed"
+    log_info "MiKTeX installed"
     
     # Finish MiKTeX setup
-    logc_info "Finalizing MiKTeX setup"
+    log_info "Finalizing MiKTeX setup"
     local setup_mode=''
     local miktex_flags=''
     is_var_set options[user] && setup_mode='sudo' && miktex_flags='--shared=yes'
     $setup_mode miktexsetup finish || {
-        logc_error "Could not finish MiKTeX setup"
+        log_error "Could not finish MiKTeX setup"
         return 1
     }
 
-    logc_info "MiKTeX setup finished"
+    log_info "MiKTeX setup finished"
 
     # Enable automatic package installation
     is_var_set options[user] && 
              initexmf         --set-config-value [MPM]AutoInstall=1 || 
         sudo initexmf --admin --set-config-value [MPM]AutoInstall=1 || 
     {
-        logc_error "Could not enable automatic package installation"
+        log_error "Could not enable automatic package installation"
         return 1
     }
     
@@ -115,11 +115,11 @@ update_miktex() {
 upgrade_miktex() {
     
     # Upgrade MiKTeX
-    logc_info "Upgrading MiKTeX ..."
+    log_info "Upgrading MiKTeX ..."
     is_var_set options[user] &&
              mpm         --verbose --package-level=complete --upgrade
         sudo mpm --admin --verbose --package-level=complete --upgrade ||
-    logc_info "MiKTeX upgraded.."
+    log_info "MiKTeX upgraded.."
 
 }
 
@@ -144,14 +144,14 @@ main() {
     )
 
     # Parsed options
-    parse_arguments
+    parse_arguments_log
 
     # Parse argument
     cmd=${$1:-}
 
     # Validate argument
-    is_one_of $cmd COMMANDS || {
-        logc_error "Invalid usage"
+    is_array_element COMMANDS $cmd || {
+        log_error "Invalid usage"
         echo $usage
         return 1
     }

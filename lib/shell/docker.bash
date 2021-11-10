@@ -2,7 +2,7 @@
 # @file     docker.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:31:34 pm
-# @modified Thursday, 4th November 2021 4:34:52 pm
+# @modified Tuesday, 9th November 2021 7:22:30 pm
 # @project  BashUtils
 # @brief
 #    
@@ -10,11 +10,6 @@
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
-
-# Source logging helper
-source $BASH_UTILS_HOME/lib/logging/logging.bash
-# Source general scripting helpers
-source $BASH_UTILS_HOME/lib/scripting/variables.bash
 
 # ========================================================== Configuration ========================================================= #
 

@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Sunday, 7th November 2021 5:12:45 pm
+# @modified Tuesday, 9th November 2021 7:25:29 pm
 # @project  BashUtils
 # @brief
 #    
@@ -61,41 +61,41 @@ var_set_default CMAKE_BIN_URL "https://github.com/Kitware/CMake/releases/downloa
 
 cmake_install_source() {
 
-    logc_info "Building CMake..."
+    log_info "Building CMake..."
     pushd $EXTRACTED_PATH
 
     # Bootstrap CMake
     if ! ./bootstrap --prefix=$CMAKE_INSTALL_DIR; then
         popd
-        logc_error "Failed to configure CMake"
+        log_error "Failed to configure CMake"
         return 1
     fi
     # Build CMake
     if ! make; then
         popd
-        logc_error "Failed to build CMake"
+        log_error "Failed to build CMake"
         return 1
     fi
 
-    logc_info "CMake built"
+    log_info "CMake built"
 
     # Install CMake
     mkdir -p $CMAKE_INSTALL_DIR
     if ! make install; then
         popd
-        logc_error "Failed to install CMake"
+        log_error "Failed to install CMake"
         return 1
     fi
 
     popd
-    logc_info "CMake installed"
+    log_info "CMake installed"
 
     # Remove sources
     if [[ $BASH_UTILS_RM_DOWNLOADED -eq "1" ]]; then
-        logc_info "Deleting downloaded sources..."
+        log_info "Deleting downloaded sources..."
         rm -rf $ARCHIEVE_PATH
         rm -rf $EXTRACTED_PATH
-        logc_info "Sources deleted"
+        log_info "Sources deleted"
     fi
 
 }
@@ -103,10 +103,10 @@ cmake_install_source() {
 cmake_install_bin() {
 
     # Install CMake
-    logc_info "Installing CMake to $CMAKE_INSTALL_DIR"
+    log_info "Installing CMake to $CMAKE_INSTALL_DIR"
     mkdir -p $(dirname $CMAKE_INSTALL_DIR)
     mv $EXTRACTED_PATH $CMAKE_INSTALL_DIR
-    logc_info "Cmake installed"
+    log_info "Cmake installed"
 
 }
 
@@ -121,14 +121,14 @@ main() {
     )
 
     # Parsed options
-    parse_arguments
+    parse_arguments_log
 
     # Parse arguments
     installation_type=${1:-}
 
     # Verify arguments
     [[ $installation_type == "source" || $installation_type == "bin" ]] || {
-        logc_error "Invalid installation type ($installation_type)"
+        log_error "Invalid installation type ($installation_type)"
         echo $usage
         return 1
     }
@@ -157,7 +157,7 @@ main() {
 
     # Check if CMake version was given
     is_var_set_non_empty CMAKE_VERSION || {
-        logc_error "No CMake version given. Please export CMAKE_VERSION before running the script "
+        log_error "No CMake version given. Please export CMAKE_VERSION before running the script "
         return 1
     }
 

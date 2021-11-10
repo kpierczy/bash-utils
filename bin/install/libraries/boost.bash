@@ -3,7 +3,7 @@
 # @file     boost.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 1:13:17 pm
-# @modified Sunday, 7th November 2021 5:12:45 pm
+# @modified Tuesday, 9th November 2021 7:25:29 pm
 # @project  BashUtils
 # @brief
 #    
@@ -74,13 +74,13 @@ install_boost_pkg() {
     ! is_pkg_installed $BOOST_PKG || return
 
     # Install package
-    logc_info "Installing boost package ..."
+    log_info "Installing boost package ..."
     sudo apt update && sudo apt install $BOOST_PKG || {
-        logc_error "Failed o install $BOOST_PKG" package
+        log_error "Failed o install $BOOST_PKG" package
         return 1
     }
 
-    logc_info "Boost package installed"
+    log_info "Boost package installed"
     
 }
 
@@ -98,16 +98,16 @@ install_boost_source() {
     )
 
     # Verify target argument
-    is_var_set_non_empty target && is_one_of $target TARGETS ||
+    is_var_set_non_empty target && is_array_element $target TARGETS ||
     {
-        logc_error "Invalid target given ($target)"
+        log_error "Invalid target given ($target)"
         echo $usage
         return 1
     }
 
     # Verify if boost version given
     is_var_set_non_empty BOOST_VERSION || {
-        logc_error "No boost version given"
+        log_error "No boost version given"
         return 1
     }
 
@@ -125,7 +125,7 @@ install_boost_source() {
 
     pushd $EXTRACTED_PATH
 
-    logc_info "Initializing Boost's bootstrap routine ..."
+    log_info "Initializing Boost's bootstrap routine ..."
 
     # Prepare bootstrap flags
     local bootflags=''
@@ -135,13 +135,13 @@ install_boost_source() {
     # Bootstrap boost
     ./bootstrap.sh $bootflags $BOOST_BOOTSTRAP_FLAGS ||
     {
-        logc_error "Failed to bootstrap Boost"
+        log_error "Failed to bootstrap Boost"
         popd
         return 1
     }
 
-    logc_info "Boost sucesfully bootstrapped"
-    logc_info "Bulding Boost ..."
+    log_info "Boost sucesfully bootstrapped"
+    log_info "Bulding Boost ..."
 
     # Select build type
     local build_type=''
@@ -158,12 +158,12 @@ install_boost_source() {
     # Build boost
     ./b2 $build_type $build_flags $BOOST_COMPILE_FLAGS ||
     {
-        logc_error "Failed to build Boost"
+        log_error "Failed to build Boost"
         popd
         return 1
     }
 
-    logc_info "Sucesfully buit Boost"
+    log_info "Sucesfully buit Boost"
 
 }
 
@@ -189,15 +189,15 @@ main() {
     )
 
     # Parsed options
-    parse_arguments
+    parse_arguments_log
 
     # Parse argument
     itype=${1:-}
     target=${2:-}
 
     # Validate argument
-    is_one_of $itype ITYPES || {
-        logc_error "Invalid usage"
+    is_array_element ITYPES $itype || {
+        log_error "Invalid usage"
         echo $usage
         return 1
     }

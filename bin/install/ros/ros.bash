@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Sunday, 7th November 2021 5:12:45 pm
+# @modified Tuesday, 9th November 2021 7:25:29 pm
 # @project  BashUtils
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
@@ -125,7 +125,7 @@ install_ros_bin() {
     install_packages -yv --su -U dependencies_
     
     # Install python dependencies
-    logc_info "Installing additional ROS2 python dependencies"
+    log_info "Installing additional ROS2 python dependencies"
     echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | map pip_install_upgrade_package
 
     # --------------------------- Installation ---------------------------
@@ -145,9 +145,9 @@ install_ros_bin() {
 
     # Remove sources
     if [[ $BASH_UTILS_RM_DOWNLOADED -eq "1" ]]; then
-        logc_info "Deleting downloaded sources..."
+        log_info "Deleting downloaded sources..."
         rm -rf $ROS2_BIN_DOWNLOAD_PATH
-        logc_info "Sources deleted"
+        log_info "Sources deleted"
     fi
     
 }
@@ -206,7 +206,7 @@ install_ros() {
             
             # If the dirst uncompatibile setting detected, print error
             if [[ valid_locale == "0" ]]; then
-                logc_error "Locales does not fully support UTF-8 encodeing:"
+                log_error "Locales does not fully support UTF-8 encodeing:"
                 valid_locale=0
             fi
             # Print incompatibile line to the user
@@ -237,18 +237,18 @@ install_ros() {
     sudo apt update && install_packages -yv --su dependencies
 
     # Install python dependencies
-    logc_info "Installing ROS2 python dependencies"
+    log_info "Installing ROS2 python dependencies"
     echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | map pip_install_upgrade_package
     
     # -------------------------------- Installation ---------------------------------
 
-    logc_info "Installing ROS2 to $ROS2_DEFAULT_INSTALLATION_PATH..."
+    log_info "Installing ROS2 to $ROS2_DEFAULT_INSTALLATION_PATH..."
     
     # Install ROS2 package (desktop-version)
     [[ $src == "pkg" ]] && install_ros_pkg ||
     [[ $src == "bin" ]] && install_ros_bin
 
-    logc_info "ROS2 installed"
+    log_info "ROS2 installed"
 
     # --------------------------- `rosdep` configuration ----------------------------
 
@@ -256,11 +256,11 @@ install_ros() {
     export ROS_PYTHON_VERSION=3
     
     # Initialize rosdep
-    logc_info "Updating rosdep..."
+    log_info "Updating rosdep..."
     [[ -f $ROS2_ROSDEP_DEFAULT_CONFIG_PATH ]] || sudo rosdep init
     rosdep update
     # Install rosdep dependencies
-    logc_info "Installing ROS2-rosdep dependencies."
+    log_info "Installing ROS2-rosdep dependencies."
     rosdep install                                   \
         --rosdistro=$ROS2_DISTRO                     \
         --from-paths $ROS2_INSTALLATION_PATH/share   \
@@ -293,7 +293,7 @@ main() {
     )
 
     # Parsed options
-    parse_arguments
+    parse_arguments_log
 
     # Parse arguments
     action=${1:-}
@@ -303,14 +303,14 @@ main() {
     [[ $#      == "2"                                 ]] &&
     [[ $action == "install" || $action == "uninstall" ]] &&
     [[ $src    == "bin"     || $src    == "pkg"       ]] || { 
-        logc_error "Usage error"
+        log_error "Usage error"
         echo $usage
         return 1
     }
 
     # Verify distro
-    is_one_of "$ROS2_DISTRO" ROS2_SUPPORTED_DISTROS || {
-        logc_error "Unsupported distro given ($(print_var ROS2_DISTRO))"
+    is_array_element ROS2_SUPPORTED_DISTROS  "$ROS2_DISTRO" || {
+        log_error "Unsupported distro given ($(print_var ROS2_DISTRO))"
         return 1
     }
 
