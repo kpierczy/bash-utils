@@ -3,7 +3,7 @@
 # @file     functional.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 6:14:24 pm
-# @modified Thursday, 4th November 2021 11:23:14 pm
+# @modified Wednesday, 10th November 2021 5:53:18 pm
 # @project  BashUtils
 # @brief
 #    
@@ -20,7 +20,7 @@
 #    beggining with '$' representing an expression to be evaluated
 #    (poor-man's lambda)
 # -------------------------------------------------------------------
-map () {
+function map () {
 
     # Arguments
     local fun=$1
@@ -53,7 +53,7 @@ map () {
 #    beggining with '$' representing an expression to be evaluated
 #    as a filter (poor-man's lambda)
 # -------------------------------------------------------------------
-filter () {
+function filter () {
 
     # Arguments
     local rule=$1
@@ -92,7 +92,7 @@ filter () {
 #    initial value of the acumulator; if not given, initial 
 #    accumulator is read from the first element passed to the stdin
 # -------------------------------------------------------------------
-reduce () {
+function reduce () {
 
     # Arguments
     local acc=$1

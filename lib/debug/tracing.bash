@@ -3,7 +3,7 @@
 # @file     tracing.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 4:05:49 am
-# @modified Tuesday, 9th November 2021 3:04:23 am
+# @modified Wednesday, 10th November 2021 5:54:32 pm
 # @project  BashUtils
 # @brief
 #    
@@ -18,7 +18,7 @@
 # @brief Traceback handler designed to be used at ERR signal's 
 #    reception
 # -------------------------------------------------------------------
-traceback () {
+function traceback () {
 
     # Parameter
     local -i rc=$?

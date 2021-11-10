@@ -2,7 +2,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 9:28:52 pm
-# @modified Tuesday, 9th November 2021 7:25:29 pm
+# @modified Wednesday, 10th November 2021 6:24:40 pm
 # @project  BashUtils
 # @brief
 #    
@@ -16,6 +16,7 @@
 # -------------------------------------------------------------------
 # @param app 
 #    name of the app
+#
 # @returns 
 #     @c 0 if app is runnable from the calling context \n
 #     @c 1 otherwise
@@ -23,10 +24,10 @@
 is_app_installed() {
 
     # Arguments
-    local app=$1
+    local app_="$1"
 
     # Check if installed
-    which $1 > /dev/null
+    which "$app_" > /dev/null
 }
 
 

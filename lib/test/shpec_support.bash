@@ -3,7 +3,7 @@
 # @file     shpec_support.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 1:26:22 am
-# @modified Wednesday, 3rd November 2021 2:07:31 am
+# @modified Wednesday, 10th November 2021 8:08:13 pm
 # @project  Winder
 # @brief
 #    
@@ -11,6 +11,8 @@
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
+
+# ============================================================= Aliases ============================================================ #
 
 # -------------------------------------------------------------------
 # @brief Replacement for shpec's 'it' opening a subprocess context

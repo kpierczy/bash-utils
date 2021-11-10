@@ -2,7 +2,7 @@
 # @file     docker.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:31:34 pm
-# @modified Tuesday, 9th November 2021 7:22:30 pm
+# @modified Wednesday, 10th November 2021 7:42:51 pm
 # @project  BashUtils
 # @brief
 #    
@@ -21,7 +21,7 @@ DOCKER_STD_ARGS=(
     --ipc=host
 )
 
-# ============================================================ Commands ============================================================ #
+# ============================================================ Functions =========================================================== #
 
 # -------------------------------------------------------------------
 # @brief Runs the docker container with standard arguments
@@ -40,7 +40,7 @@ DOCKER_STD_ARGS=(
 #    DEFULT_DOCKER_IMG - default docker container to be run
 #
 # -------------------------------------------------------------------
-drun() { 
+function drun() { 
 
     # Arguments
     local container_name=${1:-$DEFULT_DOCKER_IMG}
@@ -73,7 +73,7 @@ drun() {
 #    DEFULT_DOCKER_IMG - default docker container to be run
 #
 # -------------------------------------------------------------------
-drunv() { 
+function drunv() { 
 
     # Arguments
     local container_name=${1:-$DEFULT_DOCKER_IMG}
@@ -87,6 +87,8 @@ drunv() {
     # Run the specified container
     sudo docker run $DOCKER_STD_ARGS -v $container_name
 }
+
+# ============================================================= Aliases ============================================================ #
 
 # -------------------------------------------------------------------
 # @brief Shortcut for 'sudo docker ps' (lists docker processes)

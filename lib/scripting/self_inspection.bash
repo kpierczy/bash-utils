@@ -3,7 +3,7 @@
 # @file     self_inspection.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Thursday, 4th November 2021 4:36:50 pm
+# @modified Wednesday, 10th November 2021 7:08:44 pm
 # @project  BashUtils
 # @brief
 #    
@@ -12,20 +12,13 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# -------------------------------------------------------------------
-# @brief Writes home directory of the calling script to the local 
-#     DIR variable 
-#
-# @param DIR (out, global)
-#     set to the home directory of the calling script
-# -------------------------------------------------------------------
-alias set_script_dir='declare DIR="$(dirname "$(readlink -f "$BASH_SOURCE")")"'
+# ============================================================ Functions =========================================================== #
 
 # -------------------------------------------------------------------
 # @brief Writes absolute path to the calling script's home directory
 #    to the stdout
 # -------------------------------------------------------------------
-get_script_dir() {
+function get_script_dir() {
     echo "$(dirname "$(readlink -f "${BASH_SOURCE[1]}")")"
 }
 
@@ -33,7 +26,7 @@ get_script_dir() {
 # @brief Writes absolute path to the calling script's home directory
 #    to the stdout (resolves symlinks)
 # -------------------------------------------------------------------
-get_script_dir_sym() {
+function get_script_dir_sym() {
 
     # Get current source's path
     local src="${BASH_SOURCE[1]}"
@@ -68,7 +61,7 @@ get_script_dir_sym() {
 #     @c 0 if calling script was sourced \n
 #     @c 1 otherwise
 # -------------------------------------------------------------------
-is_sourced() {
+function is_sourced() {
 
     # Arguments
     local -i depth=${1:-0};
@@ -81,6 +74,17 @@ is_sourced() {
     # Check if script was sourced
     [[ ${FUNCNAME[$depth + 1]} == source ]]
 }
+
+# ============================================================= Aliases ============================================================ #
+
+# -------------------------------------------------------------------
+# @brief Writes home directory of the calling script to the local 
+#     DIR variable 
+#
+# @param DIR (out, global)
+#     set to the home directory of the calling script
+# -------------------------------------------------------------------
+alias set_script_dir='declare DIR="$(dirname "$(readlink -f "$BASH_SOURCE")")"'
 
 # -------------------------------------------------------------------
 # @brief Calls 'return' if script was sourced

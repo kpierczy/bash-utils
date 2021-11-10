@@ -3,7 +3,7 @@
 # @file     strings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 4:50:15 pm
-# @modified Tuesday, 9th November 2021 8:36:46 pm
+# @modified Wednesday, 10th November 2021 5:19:05 pm
 # @project  BashUtils
 # @brief
 #    
@@ -34,7 +34,7 @@ function starts_with() {
     local prefix_="$2"
 
     # Check if string is not shorter than prefix
-    (( ${#string_} >= ${#prefix_} )) || continue
+    (( ${#string_} >= ${#prefix_} )) || return 1
 
     # Match first "${#prefix_}" characters of the string with the prefix
     [[ "${string_:0:${#prefix_}}" == "$prefix_" ]]

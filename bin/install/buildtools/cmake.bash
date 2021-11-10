@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Tuesday, 9th November 2021 7:25:29 pm
+# @modified Wednesday, 10th November 2021 5:45:34 pm
 # @project  BashUtils
 # @brief
 #    
@@ -121,7 +121,7 @@ main() {
     )
 
     # Parsed options
-    parse_arguments_log
+    parse_script_options
 
     # Parse arguments
     installation_type=${1:-}
@@ -165,7 +165,7 @@ main() {
     [[ -f $CMAKE_INSTALL_DIR/bin/cmake ]] && return
 
     # Install dependencies
-    sudo apt update && install_packages -yv --su dependencies
+    sudo apt update && install_pkg_list -yv --su dependencies
 
     # Download and extract CMake
     CURL_FLAGS='-C -' LOG_CONTEXT=$LOG_CONTEXT LOG_TARGET="CMake" download_and_extract -v \

@@ -3,7 +3,7 @@
 # @file     install.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:28:20 pm
-# @modified Tuesday, 9th November 2021 7:25:29 pm
+# @modified Wednesday, 10th November 2021 5:45:34 pm
 # @project  BashUtils
 # @brief
 #    
@@ -134,14 +134,14 @@ main() {
     # ------------------------------------ Processing -----------------------------------
 
     # Parsed options
-    parse_arguments_log
+    parse_script_options
 
     # Parse argument
 
     # Validate argument
 
     # Install dependencies
-    install_packages --su -y -v -U dependencies || {
+    install_pkg_list --su -y -v -U dependencies || {
         log_error "Could not install required dependencies"
         return 1
     }

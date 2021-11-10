@@ -3,7 +3,7 @@
 # @file     net.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 9:59:21 pm
-# @modified Wednesday, 10th November 2021 5:48:11 am
+# @modified Wednesday, 10th November 2021 7:05:33 pm
 # @project  BashUtils
 # @brief
 #    
@@ -30,6 +30,9 @@
 #    log messages to the stderr via options. It is still possible
 #    though to make the progress bar visible with --show-progress 
 #    switch
+# 
+# @note If many files would be downloaded by `wget`, only location
+#    of the first one is returned to the stdout
 # -------------------------------------------------------------------
 function wget_and_localize() {
 
@@ -192,25 +195,11 @@ function wget_and_localize() {
                   '-np|--no-parent',no_parent,f
     )
 
-    # Disable word-splitting to parse positional arguments in a proper way
-    push_stack "$IFS"
-    disable_word_splitting
-
-    # Parse arguments to a named array
-    local -a args=( "$@" )
-
-    # Restore previous mode of the word-splitting
-    pop_stack IFS
-
-    # Prepare names hash arrays for positional arguments and parsed options
-    local -a posargs
-    local -A options
-
     # Parse options
-    parseopts args opt_definitions options posargs || return 1
+    parse_options
 
     # Parse arguments
-    url_="${posargs[1]}"
+    url_="${posargs[0]}"
 
     # -------------------------------------------------
 
@@ -234,26 +223,112 @@ function wget_and_localize() {
     is_var_set options[show_progress] &&
         show_progres_flag_="--show-progress"
 
+    local ret_
+    local log_
+    
     # Download requested file
-    wget "$@" --output-file="$logfile_" -nv "$show_progres_flag_" > /dev/null || return 1
+    wget "$@" --output-file="$logfile_" --no-verbose "$show_progres_flag_" && ret_=$? || ret_=$?
     
-    # Parse logfile to get output file's path
-    cat $logfile_ 1>&2
-    # is_var_set_non_empty out_file_ || out_file_=$(cut -d '"' -f2 < $logfile_)
-    # If out_file_ still empty, file had been already downloaded and the --no-clobber option
-    # has been passed. Use another parsing scheme
-    is_var_set_non_empty out_file_ || {
-
-        local log_=$(cat $logfile_)
-        # Parse prefix and suffix of the ROI
-        local prefixless_=${log_#File }
-        local suffixless_=${prefixless_% already*}
-        # Get the ROI
-        out_file_=${suffixless_:1:-1}
-
-    }
+    # If file was successfully downloaded, parse
+    if [[ $ret_ == 0 ]]; then
     
-    # Remove temporary file
+        is_var_set_non_empty out_file_ || out_file_=$(cut -d '"' -f2 < $logfile_)
+        
+    # If error code was returned, check whether an empty/buggy log was produced
+    #
+    # 1) If the empty log was produced, the --no-clobber option was passed (along
+    #    with --output-document) and the file was already downloaded. 
+    #
+    # 2) (wget bug) When the "http://: Invalid host name." log was produced, the
+    #    function was called passed with --no-clobber option and  WITHOUT 
+    #    --output-document option (downloaded file has default name ) and the file 
+    #    was already downloaded. 
+    #    
+    # In such cases `wget` can be rerun in verbose mode to produce the new log 
+    # that will contain the name of already downloaded file
+    elif [[ -z $(cat "$logfile_") || "$(cat $logfile_)" == "http://: Invalid host name." ]]; then
+      
+        # If $out_file_ is still not set, the --output-document was not passed (in such case,
+        # it would be detected before processing `wget`, @see above). 
+        is_var_set_non_empty out_file_ || {
+ 
+            # Rerun the wget with --verbose mode to produce an non-empty log file
+            # that will contain name of the 'already downloaded' file (redirect
+            # user output - stderr - to null)
+            wget "$@" --output-file="$logfile_" --verbose &> /dev/null
+
+            # Read content of the logfile
+            log_=$(cat $logfile_)
+            # Remove text around name of the file to be extracted
+            local prefixless_=${log_#File }
+            local suffixless_=${prefixless_% already*}
+            # Get the ROI (remove '' around the file's name)
+            out_file_=${suffixless_:1:-1}
+
+            # If $out_file_ was not succesfully parsed, the log file has no an expected form
+            is_var_set_non_empty out_file_ || {
+
+                # Remove log file
+                rm -rf "$logfile_"
+
+                # In such a case report an error
+                return 1
+            }
+
+        }
+
+        # If $out_file_ was already set, the --output-document was passed and already parsed.
+        # In such case, content of the log that would be produced by the verbose log of the `wget`
+        # would contain the same filename as the on given to this option
+
+    # If non-empty log was produced and error code was returned
+    else
+
+        # ----------------------------------------------------------
+        # @note There is a bug in the `wget` emerging when the file
+        #    is downloaded without '--progress-bar' option. Inspite
+        #    of success download of the file, the `1` error code is
+        #    returned.
+        # 
+        #    In such case, the function tries to parse the log file
+        #    nonetheless using the usual pattern. Only if fails to
+        #    do so, the error is reported
+        # ----------------------------------------------------------
+        
+        # Read content of the logfile
+        log_=$(cat $logfile_)
+        
+        # Check if content, matches the valid pattern (pattern: ...-> "<filename>" [1]...)
+        if [[ "$log_" =~ \-\>[[:space:]]\".*\"[[:space:]]\[1\] ]]; then
+        
+            # Get matched content
+            matched_="${BASH_REMATCH[0]}"
+            # Remove prefix and suffix from the matched pattern
+            matched_="${matched_#"-> \""}"
+            matched_="${matched_%"\" [1]"}"
+            out_file_="$matched_"
+            # Check, whether file's named was sucesfully parsed
+            is_var_set_non_empty out_file_ || {
+
+                # Remove log file
+                rm -rf "$logfile_"
+
+                # In such a case report an error
+                return 1
+            }
+
+        # If no content matched, return error
+        else
+
+            # Remove log file
+            rm -rf "$logfile_"
+
+            return 1
+        fi
+
+    fi
+    
+    # Remove log file
     rm -rf "$logfile_"
 
     # Print path to the output file to stdout

@@ -189,7 +189,7 @@ main() {
     )
 
     # Parsed options
-    parse_arguments_log
+    parse_script_options
 
     # Parse argument
     itype=${1:-}

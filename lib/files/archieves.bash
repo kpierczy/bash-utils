@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 7:11:57 pm
-# @modified Wednesday, 10th November 2021 5:20:02 am
+# @modified Wednesday, 10th November 2021 7:01:25 pm
 # @project  BashUtils
 # @brief
 #    
@@ -210,7 +210,7 @@ function extract_archieve() {
     parse_options
 
     # Parse arguments
-    local archieve_="$1"
+    local archieve_="${posargs[0]}"
 
     # -------------------------------------------------
 
@@ -316,9 +316,9 @@ function download_and_extract() {
     
     # Parse arguments to a named array
     parse_options
-
+    
     # Parse arguments
-    url_="$1"
+    url_="${posargs[0]}"
 
     # ----------------- Configure logs ----------------   
 
@@ -368,7 +368,7 @@ function download_and_extract() {
     is_var_set options[arch_dir] &&
         download_dir="${options[arch_dir]}" 
     is_var_set options[arch_path] &&
-        download_dir="$(dirname ${options[arch_path]})" ||
+        download_dir="$(dirname ${options[arch_path]})"
     # Create download dir
     mkdir -p "$download_dir"
     
@@ -388,9 +388,7 @@ function download_and_extract() {
         return 1
 
     }
-    print_var archieve_path_
-    return
-    
+
     log_info "${ltarget_^} downloaded"
 
     # Check if the downloaded file reside under the assumed path

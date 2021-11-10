@@ -3,7 +3,7 @@
 # @file     logging.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:08:34 am
-# @modified Wednesday, 10th November 2021 5:18:50 am
+# @modified Wednesday, 10th November 2021 5:54:09 pm
 # @project  BashUtils
 # @brief
 #    
@@ -67,7 +67,7 @@ var_set_default LOG_ENABLE_STDOUT 1
 # @brief Helper function used to log an error message with
 #    neither file output nor syslog output
 # -------------------------------------------------------------------
-_log_exception() {
+function _log_exception() {
     
     local LOG_FILE=''
     local LOG_JSON=''
@@ -79,28 +79,14 @@ _log_exception() {
 # -------------------------------------------------------------------
 # @Enables logging to stdout
 # -------------------------------------------------------------------
-enable_stdout_logs() {
+function enable_stdout_logs() {
     LOG_ENABLE_STDOUT=1
 }
 
 # -------------------------------------------------------------------
 # @Disables logging to stdout
 # -------------------------------------------------------------------
-disable_stdout_logs() {
-    LOG_ENABLE_STDOUT=0
-}
-
-# -------------------------------------------------------------------
-# @Enables logging to stdout
-# -------------------------------------------------------------------
-enable_stdout_logs() {
-    LOG_ENABLE_STDOUT=1
-}
-
-# -------------------------------------------------------------------
-# @Disables logging to stdout
-# -------------------------------------------------------------------
-disable_stdout_logs() {
+function disable_stdout_logs() {
     LOG_ENABLE_STDOUT=0
 }
 
@@ -108,16 +94,17 @@ disable_stdout_logs() {
 # @brief Prints @c 1 to stdout if logging to stdout is enabled or
 #    @c 0 otherwise
 # -------------------------------------------------------------------
-get_stdout_logs_status() {
+function get_stdout_logs_status() {
     [[ $LOG_ENABLE_STDOUT == "0" ]] && echo "0" || echo "1"
 }
 
 # -------------------------------------------------------------------
 # @brief Sets status of the stdout logs
+#
 # @param status
 #    if @c 0, stdout logs are disabled; otherwise logs are enabled
 # -------------------------------------------------------------------
-set_stdout_logs_status() {
+function set_stdout_logs_status() {
 
     # Arguments
     local status=$1
@@ -171,7 +158,7 @@ set_stdout_logs_status() {
 #       if @c 0, only date, log level and context will be printed in colour
 #
 # -------------------------------------------------------------------
-log() {
+function log() {
     
     # Arguments
     local level=$1
@@ -325,7 +312,7 @@ log() {
 #    LOG_CONTEXT  context of the log (optional)
 #
 # -------------------------------------------------------------------
-log_debug() {
+function log_debug() {
     log debug "${@}"
 }
 
@@ -340,7 +327,7 @@ log_debug() {
 #    LOG_CONTEXT  context of the log (optional)
 #
 # -------------------------------------------------------------------
-log_info() {
+function log_info() {
     log info "${@}"
 }
 
@@ -355,7 +342,7 @@ log_info() {
 #    LOG_CONTEXT  context of the log (optional)
 #
 # -------------------------------------------------------------------
-log_warn() {
+function log_warn() {
     log warn "${@}"
 }
 
@@ -370,7 +357,7 @@ log_warn() {
 #    LOG_CONTEXT  context of the log (optional)
 #
 # -------------------------------------------------------------------
-log_error() {
+function log_error() {
     log error "${@}"
 }
 

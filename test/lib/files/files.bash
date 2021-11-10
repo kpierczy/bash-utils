@@ -3,7 +3,7 @@
 # @file     files.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 1:05:39 am
-# @modified Tuesday, 9th November 2021 2:58:19 am
+# @modified Wednesday, 10th November 2021 4:56:05 pm
 # @project  BashUtils
 # @brief
 #    
@@ -244,4 +244,3 @@ describe remove_file_extension
     ti
     
 end_describe
-

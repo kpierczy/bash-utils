@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Tuesday, 9th November 2021 7:21:46 pm
+# @modified Wednesday, 10th November 2021 5:45:34 pm
 # @project  BashUtils
 # @brief
 #    
@@ -44,7 +44,7 @@ declare dependencies=(
 )
 
 # Install dependencies
-install_packages -yv --su dependencies || return 1
+install_pkg_list -yv --su dependencies || return 1
 
 # ========================================================= Set environment ======================================================== #
 

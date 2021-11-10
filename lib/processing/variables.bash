@@ -3,7 +3,7 @@
 # @file     variables.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 2:36:03 am
-# @modified Tuesday, 9th November 2021 7:26:08 pm
+# @modified Wednesday, 10th November 2021 7:01:46 pm
 # @project  BashUtils
 # @brief
 #    
@@ -20,7 +20,7 @@
 #    @c 0 if @p var is defined in the calling context \n
 #    @c 1 otherwise
 # -------------------------------------------------------------------
-is_var_set() {
+function is_var_set() {
     local var=$1
     # return $([[ -v  $var ]])    # Bash >= 4.2
     return $([[ -n  ${!var+x} ]]) # Portable
@@ -34,7 +34,7 @@ is_var_set() {
 #    @c 0 if @p var is defined to a non-zero string \n
 #    @c 1 otherwise
 # -------------------------------------------------------------------
-is_var_set_non_empty() {
+function is_var_set_non_empty() {
     local var=$1
     return $([[ -n  ${!var:+x} ]])
 }
@@ -62,13 +62,35 @@ function var_set_default() {
 #
 # @param var
 #    variable to be printed
+#
+# @options
+#
+#    -n  if given, name of the variable is printed
+#
 # -------------------------------------------------------------------
-print_var() {
+function print_var() {
 
     # Arguments
-    local var=$1
+    local var
+
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-n',name,f
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # Parse arguments
+    var="${posargs[0]}"
+
+    # ------------------------------------------------- 
 
     # Print variable
-    echo "$var=${!var}"
+    is_var_set options[name] &&
+        echo "$var=${!var}" ||
+        echo "${!var}"
     
 }

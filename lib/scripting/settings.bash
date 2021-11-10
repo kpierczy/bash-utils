@@ -3,7 +3,7 @@
 # @file     settings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
-# @modified Tuesday, 9th November 2021 2:55:38 am
+# @modified Wednesday, 10th November 2021 7:10:08 pm
 # @project  BashUtils
 # @brief
 #    
@@ -12,6 +12,8 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
+# ============================================================ Functions =========================================================== #
+
 # -------------------------------------------------------------------
 # @brief Enables/disables macros' expansion
 #
@@ -19,14 +21,17 @@
 #    if @c 'on', aliases expansion will be enabled \n
 #    if @c 'off', aliases expansion will be disabled
 # -------------------------------------------------------------------
-set_aliases_expansion() {
+function set_aliases_expansion() {
 
-    local query=$1
+    # Arguments
+    local query="$1"
 
+    # Set aliases expansion
     case $query in
         on )  shopt -s expand_aliases;;
         off ) shopt -u expand_aliases;;
     esac
+    
 }
 
 # -------------------------------------------------------------------
@@ -36,7 +41,7 @@ set_aliases_expansion() {
 #   can be ommittes without separating content of the expression
 #   based on the spaces.
 # -------------------------------------------------------------------
-disable_word_splitting() {
+function disable_word_splitting() {
     IFS=''
 }
 
@@ -44,7 +49,7 @@ disable_word_splitting() {
 # @brief Enables default bash-word splitting by setting @glob IFS
 #   variable to ' ' (a space). 
 # -------------------------------------------------------------------
-enable_word_splitting() {
+function enable_word_splitting() {
     IFS=$' \t\n'
 }
 
@@ -77,21 +82,21 @@ enable_word_splitting() {
 # @note In Bash >= 4.3 the cleaner way is to pass array's name to
 #    the function and make t a reference with 'local -n ref=$1'
 # -------------------------------------------------------------------
-set_word_splitting_record() {
+function set_word_splitting_record() {
     IFS=$'\037'
 }
 
 # -------------------------------------------------------------------
 # @brief Enables globbing
 # -------------------------------------------------------------------
-enable_globbing() {
+function enable_globbing() {
     shopt -s extglob
 }
 
 # -------------------------------------------------------------------
 # @brief Disables globbing
 # -------------------------------------------------------------------
-disable_globbing() {
+function disable_globbing() {
     shopt -u extglob
 }
 

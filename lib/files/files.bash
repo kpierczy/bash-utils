@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Tuesday, 9th November 2021 7:27:46 pm
+# @modified Wednesday, 10th November 2021 7:05:02 pm
 # @project  BashUtils
 # @brief
 #    
@@ -129,32 +129,21 @@ function get_file_extension() {
 #       returns an empty string
 #
 # -------------------------------------------------------------------
-remove_file_extension() {
+function remove_file_extension() {
     
     # Arguments
     local _filename_
 
     # Options
-    local defs=(
+    local opt_definitions=(
         '-z',empty,f
     )
 
-    # Disable word splitting in the context of the function
-    limit_word_splitting_settings
-    disable_word_splitting
-
-    # Parsed options
-    local -a args=( "$@" )
-    local -A options
-
     # Parse options
-    parseopts args defs options posargs || return 1
-
-    # Set positional arguments
-    set -- ${posargs[@]}
+    parse_options
 
     # Parse arguments
-    _filename_="$1"
+    _filename_="${posargs[0]}"
 
     # Local variables
     local _extension_

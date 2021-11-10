@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 4:29:08 pm
-# @modified Tuesday, 9th November 2021 7:25:29 pm
+# @modified Wednesday, 10th November 2021 5:45:34 pm
 # @project  BashUtils
 # @brief
 #    
@@ -138,7 +138,7 @@ install_python_src() {
     [[ -f $PYTHON_PREFIX/bin/python${version%%.*} ]] && return
 
     # Install dependencies
-    sudo apt update && install_packages -yv --su dependencies
+    sudo apt update && install_pkg_list -yv --su dependencies
 
     # Download and extract CMake
     ARCH_NAME=$ARCHIEVE_NAME CURL_FLAGS='-C -' LOG_TARGET="$target" download_and_extract -v \
@@ -252,14 +252,14 @@ main() {
     local set_alternative_ARG_NUM=1
 
     # Options
-    local defs=(
+    local opt_definitions=(
         '--help',help,f
     )
 
     # ------------------------------------ Processing -----------------------------------
 
     # Parsed options
-    parse_arguments_log_multicmd
+    parse_script_options_multicmd
     
     # Perform corresponding routine
     case $cmd in

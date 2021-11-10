@@ -3,7 +3,7 @@
 # @file     galactic.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 8:55:12 pm
-# @modified Friday, 5th November 2021 4:42:06 am
+# @modified Wednesday, 10th November 2021 5:45:34 pm
 # @project  BashUtils
 # @brief
 #    
@@ -20,7 +20,7 @@ prepare_ros_installation() {
     )
 
     # Install additional dependencies
-    install_packages -yv --su dependencies_
+    install_pkg_list -yv --su dependencies_
 
     # Read apt cache policy
     policy=$(apt-cache policy)

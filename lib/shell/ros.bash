@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified Tuesday, 9th November 2021 7:22:25 pm
+# @modified Wednesday, 10th November 2021 8:07:49 pm
 # @project  Winder
 # @brief
 #    
@@ -17,7 +17,7 @@
 # -------------------------------------------------------------------
 # @brief Builds colcon @p packages residing in @var COLCON_SOURCE_DIR
 #
-# @param packages..
+# @param packages...
 #    list of packages to be built; if no @p packages are given, the 
 #    whole @var COLCON_SOURCE_DIR dirctory is built
 # 
@@ -35,7 +35,12 @@
 #
 # @todo test
 # -------------------------------------------------------------------
-colbuild() {
+function colbuild() {
+
+    # Arguments
+    # local packages_
+
+    # ---------------- Parse arguments ----------------
 
     # Function's options
     declare -a defs=(
@@ -44,62 +49,73 @@ colbuild() {
         '--fv',full_verbose,f
     )
 
-    # Enable words-splitting locally
-    local IFS
-    enable_word_splitting
-
-    # Parse options
-    local -A options
-    parseopts "$*" defs options posargs
-
-    # Arguments
-    local _packages_=("${posargs[@]}")
-
-    # Get source directory
-    local _src_dir_="${COLCON_SOURCE_DIR:-.}"
+    # Parse arguments to a named array
+    parse_options
 
     # Set list of packages as positional arguments
-    set -- "${_packages_[@]}"
+    set -- "${posargs[@]}"
 
-    # Enable/disable logs
-    is_var_set options[verbose] 
+    # Get source directory
+    local src_dir_="${COLCON_SOURCE_DIR:-.}"    
 
-    # Set verbosity level
-    local INIT_LOGS_STATE=$(get_stdout_logs_status)
-    local verbose_compilation=0
-    [[ options[full_verbose] -eq "1" || options[verbose] -eq "1" ]] && enable_stdout_logs || disable_stdout_logs
-    [[ options[full_verbose] -eq "1"                             ]] && verbose_compilation=1
-    
+    # ----------------- Configure logs ----------------
+
+    # Keep current configuration of logs on the stack
+    push_stack $(get_stdout_logs_status)
+
+    # Enable/disable logs depending on the configuration
+    if is_var_set options[full_verbose] || is_var_set options[verbose]; then
+        enable_stdout_logs
+    else
+        disable_stdout_logs
+    fi
+
+    # Set log context
+    local LOG_CONTEXT="ros"
+
+    # ----------- Prepare build environment -----------
+
+    # Set verbose build flags
+    local build_flags_=""
+    is_var_set options[full_verbose] &&
+        build_flags_+="--event-handlers console_direct+ "
+     
+    # Compile colcon build
+    local build_type_
+    is_var_set options[up_to] && 
+        build_type_="--packages-up-to" ||
+        build_type_="--packages-select"
+
+    # If verbose build requested, export VERBOSE variable for CMake
+    is_var_set options[full_verbose] &&
+        export VERBOSE=1
+
+    # ----------- Prepare build environment -----------
+
     # Check for dependencies
-    [[ verbose_log == 1 ]] && log_info "ros" "Checking for dependencies"
+    log_info "Checking for dependencies"
     rosdep install -i --from-path src -y
 
-    # Prepare bulding environments
-    [[ $verbose_compilation == 1 ]] && export VERBOSE=1
-    # Compile colcon flags
-    local build_flags=''
-    [[ $verbose_compilation == 1 ]] && build_flags="--event-handlers console_direct+"
-    # Compile colcon build
-    local build_type='--packages-select'
-    is_var_set options[up_to] && build_type="--packages-up-to"
+    log_info "Building package(s) ..."
 
-    # Log initial message
-    log_info "ros" "Building package(s)"
     # If no packages' names given, build the whole directory
     if [[ $# -eq 0 ]]; then
-        colcon build --base-paths "$_src_dir_" $build_flags
-    # Else, build listed
+
+        colcon build --base-paths "$src_dir_" $build_flags_
+        
+    # Else, build listed packages
     else 
+
+        local package_
+
         # Iterate over packages
-        for package in "$@"; do
+        for package_ in "$@"; do
             
             # Build package
-            if colcon build --base-paths "$_src_dir_" $build_type $package $build_flags; then
-
-                log_error "ros" "Failed to build \'$package\' package"
-                set_stdout_logs_status "$INIT_LOGS_STATE"
+            if colcon build --base-paths "$src_dir_" $build_type_ $package_ $build_flags_; then
+                log_error "Failed to build \'$package_\' package"
+                restore_log_config_from_default_stack
                 return 1
-                
             else
                 log_info "ros" "\'$package\' package built"
             fi
@@ -108,14 +124,14 @@ colbuild() {
     fi
 
     # Restore logs state
-    set_stdout_logs_status "$INIT_LOGS_STATE"
+    restore_log_config_from_default_stack
     
 }
 
 # -------------------------------------------------------------------
 # @brief Reinitializes rosdep
 # -------------------------------------------------------------------
-reset_rosdep() {
+function reset_rosdep() {
 
     # Remove default configuration
     sudo rm /etc/ros/rosdep/sources.list.d/20-default.list

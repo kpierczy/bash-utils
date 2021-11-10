@@ -3,7 +3,7 @@
 # @file     general.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
-# @modified Tuesday, 9th November 2021 7:56:54 pm
+# @modified Wednesday, 10th November 2021 6:43:15 pm
 # @project  BashUtils
 # @brief
 #    
@@ -12,10 +12,7 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Get path to the scripts's home
-SCRIPT_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")"
-
-# =========================================================== Definitions ========================================================== #
+# ============================================================= Aliases ============================================================ #
 
 # -------------------------------------------------------------------
 # @brief A helper alias used to check content of the @var _err_ and
@@ -51,6 +48,7 @@ alias noerror?='! (( ${_err_:-} )) || (exit $_err_)'
 # -------------------------------------------------------------------
 alias kwargs='(( $# )) && local'
 
+# ============================================================ Functions =========================================================== #
 
 # -------------------------------------------------------------------
 # @brief Reads heredoc text from the standard input into the 
@@ -67,7 +65,7 @@ alias kwargs='(( $# )) && local'
 # 
 # @see https://wiki.bash-hackers.org/syntax/redirection#here_documents
 # -------------------------------------------------------------------
-get_multiline_heredoc () {
+function get_multiline_heredoc () {
 
     # Arguments
     declare -n var=$1
@@ -86,7 +84,7 @@ get_multiline_heredoc () {
 #    name of the variable that the read heredoc will be read into
 # @see get_multiline_heredoc()
 # -------------------------------------------------------------------
-get_heredoc () {
+function get_heredoc () {
     
     # Arguments
     local -n heredoc_=$1
@@ -112,7 +110,7 @@ get_heredoc () {
 #
 # @see get_heredoc()
 # -------------------------------------------------------------------
-print_heredoc() {
+function print_heredoc() {
 
     local doc
 
@@ -121,20 +119,3 @@ print_heredoc() {
     # Print result
     echo "$doc"
 }
-
-# ============================================================= Aliases ============================================================ #
-
-# -------------------------------------------------------------------
-# @brief Checks if required number of arguments was given to the 
-#    script and exits when not
-#
-# @environment
-#
-#    ARG_NUM required number of arguments
-# -------------------------------------------------------------------
-alias check_args_num='
-is_var_set_non_empty ARG_NUM && [[ "$#" = "$ARG_NUM" ]] || {
-    echo $usage
-    return 1
-}
-'

@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Tuesday, 9th November 2021 7:25:29 pm
+# @modified Wednesday, 10th November 2021 6:30:00 pm
 # @project  BashUtils
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
@@ -122,11 +122,11 @@ install_ros_bin() {
     )
 
     # Install additional dependencies
-    install_packages -yv --su -U dependencies_
+    install_pkg_list -yv --su -U dependencies_
     
     # Install python dependencies
     log_info "Installing additional ROS2 python dependencies"
-    echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | map pip_install_upgrade_package
+    echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | PIP_FLAGS='-U' map pip_install
 
     # --------------------------- Installation ---------------------------
 
@@ -234,11 +234,11 @@ install_ros() {
     add_ros_repo
     
     # Install dependencies
-    sudo apt update && install_packages -yv --su dependencies
+    sudo apt update && install_pkg_list -yv --su dependencies
 
     # Install python dependencies
     log_info "Installing ROS2 python dependencies"
-    echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | map pip_install_upgrade_package
+    echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | PIP_FLAGS='-U' map pip_install
     
     # -------------------------------- Installation ---------------------------------
 
@@ -293,7 +293,7 @@ main() {
     )
 
     # Parsed options
-    parse_arguments_log
+    parse_script_options
 
     # Parse arguments
     action=${1:-}

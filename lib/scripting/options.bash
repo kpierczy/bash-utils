@@ -3,7 +3,7 @@
 # @file     options.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Tuesday, 9th November 2021 9:01:49 pm
+# @modified Wednesday, 10th November 2021 7:41:38 pm
 # @project  BashUtils
 # @brief
 #    
@@ -33,7 +33,7 @@
 #    <long,...> containing strings with comma-separated lists of 
 #    names of short and long options defined in @p defs
 # -------------------------------------------------------------------
-denormopts () {
+function parse_option_defs () {
 
     # Arguments
     local -n _defs_=$1
@@ -57,40 +57,38 @@ denormopts () {
 
         # Set world-splitting-separator to comma to extract parts of the option's definition
         IFS=','
-        # Set positional arguments to the conent of @var defn
+        # Set positional arguments to the conent of @var defn (@notice auto word-splitting)
         set -- $_defn_
 
         # Parse positional arguments
-        local _opt_name_=$1
-        local _opt_var_=$2
-        local _opt_flag_=${3:-}
+        local _opt_name_="$1"
+        local _opt_var_="$2"
+        local _opt_flag_="${3:-}"
 
         # Reconfigure world-splitting-separator to extract short/long name of the option
         IFS='|'
 
-        # Iterate over short/long name string
+        # Iterate over short/long name string (@notice auto word-splitting)
         for _opt_ in ${_opt_name_[@]}; do
 
             # Write variables name corresponding to the option's short/long name
-            _names_[$_opt_]=$_opt_var_
+            _names_["$_opt_"]="$_opt_var_"
 
             # Append option's name to the one of getopt's strings (remove -/-- prefix)
-            case $_opt_ in
-                -?  ) _short_+=,${_opt_#?};;
-                *   ) _long_+=,${_opt_#??};;
+            case "$_opt_" in
+                -?  ) _short_+=,"${_opt_#?}";;
+                *   ) _long_+=,"${_opt_#??}";;
             esac
 
             # Check if option is a flag
-            case $_opt_flag_ in
+            case "$_opt_flag_" in
                 # If keyword argument, append ': ' to the option's name
-                '' ) 
-                case $_opt_ in
-                    -?  ) _short_+=: ;;
-                    *   ) _long_+=:  ;;
-                esac
-                ;;
+                '' ) case "$_opt_" in
+                        -?  ) _short_+=: ;;
+                        *   ) _long_+=:  ;;
+                     esac;;
                 # If flag, wrie '1' to he @p flags hash array
-                * ) _flags_[$_opt_]=1;;
+                * ) _flags_["$_opt_"]=1;;
             esac
             
         done
@@ -98,8 +96,8 @@ denormopts () {
     done
 
     # Write options' sets tot the @p getopts (remove prefix comma)
-    _getopts_[short]=${_short_#?}
-    _getopts_[long]=${_long_#?}
+    _getopts_[short]="${_short_#?}"
+    _getopts_[long]="${_long_#?}"
 
 }
 
@@ -123,32 +121,33 @@ is_enhanced_getopt() {
 # @param short
 #    string representing comma-separated list of short options
 #    to be parsed (it it created from @p def argument by the 
-#    @f denormopts function)
+#    @f parse_option_defs function)
 # @param long
 #    string representing comma-separated list of long options
 #    to be parsed (it it created from @p def argument by the 
-#    @f denormopts function)
+#    @f parse_option_defs function)
 #
 # @stdout
 #    prints an expression to be evaluetd by the calling context 
 #    depending on the result of the getopt command
 # -------------------------------------------------------------------
-wrap_getopt () {
+function wrap_getopt () {
     
     # Arguments
-    local -n _args_=$1
-    local short=$2
-    local long=$3
+    local -n _args_="$1"
+    local _short_="$2"
+    local _long_="$3"
 
     # Declare local variables
-    local result
+    local _result_
+    local _ret_
     # Parse 
-    ! result=$(getopt -o "$short" ${long:+-l} $long -n $0 -- "${_args_[@]}")
-    # Depending on the getopt's result, return expression to be evaluated
-    case $? in
-        0 ) echo "$result"; return 1;;
-        * ) echo "$result"; return 0;;
-    esac
+    _result_=$(getopt -o "$_short_" ${_long_:+-l} $_long_ -n $0 -- "${_args_[@]}") && _ret_=$? || _ret_=$?
+    # Print result of the getopt
+    echo "$_result_"
+    
+    return $_ret_
+    
 }
 
 # -------------------------------------------------------------------
@@ -204,13 +203,13 @@ wrap_getopt () {
 #    print_hash_array options
 #    print_array posargs
 # -------------------------------------------------------------------
-parseopts () {
+function parseopts () {
     
     # Arguments
-    local -n args_=$1
-    local -n defs_=$2
-    local -n opts_=$3
-    local -n posargs_=$4
+    local -n args_="$1"
+    local -n defs_="$2"
+    local -n opts_="$3"
+    local -n posargs_="$4"
     
     # Initialize output arrays
     local -A flags_
@@ -221,7 +220,7 @@ parseopts () {
     _err_=0
 
     # Parse @p defs to the form taken by getopt utility
-    denormopts defs_ names_ flags_ getopts_
+    parse_option_defs defs_ names_ flags_ getopts_
 
     # Call getopt
     local result
@@ -232,34 +231,35 @@ parseopts () {
     eval "set -- $result"
 
     # Iterate over @p args_ as long as an option is seen
-    while [[ ${1:-} == -?* ]]; do
+    while [[ "${1:-}" == -?* ]]; do
         
         # If '--' met, break
-        [[ $1 == -- ]] && {
+        [[ "$1" == -- ]] && {
             shift
             break
         }
         # If the option passed but not defined, return error
-        is_var_set names_[$1] || {
+        is_var_set names_["$1"] || {
             _err_=1
             return
         }
         # Else, parse value of the option
-        ! is_var_set flags_[$1]
+        ! is_var_set flags_["$1"]
         case $? in
             # Parse keyword option
-            0 ) opts_[${names_[$1]}]=$2
+            0 ) opts_["${names_["$1"]}"]="$2"
                 shift
                 ;;
             # Parse flag option
-            * ) opts_["${names_[$1]}"]=1;;
+            * ) opts_["${names_["$1"]}"]=1;;
         esac
         # Shift to the next arg
         shift
 
     done
+    
     # Set positional arguments to remaining args
-    posargs_=( $@ )
+    posargs_=( "$@" )
     
 }
 
@@ -279,14 +279,13 @@ parseopts () {
 #
 #       opt_definitions  array containing options' definition 
 #
-# @declared_variabled
+# @provides
 #
 #    options  hash array of parsed options
 #    posargs  array of parsed non-option arguments
 #
 # -------------------------------------------------------------------
 alias parse_options='
-
 # Disable word-splitting to parse positional arguments in a proper way
 push_stack "$IFS"
 disable_word_splitting
@@ -303,42 +302,48 @@ local -A options
 
 # Parse options
 parseopts args opt_definitions options posargs || return 1
-
-# Arguments
-set -- "${posargs[@]}"
 '
 
 # -------------------------------------------------------------------
-# @brief Common idiom for parsing script's cmd-line arguments. 
-#    Alias provides a hash array @a options containing set of 
-#    parsed options. It also sets positional arguments of the script
-#    to @a posargs array returned by @fun parseopts function
+# @brief Common idiom for parsing script's cmd-line arguments with
+#    the user-visible log. Alias provides a hash array @a options
+#    containing set of parsed options. It also sets positional 
+#    arguments of the script to @a posargs array returned by 
+#    @fun parseopts function
 #
 # @environment
 #
-#       defs  array containing options' definition 
-#      usage  usage heredoc string
-#    ARG_NUM  number of required positional arguments (not verified
-#             if undefined)
+#  opt_definitions  array containing options' definition 
+#            usage  usage heredoc string
+#          ARG_NUM  number of required positional arguments (not verified
+#                   if undefined)
 #
-# @declared_variabled
+# @provides
 #
 #    options  hash array of parsed options
 #
 # -------------------------------------------------------------------
-alias parse_arguments_log='
-# Parsed options
-declare -A options
+alias parse_script_options='
+# Disable word-splitting to parse positional arguments in a proper way
+push_stack "$IFS"
+disable_word_splitting
+
+# Parse arguments to a named array
+local -a args=( "$@" )
+
+# Restore previous mode of the word-splitting
+pop_stack IFS
+
+# Prepare names hash arrays for positional arguments and parsed options
+local -a posargs
+local -A options
 
 # Parse options
-enable_word_splitting
-parseopts "$*" defs options posargs || {
-    disable_word_splitting
+parseopts args opt_definitions options posargs || {
     log_error "Invalid usage"
     echo $usage
     return 1
 }
-disable_word_splitting
 
 # Display usage, if requested
 is_var_set options[help] && {
@@ -363,19 +368,19 @@ is_var_set_non_empty ARG_NUM && (( $# >= $ARG_NUM )) || {
 #
 #    Alias provides a hash array @a options containing set of 
 #    parsed options. It also sets positional arguments of the script
-#    to @a posargs array returned by @fun parseopts function (#1 is set
-#    to the first opsitional argument after the command's name)
+#    to @a posargs array returned by @fun parseopts function ($1 is set
+#    to the first positional argument after the command's name)
 #
 # @environment
 #
-#            defs  array containing options' definition 
-#           usage  usage heredoc string
-#        COMMANDS  list of command provided by the script
-#    "$CMD"_usage  usage heredoc string(s) for script's CMD command; if no
-#                  CMD_usage variable exists for the parse command, the
-#                  default 'usage' is assummed
-#  $"CMD"_ARG_NUM  number of required positional arguments required by
-#                  CMD command (not verified if undefined)
+#  opt_definitions  array containing options' definition 
+#            usage  usage heredoc string
+#         COMMANDS  list of command provided by the script
+#     "$CMD"_usage  usage heredoc string(s) for script's CMD command; if no
+#                   CMD_usage variable exists for the parse command, the
+#                   default 'usage' is assummed
+#   $"CMD"_ARG_NUM  number of required positional arguments required by
+#                   CMD command (not verified if undefined)
 #
 # @provides
 #
@@ -386,28 +391,36 @@ is_var_set_non_empty ARG_NUM && (( $# >= $ARG_NUM )) || {
 #    and so elements of the COMMANDS array has to be in the same 
 #    format
 # -------------------------------------------------------------------
-alias parse_arguments_log_multicmd='
-# Parsed options
-declare -A options
+alias parse_script_options_multicmd='
+# Disable word-splitting to parse positional arguments in a proper way
+push_stack "$IFS"
+disable_word_splitting
+
+# Parse arguments to a named array
+local -a args=( "$@" )
+
+# Restore previous mode of the word-splitting
+pop_stack IFS
+
+# Prepare names hash arrays for positional arguments and parsed options
+local -a posargs
+local -A options
 
 # Parse options
-enable_word_splitting
-parseopts "$*" defs options posargs || {
-    disable_word_splitting
+parseopts args opt_definitions options posargs || {
     log_error "Invalid usage"
     echo $usage
     return 1
 }
-disable_word_splitting
 
 # Parse command
 local cmd=${1:-}
 
 # Change all "-" to "_" in the name of the command 
 cmd=${cmd//-/_}
-# Get name of the usage string of the command
-local cmd_usage=usage
-[[ "$cmd"_usage != _usage ]] && cmd_usage="$cmd"_usage
+
+# Get name of the variable holding the usage string of the command
+local cmd_usage=usage; [[ "$cmd"_usage != _usage ]] && cmd_usage="$cmd"_usage
 
 # Check if a valid command given
 is_array_element COMMANDS $cmd || is_var_set options[help] || {
@@ -417,8 +430,7 @@ is_array_element COMMANDS $cmd || is_var_set options[help] || {
 }
 
 # Display usage, if requested
-is_var_set options[help] && 
-{
+is_var_set options[help] && {
     is_var_set_non_empty cmd && echo $usage || echo ${!cmd_usage}
     return 0
 }
