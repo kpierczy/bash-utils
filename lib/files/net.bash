@@ -3,7 +3,7 @@
 # @file     net.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 9:59:21 pm
-# @modified Wednesday, 10th November 2021 7:05:33 pm
+# @modified Thursday, 11th November 2021 2:47:54 am
 # @project  BashUtils
 # @brief
 #    
@@ -36,7 +36,7 @@
 # -------------------------------------------------------------------
 function wget_and_localize() {
 
-   # ---------------- Parse arguments ----------------
+    # ---------------- Parse arguments ----------------
 
     # Options taken by the `wget` command
     local -a opt_definitions=(
@@ -222,7 +222,7 @@ function wget_and_localize() {
     local show_progres_flag_=''
     is_var_set options[show_progress] &&
         show_progres_flag_="--show-progress"
-
+    
     local ret_
     local log_
     
@@ -276,7 +276,7 @@ function wget_and_localize() {
             }
 
         }
-
+        
         # If $out_file_ was already set, the --output-document was passed and already parsed.
         # In such case, content of the log that would be produced by the verbose log of the `wget`
         # would contain the same filename as the on given to this option
@@ -316,7 +316,7 @@ function wget_and_localize() {
                 # In such a case report an error
                 return 1
             }
-
+            
         # If no content matched, return error
         else
 

@@ -1,5 +1,12 @@
 {
     "recommendations": [
-        "mads-hartmann.bash-ide-vscode"
+        // Bash-related
+        "mads-hartmann.bash-ide-vscode",
+        // Editor's sugar
+        "psioniq.psi-header",
+        "vscode-icons-team.vscode-icons",
+        "stackbreak.comment-divider",
+        "cschlosser.doxdocgen",
+        "earshinov.simple-alignment",
     ]
 }

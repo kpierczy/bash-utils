@@ -3,11 +3,11 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Wednesday, 10th November 2021 7:06:35 pm
+# @modified Thursday, 11th November 2021 1:42:44 am
 # @project  BashUtils
 # @brief
 #    
-#    Set of functions performing basic routines related to software packages
+#    Set of functions performing basic routines related to apt packages
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
@@ -100,7 +100,6 @@ function install_pkg_list() {
     local -n _packages_="${posargs[0]}"
 
     # ----------------- Configure logs ----------------   
-
     # Keep current configuration of logs on the stack
     push_stack $(get_stdout_logs_status)
 

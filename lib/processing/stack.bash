@@ -3,7 +3,7 @@
 # @file     stack.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 9:00:58 pm
-# @modified Tuesday, 9th November 2021 1:01:24 am
+# @modified Thursday, 11th November 2021 2:22:23 am
 # @project  BashUtils
 # @brief
 #    
@@ -51,44 +51,51 @@ stack_name_="${STACK_PREFIX}${stack_name_}${STACK_SUFFIXFIX}"
 # ============================================================ Functions =========================================================== #
 
 # -------------------------------------------------------------------
-# @brief Pushes @p elem to the stack named @p stack_name. If no 
-#    stack with @p stack_name name exists it will be created
+# @brief Pushes @p elem to the stack. If the given stack doesn't
+#    exists it will be created
 # 
-# @param stack_name (optional)
-#    name of the destination stack ; if no @p stack_name is given,
-#    @p elem will be pushed to the default stack
 # @param elem
 #    element to be pushed to the stack
 #
 # @returns
 #    @c 0 on success \n
-#    @c 1 if no argument was given
+#    @c 1 if no argument was given or on error
+#
+# @options
+#
+#   -s|--stack-name=NAME  name of the destination stack; if not
+#                         given, the default stack will be used
+# 
 # -------------------------------------------------------------------
 function push_stack() {
 
     # Arguments
-    local stack_name_
     local elem_
 
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-s|--stack-name',stack
+    )
+    
+    # Parse options
+    parse_options
+
     # Check number of arguments
-    [[ $# == "0" ]] && return 1
+    [[ ${#posargs[@]} == "0" ]] && return 1
 
     # Parse arguments
-    if (( $# == 1 )); then
+    elem_="${posargs[0]:-}"
 
-        # Set default stack
+    # -------------------------------------------------
+
+    local stack_name_
+
+    # Establish destination stack
+    is_var_set_non_empty options[stack] &&
+        stack_name_="${options[stack]}" ||
         stack_name_="${DEFAULT_STACK_NAME}"
-        # Parse value to be pushed
-        elem_="$1"
-
-    else
-
-        # Set default stack
-        stack_name_="${1}"
-        # Parse value to be pushed
-        elem_="$2"
-
-    fi
     
     # Set names of the array representing the stack
     set_stack_name_var
@@ -100,45 +107,60 @@ function push_stack() {
 
     # Set references to the stack's variables
     local -n stack_ref_="$stack_name_"
-    
+
     # Push element to the stack
     stack_ref_+=("$elem_")
 
 }
 
 # -------------------------------------------------------------------
-# @brief Pops an element from the stack named @p stack_name and places
-#    it in the variable named @p result. 
+# @brief Pops an element from the stack and places it in the
+#    variable named @p result. 
 #
-# @param stack_name (optional)
-#    name of the stack to pop element from; if not given, string
-#    will be popped from the default string stack
 # @param result
 #    name of the variable that should store the pop result; if 
 #    return status is not @c 0, @p result variable is not modified
 #
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if string stack with @p stack_name name doesn't exist \n
-#    @c 2 if string stack named @p stack_name is empty
+#    @c 1 if string stack doesn't exist \n
+#    @c 2 if string stack is empty
+#
+# @options
+#
+#   -s|--stack-name=NAME  name of the source stack; if not
+#                         given, the default stack will be used
+#
 # -------------------------------------------------------------------
 function pop_stack() {
 
     # Arguments
-    local stack_name_
-    local result_
+    # local result_
+
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-s|--stack-name',stack
+    )
+    
+    # Parse options
+    parse_options
+
+    # Check number of arguments
+    [[ ${#posargs[@]} == "0" ]] && return 1
 
     # Parse arguments
-    if [[ $# == "1" ]]; then
-        stack_name_="${DEFAULT_STACK_NAME}"
-        result_="$1"
-    else
-        stack_name_="$1"
-        result_="$2"
-    fi
+    local -n result_="${posargs[0]}"
+    
+    # -------------------------------------------------
 
-    # Get reference to the result
-    local -n result_ref_="$result_"
+    local stack_name_
+
+    # Establish destination stack
+    is_var_set_non_empty options[stack] &&
+        stack_name_="${options[stack]}" ||
+        stack_name_="${DEFAULT_STACK_NAME}"
 
     # Set names of the array representing the stack
     set_stack_name_var
@@ -153,7 +175,7 @@ function pop_stack() {
     (( ${#stack_ref_[@]} != 0 )) || return 2
     
     # Write out last element of the stack 
-    result_ref_="${stack_ref_[-1]}"
+    result_="${stack_ref_[-1]}"    
 
     # Remove element from the stack
     unset stack_ref_[-1]
@@ -161,20 +183,38 @@ function pop_stack() {
 }
 
 # -------------------------------------------------------------------
-# @brief Resets stack named @p stack_name removing it's all elements
-#
-# @param stack_name (optional)
-#    name of the stack to be reset; if not given, the default stack
-#    will be given
+# @brief Resets a stack removing it's all elements
 #
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if stack named @p stack_name does not exist
+#    @c 1 if stack does not exist
+#
+# @options
+#
+#   -s|--stack-name=NAME  name of the target stack; if not
+#                         given, the default stack will be used
+#
 # -------------------------------------------------------------------
 function reset_stack() {
 
-    # Arguments
-    local stack_name_="${1:-${DEFAULT_STACK_NAME}}"
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-s|--stack-name',stack
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+    
+    # -------------------------------------------------
+
+    local stack_name_
+
+    # Establish destination stack
+    is_var_set_non_empty options[stack] &&
+        stack_name_="${options[stack]}" ||
+        stack_name_="${DEFAULT_STACK_NAME}"
 
     # Set names of the array representing the stack
     set_stack_name_var
@@ -192,26 +232,38 @@ function reset_stack() {
 }
 
 # -------------------------------------------------------------------
-# @brief Removes stack named @p stack_name
-#
-# @param stack_name
-#    name of the string stack to be removed
+# @brief Removes stack
 #
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if no string stack named @p stack_name exists \n
-#    @c 2 if no argument was given
+#    @c 1 if the stack doesn't exists
+#
+# @options
+#
+#   -s|--stack-name=NAME  name of the target stack; if not
+#                         given, the default stack will be used
+#
 # -------------------------------------------------------------------
 function destroy_stack() {
 
-    # Arguments
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-s|--stack-name',stack
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # -------------------------------------------------
+
     local stack_name_
 
-    # If no argument given, return error
-    [[ $# == "0" || -z "$1" ]] && return 2
-
-    # Parse stack's name
-    stack_name_="$1"
+    # Establish destination stack
+    is_var_set_non_empty options[stack] &&
+        stack_name_="${options[stack]}" ||
+        stack_name_="${DEFAULT_STACK_NAME}"
 
     # Set names of the array representing the stack
     set_stack_name_var
@@ -225,20 +277,38 @@ function destroy_stack() {
 }
 
 # -------------------------------------------------------------------
-# @brief Prints content of the stack named @p stack_name
-#
-# @param stack_name (optional)
-#    name of the stack to be printed; if no @p stack_name is given,
-#    content of the default stack will be printed
+# @brief Prints content of the stack
 #
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if no stack named @p stack_name exists
+#    @c 1 if the stack doesn't exists
+#
+# @options
+#
+#   -s|--stack-name=NAME  name of the target stack; if not
+#                         given, the default stack will be used
+#
 # -------------------------------------------------------------------
 function print_stack() {
 
-    # Arguments
-    local stack_name_="${1:-${DEFAULT_STACK_NAME}}"
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-s|--stack-name',stack
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # -------------------------------------------------
+
+    local stack_name_
+
+    # Establish destination stack
+    is_var_set_non_empty options[stack] &&
+        stack_name_="${options[stack]}" ||
+        stack_name_="${DEFAULT_STACK_NAME}"
 
     # Set names of the array representing the stack
     set_stack_name_var
@@ -252,23 +322,38 @@ function print_stack() {
 }
 
 # -------------------------------------------------------------------
-# @param stack_name
-#    name of the stack to be inspected
+# @brief Checks if the stack exists
 #
 # @returns 
 #    @c 0 if stack named @p stack_name exists \n
 #    @c 1 if no stack named @p stack_name exists
+#
+# @options
+#
+#   -s|--stack-name=NAME  name of the target stack; if not
+#                         given, the default stack will be used
+#
 # -------------------------------------------------------------------
 function is_stack() {
 
-    # Arguments
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-s|--stack-name',stack
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # -------------------------------------------------
+
     local stack_name_
 
-    # If no argument given, return error
-    [[ $# == "0" || -z "$1" ]] && return 1
-
-    # Parse stack's name
-    stack_name_="$1"
+    # Establish destination stack
+    is_var_set_non_empty options[stack] &&
+        stack_name_="${options[stack]}" ||
+        stack_name_="${DEFAULT_STACK_NAME}"
 
     # Set names of the array representing the stack
     set_stack_name_var
@@ -279,26 +364,38 @@ function is_stack() {
 }
 
 # -------------------------------------------------------------------
-# @brief Writes current size of the stack named @p stack_name to the
-#    stdout if it exists
-#
-# @param stack_name
-#    name of the stack to be inspected
+# @brief Writes current size of the stack to the stdout if it exists
 #
 # @returns 
-#    @c 0 if stack named @p stack_name exists \n
-#    @c 1 if no stack named @p stack_name exists
+#    @c 0 if stack exists \n
+#    @c 1 if stack doesn't exist
+#
+# @options
+#
+#   -s|--stack-name=NAME  name of the target stack; if not
+#                         given, the default stack will be used
+#
 # -------------------------------------------------------------------
 function get_stack_size() {
 
-    # Arguments
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-s|--stack-name',stack
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # -------------------------------------------------
+
     local stack_name_
 
-    # If no argument given, return error
-    [[ $# == "0" || -z "$1" ]] && return 1
-
-    # Parse stack's name
-    stack_name_="$1"
+    # Establish destination stack
+    is_var_set_non_empty options[stack] &&
+        stack_name_="${options[stack]}" ||
+        stack_name_="${DEFAULT_STACK_NAME}"
 
     # Set names of the array representing the stack
     set_stack_name_var

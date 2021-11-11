@@ -3,7 +3,7 @@
 # @file     general.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
-# @modified Wednesday, 10th November 2021 6:43:15 pm
+# @modified Thursday, 11th November 2021 2:50:08 am
 # @project  BashUtils
 # @brief
 #    
@@ -82,6 +82,7 @@ function get_multiline_heredoc () {
 # 
 # @param heredoc (out)
 #    name of the variable that the read heredoc will be read into
+#
 # @see get_multiline_heredoc()
 # -------------------------------------------------------------------
 function get_heredoc () {

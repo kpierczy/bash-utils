@@ -3,7 +3,7 @@
 # @file     stack.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 11:13:15 pm
-# @modified Tuesday, 9th November 2021 2:43:22 pm
+# @modified Thursday, 11th November 2021 1:32:21 am
 # @project  BashUtils
 # @brief
 #    
@@ -65,13 +65,13 @@ describe stack
     it "Check pushing & printing (custom stack)"
 
         # Push some elements
-        push_stack st elem1; assert equal $? 0
-        push_stack st elem2; assert equal $? 0
-        push_stack st elem3; assert equal $? 0
-        push_stack st elem4; assert equal $? 0
+        push_stack -s st elem1; assert equal $? 0
+        push_stack -s st elem2; assert equal $? 0
+        push_stack -s st elem3; assert equal $? 0
+        push_stack -s st elem4; assert equal $? 0
 
         # Print elements
-        result=$(print_stack st); assert equal $? 0
+        result=$(print_stack -s st); assert equal $? 0
         # Test result
         assert equal "$result" "elem1\nelem2\nelem3\nelem4"
         
@@ -82,21 +82,21 @@ describe stack
         local ret
 
         # Push some elements
-        push_stack st elem1; assert equal $? 0
-        push_stack st elem2; assert equal $? 0
-        push_stack st elem3; assert equal $? 0
-        push_stack st elem4; assert equal $? 0
-        push_stack st elem5; assert equal $? 0
-        push_stack st elem6; assert equal $? 0
+        push_stack -s st elem1; assert equal $? 0
+        push_stack -s st elem2; assert equal $? 0
+        push_stack -s st elem3; assert equal $? 0
+        push_stack -s st elem4; assert equal $? 0
+        push_stack -s st elem5; assert equal $? 0
+        push_stack -s st elem6; assert equal $? 0
 
         # Pop some elements
-        pop_stack st ret; assert equal $? 0; assert equal "$ret" "elem6"
-        pop_stack st ret; assert equal $? 0; assert equal "$ret" "elem5"
-        pop_stack st ret; assert equal $? 0; assert equal "$ret" "elem4"
-        pop_stack st ret; assert equal $? 0; assert equal "$ret" "elem3"
+        pop_stack -s st ret; assert equal $? 0; assert equal "$ret" "elem6"
+        pop_stack -s st ret; assert equal $? 0; assert equal "$ret" "elem5"
+        pop_stack -s st ret; assert equal $? 0; assert equal "$ret" "elem4"
+        pop_stack -s st ret; assert equal $? 0; assert equal "$ret" "elem3"
 
         # Print elements
-        result=$(print_stack st); assert equal $? 0
+        result=$(print_stack -s st); assert equal $? 0
         # Test result
         assert equal "$result" "elem1\nelem2"
         
@@ -104,21 +104,21 @@ describe stack
     
     it "Check stack's size"
 
-        push_stack st elem1; assert equal $? 0
-        push_stack st elem2; assert equal $? 0
-        push_stack st elem3; assert equal $? 0
-        assert equal "$(get_stack_size st)" "3"
+        push_stack -s st elem1; assert equal $? 0
+        push_stack -s st elem2; assert equal $? 0
+        push_stack -s st elem3; assert equal $? 0
+        assert equal "$(get_stack_size -s st)" "3"
 
-        push_stack st elem1; assert equal $? 0
-        push_stack st elem2; assert equal $? 0
-        push_stack st elem3; assert equal $? 0
-        assert equal "$(get_stack_size st)" "6"
+        push_stack -s st elem1; assert equal $? 0
+        push_stack -s st elem2; assert equal $? 0
+        push_stack -s st elem3; assert equal $? 0
+        assert equal "$(get_stack_size -s st)" "6"
 
         local ret
         
-        pop_stack st ret; assert equal $? 0
-        pop_stack st ret; assert equal $? 0
-        assert equal "$(get_stack_size st)" "4"
+        pop_stack -s st ret; assert equal $? 0
+        pop_stack -s st ret; assert equal $? 0
+        assert equal "$(get_stack_size -s st)" "4"
 
     ti
 

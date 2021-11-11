@@ -3,7 +3,7 @@
 # @file     functional.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 6:14:24 pm
-# @modified Wednesday, 10th November 2021 5:53:18 pm
+# @modified Thursday, 11th November 2021 1:18:36 am
 # @project  BashUtils
 # @brief
 #    
@@ -23,20 +23,20 @@
 function map () {
 
     # Arguments
-    local fun=$1
+    local fun_=$1
 
     # Local variables
-    local arg
+    local arg_
 
     # Apply function to all elements on the stdin
     while read -r arg; do
-        ! [[ $fun == *\$* ]]
+        ! [[ "$fun_" == *\$* ]]
         case $? in
             # If @p fun is a regular function
-            0 ) $fun $arg;;
+            0 ) "$fun_" "$arg_";;
             # If @p fun is a 'lambda'
-            * ) set -- $arg
-                eval "echo $fun"
+            * ) set -- "$arg_"
+                eval "echo "$fun_""
                 ;;
         esac
     done;:
@@ -56,20 +56,20 @@ function map () {
 function filter () {
 
     # Arguments
-    local rule=$1
+    local rule_=$1
 
     # Local variables
-    local arg
+    local arg_
 
     # Apply function to all elements on the stdin
     while read -r arg; do
-        ! [[ $rule == *\$* ]]
+        ! [[ "$rule_" == *\$* ]]
         case $? in
             # If @p fun is a regular function
-            0 ) $rule $arg && echo $arg;;
+            0 ) "$rule_" "$arg_" && echo "$arg_";;
             # If @p fun is a 'lambda'
-            * ) set -- $arg
-                eval "$rule && echo $1"
+            * ) set -- "$arg_"
+                eval ""$rule_" && echo $1"
                 ;;
         esac
     done;:
@@ -88,35 +88,54 @@ function filter () {
 #       accumulated - accumulated value
 #       item        - next item from the input
 #
-# @param accumulator (optional)
-#    initial value of the acumulator; if not given, initial 
-#    accumulator is read from the first element passed to the stdin
+# @options
+#     
+#    -a|--accumulator  initial value of the acumulator; if not 
+#                      given, initial accumulator is read from the
+#                      first element passed to the stdin
 # -------------------------------------------------------------------
 function reduce () {
 
     # Arguments
-    local acc=$1
-    local accumulator=${2:-}
+    local acc_
+
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-a|--accumulator',acc
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+    
+    # Parse arguments
+    acc_="${posargs[0]}"
+
+    # Parse options
+    local accumulator_="${options[acc]:-}"
+
+    # -------------------------------------------------
 
     # Local variables
-    local arg
+    local arg_
 
     # Read initial value of the accumulator
-    (( $# == 1 )) && read -r accumulator
+    ! is_var_set_non_empty accumulator_ && read -r accumulator_
     # Apply function to all elements on the stdin
-    while read -r arg; do
-        ! [[ $acc == *\$* ]]
+    while read -r arg_; do
+        ! [[ "$acc_" == *\$* ]]
         case $? in
             # If @p fun is a regular function
-            0 ) accumulator=$($acc $accumulator $arg);;
+            0 ) accumulator_="$($acc $accumulator_ $arg_)";;
             # If @p fun is a 'lambda'
-            * ) set -- $accumulator $arg
-                eval "accumulator=\$(echo $acc)"
+            * ) set -- "$accumulator_" "$arg_"
+                eval "accumulator=\$(echo "$acc_")"
                 ;;
         esac
     done
 
     # Print result
-    echo $accumulator
+    echo "$accumulator_"
 
 }

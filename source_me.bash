@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Wednesday, 10th November 2021 5:45:34 pm
+# @modified Thursday, 11th November 2021 2:53:47 am
 # @project  BashUtils
 # @brief
 #    
@@ -27,9 +27,6 @@ BASH_UTILS_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
 # Source library
 source $BASH_UTILS_HOME/lib/lib.bash
-
-# Source bin config
-source $BASH_UTILS_HOME/bin/config.bash
 
 # Enable aliases' expansion
 set_aliases_expansion on

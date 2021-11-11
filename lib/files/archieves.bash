@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 7:11:57 pm
-# @modified Wednesday, 10th November 2021 7:01:25 pm
+# @modified Thursday, 11th November 2021 3:13:06 am
 # @project  BashUtils
 # @brief
 #    
@@ -19,7 +19,7 @@ source $BASH_UTILS_HOME/lib/scripting/settings.bash
 # ============================================================ Constant ============================================================ #
 
 # Dictionary of supported archieves formats paired with space-separated lists of corresponding files extensions
-declare -A BASHLIB_SUPPORTED_ARCHIEVES=(
+declare -A BASH_UTILS_SUPPORTED_ARCHIEVES=(
     ["tar.gz"]="tgz tar.gz"
    ["tar.bz2"]="tbz tar.bz2"
     ["tar.xz"]="txz tar.xz"
@@ -45,7 +45,7 @@ function is_compatibile_archieve_format() {
     local format_="$1"
 
     # Get array of dictionaries' keys
-    local -a supported_formats_=( "${!BASHLIB_SUPPORTED_ARCHIEVES[@]}" )
+    local -a supported_formats_=( "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}" )
     
     # Iterate over valid formats
     is_array_element supported_formats_ "$format_"
@@ -75,7 +75,7 @@ function is_compatibile_archieve_extension() {
     # Flatten values of the dictionary holding <supported_format:corresponding extensions> pairs
     # to an array of supported extensions by breaking dictionarie's values on '[:space:]' 
     # (thanks to auto word-splitting)
-    local -a supported_extensions_=( ${BASHLIB_SUPPORTED_ARCHIEVES[@]} )
+    local -a supported_extensions_=( ${BASH_UTILS_SUPPORTED_ARCHIEVES[@]} )
     
     # Iterate over valid formats
     is_array_element supported_extensions_ "$extension_"
@@ -87,13 +87,14 @@ function is_compatibile_archieve_extension() {
 #
 # @param filename
 #    path to the archieve
+#
 # @returns
 #    @c 0 on succes \n
 #    @c 1 if @p filename is not a path to a known archieve file
 #
 # @note List of supported archieves extension with their 
 #    corresponding return strings is hold in 
-#    @var BASHLIB_SUPPORTED_ARCHIEVES hash array
+#    @var BASH_UTILS_SUPPORTED_ARCHIEVES hash array
 # -------------------------------------------------------------------
 function get_archieve_format() {
 
@@ -109,10 +110,10 @@ function get_archieve_format() {
     local extension_
 
     # Iterate over dictionary of supported archieves' formats
-    for format_ in "${!BASHLIB_SUPPORTED_ARCHIEVES[@]}"; do
+    for format_ in "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
 
         # Iterate over extensions corresponding to the format
-        for extension_ in ${BASHLIB_SUPPORTED_ARCHIEVES[$format_]}; do
+        for extension_ in ${BASH_UTILS_SUPPORTED_ARCHIEVES[$format_]}; do
 
             # If @p filename ends with @var extension, return corresponding format
             ends_with "$filename_" ".$extension_" && {
@@ -155,7 +156,7 @@ function get_archieve_format() {
 #
 # @note List of supported archieves extension with their 
 #    corresponding return string are hold in 
-#    @var BASHLIB_SUPPORTED_ARCHIEVES hash array
+#    @var BASH_UTILS_SUPPORTED_ARCHIEVES hash array
 # -------------------------------------------------------------------
 function extract_archieve() {
 
@@ -257,39 +258,41 @@ function extract_archieve() {
 #
 # @param url
 #    URL to be downloaded
+#
 # @returns
 #    @c 0 on success \n
 #    @c 1 on error
 #
 # @options
 #
-#        --arch-dir  directory where the archive will be downloaded
-#                    (default: '.')
-#       --arch-path  path to the archieve after being downloaded; if 
-#                    given, overwrites --archdir option (by default,
-#                    name of the downloaded archieve is not modified)
-#     --arch-format  format of the downloaded directory ( @see 
-#                    BASHLIB_SUPPORTED_ARCHIEVES ). By default, 
-#                    function tries to deduce format of the archieves
-#                    from the --arch-path (if given) or the default
-#                    name of the downloaded file (if not)
-#     --extract-dir  directory where the archieve will be extracted
-#                -p  displays progress bars when downloading and when
-#                    extracting
-#                -v  prints verbose logs; passes --no-verbose flag
-#                    to the `wget` (@note output of the download
-#                    and extract tools like `wget` (except progress
-#                    bars) are forced silence)
-#  --force-download  forced download of the archieve even if the 
-#                    target file already exists (by default, function
-#                    will skip download step, if a file already 
-#                    exist)
+#           --arch-dir  directory where the archive will be downloaded
+#                       (default: '.')
+#          --arch-path  path to the archieve after being downloaded; if 
+#                       given, overwrites --archdir option (by default,
+#                       name of the downloaded archieve is not modified)
+#        --arch-format  format of the downloaded directory ( @see 
+#                       BASH_UTILS_SUPPORTED_ARCHIEVES ). By default, 
+#                       function tries to deduce format of the archieves
+#                       from the --arch-path (if given) or the default
+#                       name of the downloaded file (if not)
+#        --extract-dir  directory where the archieve will be extracted;
+#                       will be created, if needed
+#   -p|--show-progress  displays progress bars when downloading and when
+#                       extracting
+#         -v|--verbose  prints verbose logs; passes --no-verbose flag
+#                       to the `wget` (@note output of the download
+#                       and extract tools like `wget` (except progress
+#                       bars) are forced silence)
+#  -f|--force-download  forced download of the archieve even if the 
+#                       target file already exists (by default, function
+#                       will skip download step, if a file already 
+#                       exist)
+#   --log-target=NAME  name of the target used in logs when -v option 
+#                      passed
 #
 # @environment
 #
 #       LOG_CONTEXT  log context to be used when -v option passed
-#        LOG_TARGET  name of the target used in logs when -v option 
-#                    passed
 #        WGET_FLAGS  additional flags for wget command (overwrites
 #                    flags passed by the function)
 #  
@@ -309,9 +312,10 @@ function download_and_extract() {
         '--arch-path',arch_path
         '--arch-format',arch_format
         '--extract-dir',extr_dir
-        '-p',progress,f
-        '-v',verbose,f
-        '--force-download',force_download,f
+        '-p|--show-progress',progress,f
+        '-v|--verbose',verbose,f
+        '-f|--force-download',force_download,f
+        '--log-target',log_target
     )
     
     # Parse arguments to a named array
@@ -357,11 +361,11 @@ function download_and_extract() {
         "${wget_force_download_flag_}" \
         "${WGET_FLAGS:-}"
     )
-
+    
     # --------------- Download archieve ---------------  
 
     # Prepare log target
-    local ltarget_="${LOG_TARGET:-archieve}"
+    local ltarget_="${options[log_target]:-archieve}"
 
     # Establish download directory
     local download_dir='.'
@@ -377,6 +381,10 @@ function download_and_extract() {
     # Establish path to the downloaded archieve
     local archieve_path_=''
     
+    # Enable word-splitting (locally) to properly parse wget's arguments
+    limit_word_splitting_settings
+    enable_word_splitting
+    
     # Download URL
     archieve_path_=$(wget_and_localize $wget_all_flags_ $url_) || {
 
@@ -388,7 +396,7 @@ function download_and_extract() {
         return 1
 
     }
-
+    
     log_info "${ltarget_^} downloaded"
 
     # Check if the downloaded file reside under the assumed path
@@ -404,7 +412,7 @@ function download_and_extract() {
         return 1
 
     }
-
+    
     # ------------ Prepare extraction flags -----------
 
     # Establish whether progress bar should be displayed

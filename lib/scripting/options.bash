@@ -3,7 +3,7 @@
 # @file     options.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Wednesday, 10th November 2021 7:41:38 pm
+# @modified Thursday, 11th November 2021 2:21:40 am
 # @project  BashUtils
 # @brief
 #    
@@ -286,15 +286,8 @@ function parseopts () {
 #
 # -------------------------------------------------------------------
 alias parse_options='
-# Disable word-splitting to parse positional arguments in a proper way
-push_stack "$IFS"
-disable_word_splitting
-
 # Parse arguments to a named array
 local -a args=( "$@" )
-
-# Restore previous mode of the word-splitting
-pop_stack IFS
 
 # Prepare names hash arrays for positional arguments and parsed options
 local -a posargs

@@ -2,7 +2,7 @@
 # @file     docker.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:31:34 pm
-# @modified Wednesday, 10th November 2021 7:42:51 pm
+# @modified Thursday, 11th November 2021 2:52:58 am
 # @project  BashUtils
 # @brief
 #    
@@ -26,14 +26,16 @@ DOCKER_STD_ARGS=(
 # -------------------------------------------------------------------
 # @brief Runs the docker container with standard arguments
 #
-# @param container_name (optional)
-#    name of the container to be run; if no argumnent given, the
-#    @var DEFULT_DOCKER_IMG container is run
-#
 # @returns 
 #    @c 0 if container was run succesfully \n
 #    @c 1 if either no argument was given and @var DEFULT_DOCKER_IMG
 #       is not set, or container failed to run
+#
+# @options
+#
+#    -c|--container  name of the container to be run; if no container
+#                    given, the @var DEFULT_DOCKER_IMG container is 
+#                    run
 #
 # @environment 
 # 
@@ -42,31 +44,45 @@ DOCKER_STD_ARGS=(
 # -------------------------------------------------------------------
 function drun() { 
 
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-c|--container',container
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+    
+    # -------------------------------------------------
+
     # Arguments
-    local container_name=${1:-$DEFULT_DOCKER_IMG}
+    local container_name_=${options[container]:-$DEFULT_DOCKER_IMG}
 
     # Check if container is defined
-    if ! is_var_set container_name; then
+    if ! is_var_set container_name_; then
         log_error "docker" "No container to be run given"
         return 1
     fi
 
     # Run the specified container
-    sudo docker run $DOCKER_STD_ARGS $container_name
+    sudo docker run $DOCKER_STD_ARGS $container_name_
 }
 
 # -------------------------------------------------------------------
 # @brief Runs the docker container with standard arguments and 
 #    additional volume mounted
 #
-# @param container_name (optional)
-#    name of the container to be run; if no argumnent given, the
-#    @var DEFULT_DOCKER_IMG container is run
-#
 # @returns 
 #    @c 0 if container was run succesfully \n
 #    @c 1 if either no argument was given and @var DEFULT_DOCKER_IMG
 #       is not set, or container failed to run
+#
+# @options
+#
+#    -c|--container  name of the container to be run; if no container
+#                    given, the @var DEFULT_DOCKER_IMG container is 
+#                    run
 #
 # @environment 
 # 
@@ -75,17 +91,29 @@ function drun() {
 # -------------------------------------------------------------------
 function drunv() { 
 
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-c|--container',container
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+    
+    # -------------------------------------------------
+
     # Arguments
-    local container_name=${1:-$DEFULT_DOCKER_IMG}
+    local container_name_=${options[container]:-$DEFULT_DOCKER_IMG}
 
     # Check if container is defined
-    if ! is_var_set container_name; then
+    if ! is_var_set container_name_; then
         log_error "docker" "No container to be run given"
         return 1
     fi
 
     # Run the specified container
-    sudo docker run $DOCKER_STD_ARGS -v $container_name
+    sudo docker run $DOCKER_STD_ARGS -v $container_name_
 }
 
 # ============================================================= Aliases ============================================================ #

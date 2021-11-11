@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 4:29:08 pm
-# @modified Wednesday, 10th November 2021 5:45:34 pm
+# @modified Wednesday, 10th November 2021 9:41:17 pm
 # @project  BashUtils
 # @brief
 #    
@@ -213,9 +213,9 @@ set_python_alternative() {
     local version=$1
 
     # Set default environment
-    var_set_default PYTHON_ALT_LINK "/usr/bin/python"
-    var_set_default PYTHON_ALT_NAME "python$version"
-    var_set_default PYTHON_ALT_PATH "/usr/bin/python$version"
+    local PYTHON_ALT_LINK=${PYTHON_ALT_LINK:-/usr/bin/python}
+    local PYTHON_ALT_NAME=${PYTHON_ALT_NAME:-python$version}
+    local PYTHON_ALT_PATH=${PYTHON_ALT_PATH:-/usr/bin/python$version}
 
     # Check if existing executable given
     [[ -f $PYTHON_ALT_PATH ]] || {
@@ -225,7 +225,10 @@ set_python_alternative() {
 
     # Set alternative
     sudo update-alternatives --install \
-        $PYTHON_ALT_LINK $PYTHON_ALT_NAME $PYTHON_ALT_PATH ${PYTHON_ALT_FLAGS:-} ||
+        $PYTHON_ALT_LINK               \
+        $PYTHON_ALT_NAME               \
+        $PYTHON_ALT_PATH               \
+        ${PYTHON_ALT_FLAGS:-} ||
     {
         log_error "Could not set python's alternative"
         return 1

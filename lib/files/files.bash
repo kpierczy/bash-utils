@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Wednesday, 10th November 2021 7:05:02 pm
+# @modified Thursday, 11th November 2021 1:19:30 am
 # @project  BashUtils
 # @brief
 #    
@@ -119,6 +119,7 @@ function get_file_extension() {
 #
 # @param filename
 #    name of the file to be processed
+#
 # @returns
 #    @c 0 on success \n
 #    @c 1 if @p filename without extension was given

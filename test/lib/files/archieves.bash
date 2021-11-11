@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 8:39:00 pm
-# @modified Wednesday, 10th November 2021 5:07:52 pm
+# @modified Thursday, 11th November 2021 2:32:31 am
 # @project  BashUtils
 # @brief
 #    
@@ -32,7 +32,7 @@ describe is_compatibile_archieve_format
     ti
 
     it "Check if all valid formats are valid"
-        for format in "${!BASHLIB_SUPPORTED_ARCHIEVES[@]}"; do
+        for format in "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
             is_compatibile_archieve_format "$format"
             assert equal $? 0
         done
@@ -49,7 +49,7 @@ describe is_compatibile_archieve_format
     ti
 
     it "Check if all valid formats are valid"
-        for format in "${!BASHLIB_SUPPORTED_ARCHIEVES[@]}"; do
+        for format in "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
             is_compatibile_archieve_format "$format"
             assert equal $? 0
         done
@@ -75,10 +75,13 @@ describe get_archieve_format
     it "Check all supported archieve extensions"
         
         # Iterate over dictionary of supported archieves' formats
-        for format in "${!BASHLIB_SUPPORTED_ARCHIEVES[@]}"; do
+        for format in "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
+
+            # Enable word splitting to parse extensions from the space-separated etxension's list
+            enable_word_splitting
 
             # Iterate over extensions corresponding to the format
-            for extension in ${BASHLIB_SUPPORTED_ARCHIEVES[$format]}; do
+            for extension in ${BASH_UTILS_SUPPORTED_ARCHIEVES[$format]}; do
                 archieve_format="$(get_archieve_format "filename.${extension}")"
                 assert equal $? 0
                 assert equal "$archieve_format" "$format"
@@ -130,15 +133,19 @@ describe extract_archieve
     # Flatten values of the dictionary holding <supported_format:corresponding extensions> pairs
     # to an array of supported extensions by breaking dictionarie's values on '[:space:]' 
     # (thanks to auto word-splitting)
-    declare -a supported_extensions=( ${BASHLIB_SUPPORTED_ARCHIEVES[@]} )    
+    declare -a supported_extensions=( ${BASH_UTILS_SUPPORTED_ARCHIEVES[@]} )    
 
     it "Check if supported archieves are succesfully extracted"
             
         # Jump to the folder of temporary files
         cd /tmp
 
+        # Enable word splitting to parse extensions from the space-separated etxension's list
+        enable_word_splitting
+            
         # Iterate over valid archieve extensions
         for extension in ${supported_extensions[@]}; do
+
 
             # Create temporary file
             echo $teststring > $file
@@ -188,6 +195,9 @@ describe extract_archieve
         # Create destination directory 
         mkdir -p $distdir
 
+        # Enable word splitting to parse extensions from the space-separated etxension's list
+        enable_word_splitting
+
         # Iterate over valid archieve extensions
         for extension in ${supported_extensions[@]}; do
 
@@ -235,6 +245,9 @@ describe extract_archieve
         # Jump to the folder of temporary files
         cd /tmp
 
+        # Enable word splitting to parse extensions from the space-separated etxension's list
+        enable_word_splitting
+        
         # Iterate over valid archieve extensions
         for extension in ${supported_extensions[@]}; do
 
@@ -295,8 +308,7 @@ describe download_and_extract
     it "Check if simple archieve can be downloaded and extracted automatically"
         
         # Download and extract
-        download_and_extract $url
-        assert equal $? 0
+        download_and_extract $url; assert equal $? 0
 
         # Assert, that the archieve was downloaded
         [[ -f $arch_dflt_name ]]; assert equal $? 0
@@ -317,8 +329,7 @@ describe download_and_extract
         local download_dir="download"
 
         # Download and extract
-        download_and_extract --arch-dir=$download_dir $url
-        assert equal $? 0
+        download_and_extract --arch-dir=$download_dir $url; assert equal $? 0
 
         # Assert, that the archieve was downloaded
         [[ -f $download_dir/$arch_dflt_name ]]; assert equal $? 0
@@ -339,8 +350,7 @@ describe download_and_extract
         local archieve_path="download/archieve.${arch_dflt_name##*.}"
         
         # Download and extract
-        download_and_extract --arch-path=$archieve_path $url
-        assert equal $? 0
+        download_and_extract --arch-path=$archieve_path $url; assert equal $? 0
 
         # Assert, that the archieve was downloaded
         [[ -f $archieve_path ]]; assert equal $? 0
