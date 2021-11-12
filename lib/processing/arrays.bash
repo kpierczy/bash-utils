@@ -3,7 +3,7 @@
 # @file     arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Wednesday, 10th November 2021 7:01:34 pm
+# @modified Friday, 12th November 2021 12:06:59 am
 # @project  BashUtils
 # @brief
 #    
@@ -178,8 +178,33 @@ function print_array() {
     is_var_set options[name] && echo "${posargs[0]}:"
 
     # Print array
-    for elem in ${arr[@]}; do
+    for elem in "${arr[@]}"; do
         echo "$elem"
     done
+
+}
+
+# -------------------------------------------------------------------
+# @brief Fills @p array with the lines of the @p file
+#
+# @param file
+#    name fo the source file
+# @param arr
+#    name fo the destination array
+#
+# @returns 
+#    @c 0 on success \n
+#    @c 1 on error
+# -------------------------------------------------------------------
+function files_lines_to_array() {
+
+    # Arguments
+    local file_="$0"
+    local -n arr_="$1"
+
+    # ------------------------------------------------- 
+
+    # Read file line by line array
+    IFS=$'\n' read -d '' -ra arr_ < "$file_"
 
 }

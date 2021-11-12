@@ -13,3 +13,8 @@
 1. [bash-lib (cyberark)](https://github.com/cyberark/bash-lib)
 3. [bash-lib (aks)](https://github.com/aks/bash-lib)
 2. [bashlog](https://github.com/Zordrak/bashlog)
+
+# Others
+1. [diffoscope](https://diffoscope.org/)
+2. [Bash Regex](https://tldp.org/LDP/Bash-Beginners-Guide/html/chap_04.html)
+3. `colourdiff` - colourfull substitute of the `diff`

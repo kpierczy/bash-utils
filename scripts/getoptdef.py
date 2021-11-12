@@ -1,27 +1,40 @@
+#!/usr/bin/env python3
 # ====================================================================================================================================
-# @file     wget.py
+# @file     getoptdef.py
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 2:57:02 am
-# @modified Wednesday, 10th November 2021 4:46:53 am
+# @modified Friday, 12th November 2021 12:31:54 am
 # @project  BashUtils
 # @brief
 #    
-#    Script produces a bash-format array containing definitions of all options switches of the `wget` programs
-#    
+#    Script produces a bash-format array containing definitions of all options switches of the given programs
+#    To do so, script parsed output of the --help option for the given program. It assumes that the list of options
+#    has a standard GNU format (i.e. -<shortopt>, --<longopt>[=<SOME_VALUE>] <description>). 
+#
+# @note Utility was tested only with the `wget` command and probably should be extended to work with other ones
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
 import re
+import regex
 import subprocess
+
+# ========================================================== Configruation ========================================================= #
+
+# Name of the program to be parsed
+PROGRAM="wget"
 
 # Output file
 OUTPUT_FILE="wget.bash"
 
+# ============================================================= Process ============================================================ #
+
 # Get lines of the wget's help
-lines=subprocess.run(["wget", "--help"], capture_output=True).stdout.decode('UTF-8').split('\n')
+lines=subprocess.run([PROGRAM, "--help"], capture_output=True).stdout.decode('UTF-8').split('\n')
 
 # Iterate over lines
 options=[]
+i = 0 
 for line in lines:
 
     # Try to find option definition in the line starting from the '-[a-zA-Z]' (short option)

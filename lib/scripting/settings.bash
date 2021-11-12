@@ -3,7 +3,7 @@
 # @file     settings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
-# @modified Wednesday, 10th November 2021 7:10:08 pm
+# @modified Thursday, 11th November 2021 11:09:35 pm
 # @project  BashUtils
 # @brief
 #    
@@ -106,4 +106,4 @@ function disable_globbing() {
 # @brief Limits changes to the word-splitting settings (@var IFS)
 #    to the current function
 # -------------------------------------------------------------------
-alias limit_word_splitting_settings='local IFS'
+alias localize_word_splitting='local IFS'

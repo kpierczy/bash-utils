@@ -3,7 +3,7 @@
 # @file     general.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
-# @modified Thursday, 11th November 2021 2:50:08 am
+# @modified Friday, 12th November 2021 12:25:06 am
 # @project  BashUtils
 # @brief
 #    
@@ -113,10 +113,44 @@ function get_heredoc () {
 # -------------------------------------------------------------------
 function print_heredoc() {
 
-    local doc
+    local doc_
 
     # Read heredoc
-    get_heredoc doc
+    get_heredoc doc_
     # Print result
-    echo "$doc"
+    echo "$doc_"
+}
+
+# -------------------------------------------------------------------
+# @brief Adds @p path at the beginning of the PATH variable if is
+#    not alredy in PATH
+#
+# @param path
+#    path to be added to the PATH
+# -------------------------------------------------------------------
+function prepend_path() {
+
+    local path_="$1"
+
+    # Prepend PATH
+    is_substring "$PATH" "$path_" || 
+        PATH="$path_:$PATH"
+        
+}
+
+# -------------------------------------------------------------------
+# @brief Adds @p path at the end of the PATH variable if is
+#    not alredy in PATH
+#
+# @param path
+#    path to be added to the PATH
+# -------------------------------------------------------------------
+function append_path() {
+
+    local path_="$1"
+
+    # Prepend PATH
+    is_substring "$PATH" "$path_" || 
+        PATH="$PATH:$path_"
+        
 }

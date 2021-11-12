@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 7:11:57 pm
-# @modified Thursday, 11th November 2021 3:13:06 am
+# @modified Friday, 12th November 2021 1:58:37 am
 # @project  BashUtils
 # @brief
 #    
@@ -13,18 +13,20 @@
 # ====================================================================================================================================
 
 # Source dependencies
+source $BASH_UTILS_HOME/lib/files/archieves/tar.bash
+source $BASH_UTILS_HOME/lib/files/archieves/zip.bash
 source $BASH_UTILS_HOME/lib/scripting/options.bash
 source $BASH_UTILS_HOME/lib/scripting/settings.bash
 
 # ============================================================ Constant ============================================================ #
 
-# Dictionary of supported archieves formats paired with space-separated lists of corresponding files extensions
-declare -A BASH_UTILS_SUPPORTED_ARCHIEVES=(
-    ["tar.gz"]="tgz tar.gz"
-   ["tar.bz2"]="tbz tar.bz2"
-    ["tar.xz"]="txz tar.xz"
-       ["tar"]="tar"
-       ["zip"]="zip"
+# List of supported archieves formats
+declare -a BASH_UTILS_SUPPORTED_ARCHIEVES=(
+    "tar.gz"
+    "tar.bz2"
+    "tar.xz"
+    "tar"
+    "zip"
 )
 
 # ============================================================ Functions =========================================================== #
@@ -43,57 +45,24 @@ function is_compatibile_archieve_format() {
 
     # Arguments
     local format_="$1"
-
-    # Get array of dictionaries' keys
-    local -a supported_formats_=( "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}" )
     
     # Iterate over valid formats
-    is_array_element supported_formats_ "$format_"
+    is_array_element BASH_UTILS_SUPPORTED_ARCHIEVES "$format_"
 
 }
 
 # -------------------------------------------------------------------
-# @brief Checks whether @p extension is a supported archieve
-#    extension
-# 
-# @param extension
-#    archieve extension to be verified
-#
-# @returns 
-#    @c 0 if @p extension is a supported archieve extension \n
-#    @c 1 otherwise
-# -------------------------------------------------------------------
-function is_compatibile_archieve_extension() {
-
-    # Arguments
-    local extension_="$1"
-
-    # Enable words-splitting (localy)
-    limit_word_splitting_settings
-    enable_word_splitting
-
-    # Flatten values of the dictionary holding <supported_format:corresponding extensions> pairs
-    # to an array of supported extensions by breaking dictionarie's values on '[:space:]' 
-    # (thanks to auto word-splitting)
-    local -a supported_extensions_=( ${BASH_UTILS_SUPPORTED_ARCHIEVES[@]} )
-    
-    # Iterate over valid formats
-    is_array_element supported_extensions_ "$extension_"
-
-}
-
-# -------------------------------------------------------------------
-# @brief Writes extension of the archieve's @p filename to stdout
+# @brief Writes format of the archieve's @p filename to stdout
 #
 # @param filename
 #    path to the archieve
 #
 # @returns
 #    @c 0 on succes \n
-#    @c 1 if @p filename is not a path to a known archieve file
+#    @c 1 if @p filename is not a path to a archieve file of the
+#       known file
 #
-# @note List of supported archieves extension with their 
-#    corresponding return strings is hold in 
+# @note List of supported archieves formats is hold in 
 #    @var BASH_UTILS_SUPPORTED_ARCHIEVES hash array
 # -------------------------------------------------------------------
 function get_archieve_format() {
@@ -101,31 +70,194 @@ function get_archieve_format() {
     # Arguments
     local filename_="$1"
 
-    # Enable words-splitting (localy)
-    limit_word_splitting_settings
+    # Check if file exists
+    [[ -f "$filename_" ]] || return 1
+
+    # Enable word splitting (locally) to parse output of the `file` command into array
+    localize_word_splitting
+    IFS=$' \t\n,'
+    # Inspect format of the file with the `file` application
+    local -a file_desc_arr_
+    file_desc_arr_=( $(file --brief $filename_ ) ) || return 1
+
+    # Extract first three keys of the description
+    local file_desc_="$(echo ${file_desc_arr_[@]:0:3})"
+
+    # Hash array pairing supported formats with file's description
+    declare -A supported_arch_desc_=(
+            ["POSIX tar archive"]="tar"
+        ["bzip2 compressed data"]="tar.bz2"
+         ["gzip compressed data"]="tar.gz"
+           ["XZ compressed data"]="tar.xz"
+             ["Zip archive data"]="zip"
+    )
+
+    # Write out format based on the file's description
+    local file_format_=${supported_arch_desc_["$file_desc_"]:-}
+
+    # Check, if file is a supported archieve
+    is_var_set_non_empty file_format_ || return 1
+
+    # Print file's format
+    echo "$file_format_"
+    
+    return 0
+}
+
+# -------------------------------------------------------------------
+# @brief Creates archieve of the supported format
+#
+# @param format
+#    format of the target archieve (on of values listed in the
+#    @var BASH_UTILS_SUPPORTED_ARCHIEVES array)
+# @param name
+#    name of the target archieve
+# @param files...
+#    files to be added to the archieve
+#
+# @returns
+#    @c 0 on success \n
+#    @c 1 on error or if the unsupported archieve format was given
+#
+# @options
+#
+#     -v|--verbose  prints output of the underlying archive tool
+#                   too the stdout
+#
+# @environment
+#  
+#   ARCHIEVE_FLAGS  list containing flags to be passed to the tool
+#                   creating an archieve
+#
+# -------------------------------------------------------------------
+function create_archieve() {
+
+    # Arguments
+    local format_
+    local name_
+    local files_
+    
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-v|--verbose',verbose,f
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # Parse arguments
+    format_="${posargs[0]}"
+    name_="${posargs[1]}"
+    files_=( "${posargs[@]:2}" )
+
+    # -------------------------------------------------
+    
+    # Check if a supported format given
+    is_compatibile_archieve_format "$format_" || return 1
+    # Select tool
+    local cmd_=''
+    local options_=''
+    case "$format_" in
+        "tar.gz"  ) cmd_="tar"; options_="czf" ;;
+        "tar.bz2" ) cmd_="tar"; options_="cjf" ;;
+        "tar.xz"  ) cmd_="tar"; options_="cJf" ;;
+        "tar"     ) cmd_="tar"; options_="cf"  ;;
+        "zip"     ) cmd_="zip"                 ;;
+    esac
+
+    # Enable wor splitting (locally) to properly parse command's arguments
+    localize_word_splitting
     enable_word_splitting
 
-    # Make iterators local
+    # Get archieve's flags
+    local flags_="${ARCHIEVE_FLAGS[*]:-}"
+
+    # Compile the whole command
+    cmd_="$cmd_ $flags_ $options_ $name_ ${files_[@]}"
+
+    # Create an chieve
+    if is_var_set options[verbose]; then
+        $cmd_ || return 1
+    else
+        $cmd_ &> /dev/null || return 1
+    fi
+    
+    return 0
+}
+
+# -------------------------------------------------------------------
+# @brief Checks whether the archieve named @p archieve was already
+#    extracted to the directory
+#
+# @param archieve
+#    name of the archieve file to be inspected
+#
+# @returns
+#   @c 0 if archieve wasn't already extracted \n
+#   @c 1 on error \n
+#   @c 2 if archieve was already extracted
+#
+# @options
+#
+#    -d|--directory  extraction directory that should be compared
+#                    with the content of an archieve (default: .)
+#   
+# -------------------------------------------------------------------
+function need_extract() {
+
+    # Arguments
+    local archieve_
+    
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-d|--directory',dir
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # Parse arguments
+    archieve_="${posargs[0]}"
+
+    # Parse options
+    local dir_="${options[dir]:-.}"
+
+    # -------------------------------------------------
+
     local format_
-    local extension_
 
-    # Iterate over dictionary of supported archieves' formats
-    for format_ in "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
+    # Check if file is a supported archieve type
+    format_=$(get_archieve_format $archieve_) || return 1
 
-        # Iterate over extensions corresponding to the format
-        for extension_ in ${BASH_UTILS_SUPPORTED_ARCHIEVES[$format_]}; do
+    # Check if directory exists
+    [[ -d "${dir_}" ]] || return 0
 
-            # If @p filename ends with @var extension, return corresponding format
-            ends_with "$filename_" ".$extension_" && {
-                echo "$format_"
-                return 0
-            }
+    # Select an appropriate test basing on the file's format
+    case "$format_" in
 
-        done
+        # Tarballs
+        "tar.gz"  | "tar.bz2" |  "tar.xz"  |  "tar" ) 
 
-    done
+            local ret_
 
-    return 1
+            # Compare directory and archieve
+            tar --compare --file="$archieve_" --directory="$dir_" &> /dev/null && ret_=$? || ret_=$?
+            
+            # Return status code
+            [[ $ret_ == "0" ]] && return 2 ||
+            [[ $ret_ == "1" ]] && return 0 ||
+                                  return 1;;
+
+        # ZIP archieves (parsing by hand...)
+        "zip" ) 
+            
+            need_zip_extract --directory="$dir_" "$archieve_"
+
+    esac
 
 }
 
@@ -133,78 +265,38 @@ function get_archieve_format() {
 # @brief Extracts content of the archieve file
 #
 # @param archieve
-#    name of the archieve to be extracted; type of the archieve
-#    is deduced from the name of the file
+#    name of the archieve to be extracted
 #
 # @returns 
 #    @c 0 on success \n
-#    @c 1 on error
+#    @c 1 on error \n
+#    @c 2 if archieve was already extracted
 #
 # @options
 #
-#      -v  --verbose  a progress bar will be printed during 
-#                     extraction
-#    --directory=dir  content of the archieve will be extracted
-#                     to the dir directory
-#           --format If set, determines format of the archieve 
-#                    eliminating automatic format detection based
-#                    on the @p archieve's extension. This can be 
-#                    used when an archieve is downloaded from the 
-#                    Internet and the default name of the file does
-#                    not contains extention that could be used to
-#                    deduce tool required for extracting files
+#       -v  --verbose  a progress bar will be printed during 
+#                      extraction
+#  -d|--directory=dir  content of the archieve will be extracted
+#                      to the dir directory
+#          -f|--force  extracts directory even if content of the
+#                      extraction directory matches content of the
+#                      archieve
 #
-# @note List of supported archieves extension with their 
-#    corresponding return string are hold in 
-#    @var BASH_UTILS_SUPPORTED_ARCHIEVES hash array
+# @note List of supported archieves extension is held in 
+#    @var BASH_UTILS_SUPPORTED_ARCHIEVES array
 # -------------------------------------------------------------------
 function extract_archieve() {
 
     # Arguments
     local archieve_
 
-    # ----------------- Configuration -----------------
-    
-    # Commands used to extract archieves of specified formats
-    local -A EXTRACTION_COMMANDS_=(
-            [tar]="tar xf        %s %s"
-         [tar.gz]="tar xzf       %s %s"
-        [tar.bz2]="tar xjf       %s %s"
-         [tar.xz]="tar xJf       %s %s"
-            [zip]="busybox unzip %s %s"
-             [7z]="7z x          %s %s"
-    )
-    
-    # Commands used to extract archieves of specified formats in verbose mode
-    # (7z extraction does not work with pipe input for some reason)
-    local -A EXTRACTION_COMMANDS_VERBOSE_=(
-            [tar]="tar x"
-         [tar.gz]="tar xz"
-        [tar.bz2]="tar xj"
-         [tar.xz]="tar xJ"
-            [zip]="busybox unzip -"
-             [7z]="7z x -t7z -si" 
-    )
-    
-    # Commands modiefier used to extract archieve to a specified directory
-    # (@ note: \055 is an octal code of the '-'; it is used to not let
-    # `printf` call interpret values of the following table as it's own option)
-    local -A EXTRACTION_COMMANDS_DIR_MOD_=(
-            [tar]="\055C %s"
-         [tar.gz]="\055C %s"
-        [tar.bz2]="\055C %s"
-         [tar.xz]="\055C %s"
-            [zip]="\055d %s"
-             [7z]="\055o %s"
-    )
-
     # ---------------- Parse arguments ----------------
 
     # Function's options
     local -a opt_definitions=(
         '-v|--verbose',verbose,f
-        '--directory',dir
-        '--format',format
+        '-d|--directory',dir
+        '-f|--force',force,f
     )
     
     # Parse arguments to a named array
@@ -219,49 +311,49 @@ function extract_archieve() {
     local format_
     local cmd_
 
-    # Try to parse format from options
-    if is_var_set options[format]; then
-
-        # If a valid format given, parse it
-        is_compatibile_archieve_format "${options[format]}" &&
-            format_="${options[format]}"
-
-    # Else, try to deduce archieve format from archieve's extension
-    else
-        format_=$(get_archieve_format $archieve_) || return 1
-    fi
+    # Get archieve's format    
+    format_=$(get_archieve_format $archieve_) || return 1
     
     # Prepare directory modifier, if given
-    local dir_mod_=''
-    is_var_set options[dir] && 
-        dir_mod_="$(printf "${EXTRACTION_COMMANDS_DIR_MOD_[$format_]}" "${options[dir]}")"
+    local verbose_flag=''
+    is_var_set options[verbose] &&
+        verbose_flag='-v'
 
-    # Prepare command to be used to extract archieve
-    if is_var_set options[verbose]; then
-        cmd_="${EXTRACTION_COMMANDS_VERBOSE_[$format_]} "$dir_mod_""
-    else
-        cmd_="$(printf "${EXTRACTION_COMMANDS_[$format_]}" "$archieve_" "$dir_mod_")"
-    fi
+    # ------ Check if archieve already extracted ------
+    
+    # Check if extraction was forced by option
+    is_var_set options[force] || {
+        
+        local ret_
+        # Check if archieve would be extracted despite no differences in the source
+        need_extract --directory="${options[dir]:-.}" "$archieve_" && ret_=$? || ret_=$?
+        # If so, return (or return an error)
+        [[ $ret_ == "0" ]] || return $ret_
+
+    }
+
+    # --------------- Extract archieve ----------------
+
+    # Select tool for extraction
+    local tool_="extract_${format_%.*}_archieve"
 
     # Extract archieve
-    if is_var_set options[verbose]; then
-        pv "$archieve_" | $cmd_ > /dev/null || return 1
-    else
-        $cmd_ > /dev/null || return 1
-    fi
+    ${tool_} $verbose_flag --directory="${options[dir]:-.}" "$archieve_"
 
 }
 
 # -------------------------------------------------------------------
 # @brief Downloads an archieve file from the @p url online server 
-#   and extracts it's content 
+#   and extracts it's content. If the archieve is already downloaded,
+#   this step is skipped. The same concenrs extraction step
 #
 # @param url
 #    URL to be downloaded
 #
 # @returns
 #    @c 0 on success \n
-#    @c 1 on error
+#    @c 1 on error \n
+#    @c 2 if both download and extraction steps were skipped
 #
 # @options
 #
@@ -270,11 +362,6 @@ function extract_archieve() {
 #          --arch-path  path to the archieve after being downloaded; if 
 #                       given, overwrites --archdir option (by default,
 #                       name of the downloaded archieve is not modified)
-#        --arch-format  format of the downloaded directory ( @see 
-#                       BASH_UTILS_SUPPORTED_ARCHIEVES ). By default, 
-#                       function tries to deduce format of the archieves
-#                       from the --arch-path (if given) or the default
-#                       name of the downloaded file (if not)
 #        --extract-dir  directory where the archieve will be extracted;
 #                       will be created, if needed
 #   -p|--show-progress  displays progress bars when downloading and when
@@ -283,12 +370,15 @@ function extract_archieve() {
 #                       to the `wget` (@note output of the download
 #                       and extract tools like `wget` (except progress
 #                       bars) are forced silence)
-#  -f|--force-download  forced download of the archieve even if the 
+#           -f|--force  forced download of the archieve even if the 
 #                       target file already exists (by default, function
 #                       will skip download step, if a file already 
-#                       exist)
-#   --log-target=NAME  name of the target used in logs when -v option 
-#                      passed
+#                       exist). By default, dontent of the archieve
+#                       is compared with the extraction directory and
+#                       extraction step is performed only if both 
+#                       differs. -f flag forces extraction.
+#    --log-target=NAME  name of the target used in logs when -v option 
+#                       passed
 #
 # @environment
 #
@@ -310,11 +400,10 @@ function download_and_extract() {
     local -a opt_definitions=(
         '--arch-dir',arch_dir
         '--arch-path',arch_path
-        '--arch-format',arch_format
         '--extract-dir',extr_dir
         '-p|--show-progress',progress,f
         '-v|--verbose',verbose,f
-        '-f|--force-download',force_download,f
+        '-f|--force',force,f
         '--log-target',log_target
     )
     
@@ -323,6 +412,9 @@ function download_and_extract() {
     
     # Parse arguments
     url_="${posargs[0]}"
+
+    # Assume that both steps will be skipped
+    local all_skipped_=1
 
     # ----------------- Configure logs ----------------   
 
@@ -350,7 +442,7 @@ function download_and_extract() {
 
     # Establish whether archieve should be redownloaded
     local wget_force_download_flag_=''
-    ! is_var_set options[force_download] &&
+    ! is_var_set options[force] &&
         wget_force_download_flag_="--no-clobber"
 
     # Compile wget flags
@@ -382,11 +474,16 @@ function download_and_extract() {
     local archieve_path_=''
     
     # Enable word-splitting (locally) to properly parse wget's arguments
-    limit_word_splitting_settings
+    localize_word_splitting
     enable_word_splitting
     
+    local ret_
+
     # Download URL
-    archieve_path_=$(wget_and_localize $wget_all_flags_ $url_) || {
+    archieve_path_=$(wget_and_localize $wget_all_flags_ $url_)  && ret_=$? || ret_=$?
+    
+    # Check if error occurred
+    [[ "$ret_" != "1" ]] || {
 
         # Log error
         log_error "Failed to download ${ltarget_}"
@@ -396,16 +493,22 @@ function download_and_extract() {
         return 1
 
     }
-    
-    log_info "${ltarget_^} downloaded"
 
+    log_info "${ltarget_^} downloaded"
+    
+    # If download step was not skipped, mark it
+    [[ "$ret_" != "0" ]] || all_skipped_=0
+    
     # Check if the downloaded file reside under the assumed path
+    # (should not heppen with a new implementation of `wget_and_localize`)
     [[ -f "$archieve_path_" ]] || {
         
         # Log error
-        log_error "Downloaded archieve could not be fund under assummed path ($archieve_path_). " \
+        log_error "Downloaded archieve could not be found under assummed path ($archieve_path_). " \
                   "The most probable reason is that name could not be deduced from the given URL" \
                   "due to redirections. Please retry with --arch-path option. "
+        log_error "This error should not heppen with a new implementation of `wget_and_localize`" \
+                  "Please report an error"
         # Restore logging settings
         restore_log_config_from_default_stack
         # Return error
@@ -425,16 +528,17 @@ function download_and_extract() {
     is_var_set options[extr_dir] &&
         extract_directory_opt_="--directory=${options[extr_dir]}"
 
-    # Establish archieve format
-    local extract_format_opt_=''
-    is_var_set options[arch_format] &&
-        extract_format_opt_="--format=${options[arch_format]}"
+    # Establish whether extraction should be forces
+    local extract_force_flag_=''
+    if is_var_set options[force] || [[ "$all_skipped_" != 1 ]]; then
+        extract_force_flag_='--force'
+    fi
 
     # Compile extraction flags
-    local extract_all_flags_=$(echo  \
-        "${extract_progress_flag_}"  \
-        "${extract_directory_opt_}"  \
-        "${extract_format_opt_}"  
+    local extract_all_flags_=$(echo \
+        "${extract_progress_flag_}" \
+        "${extract_directory_opt_}" \
+        "${extract_force_flag_}"
     )
 
     # ---------------- Extract archieve ---------------
@@ -452,7 +556,10 @@ function download_and_extract() {
     log_info "Extracting ${ltarget_} to $(realpath ${extract_dir_}) ..."
 
     # Extract files
-    extract_archieve $extract_all_flags_ $archieve_path_ || {
+    extract_archieve $extract_all_flags_ $archieve_path_ && ret_=$? || ret_=$?
+
+    # Check if error ocurred
+    [[ "$ret_" != "1" ]] || {
 
         # Log error
         log_error "Failed to extract "
@@ -462,10 +569,16 @@ function download_and_extract() {
         return 1
         
     }
-    
+
     log_info "${ltarget_^} extracted"
+
+    # If extraction step was not skipped, mark it
+    [[ "$ret_" != "0" ]] || all_skipped_=0
 
     # Restore logging settings
     restore_log_config_from_default_stack
+
+    # Restore status code
+    [[ "$all_skipped_" == "1" ]] && return 2 || return 0
     
 }

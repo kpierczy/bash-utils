@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Thursday, 11th November 2021 2:53:47 am
+# @modified Friday, 12th November 2021 1:54:18 am
 # @project  BashUtils
 # @brief
 #    
@@ -35,13 +35,22 @@ set_aliases_expansion on
 
 # List of dependencies
 declare dependencies=(
-    pv         # Progress-monitor
-    tar        # Tarball archieves tool
-    p7zip-full # 7z arhieves tool
+    pv       # Progress-monitor
+    tar      # Tarball archieves tool
+    zip      # ZIP archieves tool
+    unzip    # ZIP archieves tool (extraction)
+    fuse-zip # Mounting ZIP as filesystem
+)
+
+# List of Python dependencies
+declare pip_dependencies=(
+    tqdm # Extracting ZIP files
 )
 
 # Install dependencies
 install_pkg_list -yv --su dependencies || return 1
+# Install Python dependencies
+pip_install_list -v pip_dependencies || return 1
 
 # ========================================================= Set environment ======================================================== #
 
@@ -49,11 +58,15 @@ install_pkg_list -yv --su dependencies || return 1
 export BASH_UTILS_HOME
 
 # Add `shpec` library to the PATH
-PATH+=:"$BASH_UTILS_HOME/dep/shpec/bin"
+append_path "$BASH_UTILS_HOME/dep/shpec/bin"
 
 # Add ./bin directory PATH
-PATH+=:"$BASH_UTILS_HOME/dep/shpec/bin"
+append_path "$BASH_UTILS_HOME/bin"
+
+# Add ./scripts directory PATH
+append_path "$BASH_UTILS_HOME/scripts"
 
 # ============================================================= Cleanup ============================================================ #
 
 unset dependencies
+unset pip_dependencies

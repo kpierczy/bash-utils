@@ -3,7 +3,7 @@
 # @file     net.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 1:58:33 am
-# @modified Wednesday, 10th November 2021 4:45:45 pm
+# @modified Thursday, 11th November 2021 4:15:26 pm
 # @project  BashUtils
 # @brief
 #    
@@ -120,7 +120,7 @@ describe wget_and_localize
 
         # Wget and localize
         path=$(wget_and_localize --no-clobber $url); assert equal $? "0"
-        path=$(wget_and_localize --no-clobber $url); assert equal $? "0"
+        path=$(wget_and_localize --no-clobber $url); assert equal $? "2"
 
         # Assert file was downloaded
         [[ -f "$arch_dflt_name" ]]; assert equal $? "0"
@@ -139,7 +139,7 @@ describe wget_and_localize
 
         # Wget and localize
         path=$(wget_and_localize --no-clobber --output-document=${target} $url); assert equal $? "0"
-        path=$(wget_and_localize --no-clobber --output-document=${target} $url); assert equal $? "0"
+        path=$(wget_and_localize --no-clobber --output-document=${target} $url); assert equal $? "2"
 
         # Assert file was downloaded
         [[ -f "$target" ]]; assert equal $? "0"

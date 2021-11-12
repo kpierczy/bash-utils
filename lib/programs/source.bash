@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Thursday, 11th November 2021 3:14:50 am
+# @modified Friday, 12th November 2021 2:28:26 am
 # @project  BashUtils
 # @brief
 #    
@@ -169,6 +169,7 @@ function is_build_action() {
 #    @c 0 if action can be performed on the target \n
 #    @c 1 if action cannot be performed on the target \n
 #    @c 2 if invalid action given
+#
 # -------------------------------------------------------------------
 function is_targeted_action() {
 
@@ -195,8 +196,8 @@ function is_targeted_action() {
 # 
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if action was skipped \n
-#    @c 2 on error
+#    @c 1 on error \n
+#    @c 2 if action was skipped
 #
 # @options
 #
@@ -291,7 +292,7 @@ function perform_build_action() {
     if_build_action "$action_" || {
         log_error "Invalid build actin given ($action_)"
         restore_log_config_from_default_stack
-        return 2
+        return 1
     }
 
     # Establish the builddir
@@ -336,7 +337,7 @@ function perform_build_action() {
         is_directory_marked "$build_dir_" "$action_" "$target_" || {
             restore_log_config_from_default_stack
             popd
-            return 1
+            return 2
         }
 
         # Check whether action can be performed
@@ -347,7 +348,7 @@ function perform_build_action() {
                 is_directory_marked "$build_dir_" "configured" || {
                     restore_log_config_from_default_stack
                     popd
-                    return 2
+                    return 1
                 };;
                 
             install   )
@@ -356,7 +357,7 @@ function perform_build_action() {
                 is_directory_marked "$build_dir_" "built" "$target_" || {
                     restore_log_config_from_default_stack
                     popd
-                    return 2
+                    return 1
                 };;
                 
         esac
@@ -375,7 +376,7 @@ function perform_build_action() {
 
         restore_log_config_from_default_stack
         popd        
-        return 2
+        return 1
     }
 
     is_var_set LOG_TABLE[SUCCESS] && log_info "${LOG_TABLE[SUCCESS]}"
@@ -396,8 +397,8 @@ function perform_build_action() {
 #
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if action was skipped \n
-#    @c 2 on error
+#    @c 1 on error \n
+#    @c 2 if action was skipped
 #
 # @options
 #
@@ -492,8 +493,8 @@ function configure_source() {
 #
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if action was skipped \n
-#    @c 2 on error
+#    @c 1 on error \n
+#    @c 2 if action was skipped
 #
 # @options
 #
@@ -586,8 +587,8 @@ function build_source() {
 #
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if action was skipped \n
-#    @c 2 on error
+#    @c 1 on error \n
+#    @c 2 if action was skipped
 #
 # @options
 #
@@ -682,8 +683,8 @@ function install_source() {
 # 
 # @returns 
 #    @c 0 on success \n
-#    @c 1 if all steps were skipped \n
-#    @c 2 on error
+#    @c 1 on error \n
+#    @c 2 if action was skipped
 #
 # @options
 #
@@ -781,8 +782,8 @@ function build_and_install() {
 
     # Perform configuration
     configure_source "$config_flags_" "${options[src_dir_]:-.}" "${options[build_dir]:-.}" & ret_=$? || ret_=$?
-    # If erro occurred, exit
-    [[ "$ret_" == "2" ]] && return 2
+    # If error occurred, exit
+    [[ "$ret_" == "2" ]] && return 1
     # If a new configuration was performed, mark the folder as not-built and not-installed
     [[ "$ret_" == "1" ]] && {
         remove_directory_marker "${options[build_dir]:-.}" "configure" "$target_"
@@ -792,7 +793,7 @@ function build_and_install() {
     # Perform building
     build_source "$build_flags_" "${options[build_dir]:-.}"
     # If erro occurred, exit
-    [[ "$ret_" == "2" ]] && return 2
+    [[ "$ret_" == "2" ]] && return 1
     # If a new configuration was performed, mark the folder as not-installed
     [[ "$ret_" == "1" ]] && {
         remove_directory_marker "${options[build_dir]:-.}" "install" "$target_"
@@ -801,12 +802,12 @@ function build_and_install() {
     # Perform installation
     install_source "$install_flags_" "${options[build_dir]:-.}"
     # If erro occurred, exit
-    [[ "$ret_" == "2" ]] && return 2
+    [[ "$ret_" == "2" ]] && return 1
     # Update information about skipping all steps
     [[ "$ret_" == "1" ]] || all_skipped_=0
 
     # Return status code
-    [[ "$all_skipped_" == "1" ]] && return 1 || return 0
+    [[ "$all_skipped_" == "1" ]] && return 2 || return 0
 
 }
 
@@ -831,14 +832,9 @@ function build_and_install() {
 #      --arch-path=DIR  path to the archieve after being downloaded; if 
 #                       given, overwrites --archdir option (by default,
 #                       name of the downloaded archieve is not modified)
-# --arch-format=FROMAT  format of the downloaded directory ( @see 
-#                       BASH_UTILS_SUPPORTED_ARCHIEVES ). By default, 
-#                       function tries to deduce format of the archieves
-#                       from the --arch-path (if given) or the default
-#                       name of the downloaded file (if not)
 #    --extract-dir=DIR  directory where the archieve will be extracted;
 #                       will be created, if needed
-#   -p|--show-progress  displays progress bars when downloading and when
+#   -p|--show-progress  displays progress bars when downloading and
 #                       extracting
 #           -f|--force  by default, function checks whether subsequent
 #                       steps are required (i.e. if the archieve is
@@ -888,7 +884,141 @@ function build_and_install() {
 #                      installation tool
 #
 # -------------------------------------------------------------------
-# function download_buil_and_install() {
+function download_buil_and_install() {
 
+    # Arguments
+    local url_
+
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-v|--verbose',verbose,f
+        '--arch-dir',arch_dir,
+        '--arch-path',arch_path,
+        '--extract-dir',extract_dir,
+        '-p|--show-progress',progress,f
+        '-f|--force',force,f
+        '-s|--src-dir',src_dir
+        '-b|--build-dir',build_dir
+        '-t|--target',target
+        '-m|--mark',mark,f
+        '--log-target',log_target
+    )
     
-# }
+    # Parse arguments to a named array
+    parse_options
+
+    # Parse arguments
+    url_="${posargs[0]}"
+
+    # Assume that all steps will be skipped
+    local all_skipped_=1
+    # Return status
+    local ret_
+
+    # ---------- Prepare common environment -----------
+
+    # Establish whether verbose logs should be displayed
+    local verbose_flag_=''
+    is_var_set options[verbose] &&
+        verbose_flag_="--verbose"
+
+    # Establish whether all steps should be forced
+    local force_flag_=''
+    is_var_set options[force] &&
+        force_flag_="--force"
+
+    # Establish whether a specific log target should be used
+    local log_target_=''
+    is_var_set options[log_target] &&
+        log_target_="--log-target=${options[log_target]}"
+
+    # --- Prepare download & extraction environment ---
+
+    # Establish whether progress bar should be displayed
+    local download_extract_progess_flag_=''
+    is_var_set options[verbose] &&
+        download_extract_progess_flag_="--show-progress"
+
+    # Establish download directory
+    local download_extract_destination_opt_=''
+    is_var_set options[arch_dir] &&
+        download_extract_destination_opt_="--arch-dir=${options[arch_dir]}"
+    is_var_set options[arch_path] &&
+        download_extract_destination_opt_="--arch-path=${options[arch_path]}"
+
+    # Establish extraction directory
+    local download_extract_extract_dir_=''
+    is_var_set options[extract_dir] &&
+        download_extract_extract_dir_="--extract-dir=${options[extract_dir]}"
+
+    # Compile dowload/extract flags
+    local download_extract_all_flags_=$(echo   \
+        "${verbose_flag_}"                     \
+        "${force_flag_}"                       \
+        "${log_target_}"                       \
+        "${download_extract_progess_flag_}"    \
+        "${download_extract_destination_opt_}" \
+        "${download_extract_extract_dir_}"
+    )
+
+    # ------------ Prepare build environment ---------- 
+
+    # Establish source directory
+    local build_source_dir_="--src-dir=${options[extract_dir]:-.}"
+    is_var_set options[src_dir] &&
+        build_source_dir_="--src-dir=${options[src_dir]}"    
+
+    # Establish build directory
+    local build_build_dir_="."
+    is_var_set options[build_dir] &&
+        build_build_dir_="--build-dir=${options[build_dir]}"    
+
+    # Establish build target
+    local build_target_=""
+    is_var_set options[target] &&
+        build_target_="--target=${options[target]}"    
+
+    # Establish whether build steps should be marked
+    local build_mark_flag_="."
+    is_var_set options[target] &&
+        build_mark_flag_="--mark"
+    
+    # Compile build flags
+    local build_all_flags_=$(echo \
+        "${verbose_flag_}"        \
+        "${force_flag_}"          \
+        "${log_target_}"          \
+        "${build_source_dir_}"    \
+        "${build_build_dir_}"     \
+        "${build_target_}"        \
+        "${build_mark_flag_}"
+    )
+
+    # --------- Download and extract sources ---------- 
+
+    # Try to download and extract sources
+    download_and_extract $download_extract_all_flags_ $url_ && ret_=$? || ret_=$?
+
+    # If error occurred, return error
+    [[ $ret_ == "1" ]] && return 1
+
+    # If downloading and/or extraction wasn't skipped, mark it
+    [[ $ret_ != "2" ]] && all_skipped_=0
+
+    # ---------------- Build sources ------------------ 
+
+    # Try to build and install sources
+    build_and_install $build_all_flags_ && ret_=$? || ret_=$?
+    
+    # If error occurred, return error
+    [[ $ret_ == "1" ]] && return 1
+
+    # If downloading and/or extraction wasn't skipped, mark it
+    [[ $ret_ != "2" ]] && all_skipped_=0
+
+    # Return status code
+    [[ $all_skipped_ == "1" ]] && return 2 || return 0
+    
+}

@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Thursday, 11th November 2021 1:42:44 am
+# @modified Thursday, 11th November 2021 10:57:32 pm
 # @project  BashUtils
 # @brief
 #    
@@ -62,6 +62,10 @@ function is_pkg_installed() {
 #
 # @param packages
 #    name of the list holding names of packages to be installed
+#
+# @returns 
+#    @c 0 on success \n
+#    @c 1 on error 
 #
 # @options
 #    

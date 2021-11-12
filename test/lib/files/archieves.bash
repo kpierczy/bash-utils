@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 8:39:00 pm
-# @modified Thursday, 11th November 2021 2:32:31 am
+# @modified Friday, 12th November 2021 2:00:06 am
 # @project  BashUtils
 # @brief
 #    
@@ -32,24 +32,7 @@ describe is_compatibile_archieve_format
     ti
 
     it "Check if all valid formats are valid"
-        for format in "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
-            is_compatibile_archieve_format "$format"
-            assert equal $? 0
-        done
-    ti
-
-end_describe
-
-# Test is_compatibile_archieve_extension function
-describe is_compatibile_archieve_format
-
-    it "Check if 'x' is NOT a valid archieve extension"
-        is_compatibile_archieve_extension "x"
-        assert equal $? 1
-    ti
-
-    it "Check if all valid formats are valid"
-        for format in "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
+        for format in "${BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
             is_compatibile_archieve_format "$format"
             assert equal $? 0
         done
@@ -72,23 +55,41 @@ describe get_archieve_format
         assert equal "$archieve_format" ""
     ti
 
-    it "Check all supported archieve extensions"
+    it "Check all supported archieve formats are supported"
         
+        # List of formats that should be supported
+        declare -a supported_formats=(
+            "tar.gz"
+            "tar.bz2"
+            "tar.xz"
+            "tar"
+            "zip"
+        )
+
+        # Testfile
+        local testfile="/tmp/file"
+
+        # Create testfil
+        touch $testfile
+
         # Iterate over dictionary of supported archieves' formats
-        for format in "${!BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
+        for format in "${supported_formats[@]}"; do
 
-            # Enable word splitting to parse extensions from the space-separated etxension's list
-            enable_word_splitting
+            # Create an archieve
+            create_archieve $format $testfile.$format $testfile
 
-            # Iterate over extensions corresponding to the format
-            for extension in ${BASH_UTILS_SUPPORTED_ARCHIEVES[$format]}; do
-                archieve_format="$(get_archieve_format "filename.${extension}")"
-                assert equal $? 0
-                assert equal "$archieve_format" "$format"
+            # Check if format is valid
+            archieve_format="$(get_archieve_format "$testfile.$format")"
+            assert equal $? 0
+            assert equal "$archieve_format" "$format"
 
-            done
+            # Remoe archieve
+            rm $testfile.$format
 
         done
+
+        # Remove testfile
+        rm $testfile
         
     ti
 
@@ -116,24 +117,7 @@ describe extract_archieve
     # Basename of the archieve
     declare arch_base_name="arch"
     # Test content of the archieved file
-    declare teststring="Hello"
-    
-    # Commands used archieve the file
-    declare -A ARCHIEVE_COMMANDS=(
-            [tar]="tar cf   ${arch_base_name}.tar     %s"
-         [tar.gz]="tar czf  ${arch_base_name}.tar.gz  %s"
-        [tar.bz2]="tar cjf  ${arch_base_name}.tar.bz2 %s"
-         [tar.xz]="tar cJf  ${arch_base_name}.tar.xz  %s"
-            [tgz]="tar czf  ${arch_base_name}.tgz     %s"
-            [tbz]="tar cjf  ${arch_base_name}.tbz     %s"
-            [txz]="tar cJf  ${arch_base_name}.txz     %s"
-            [zip]="zip      ${arch_base_name}.zip     %s"
-    )
-
-    # Flatten values of the dictionary holding <supported_format:corresponding extensions> pairs
-    # to an array of supported extensions by breaking dictionarie's values on '[:space:]' 
-    # (thanks to auto word-splitting)
-    declare -a supported_extensions=( ${BASH_UTILS_SUPPORTED_ARCHIEVES[@]} )    
+    declare teststring="Hello"  
 
     it "Check if supported archieves are succesfully extracted"
             
@@ -142,23 +126,19 @@ describe extract_archieve
 
         # Enable word splitting to parse extensions from the space-separated etxension's list
         enable_word_splitting
+        
+        # Iterate over valid archieve format
+        for format in "${BASH_UTILS_SUPPORTED_ARCHIEVES[@]}"; do
             
-        # Iterate over valid archieve extensions
-        for extension in ${supported_extensions[@]}; do
-
-
             # Create temporary file
             echo $teststring > $file
-            
-            # Get a command for creating the archieve
-            local cmd=$(printf "${ARCHIEVE_COMMANDS[$extension]}" "$(basename "$file")")
             
             # Deduce name of the target archieve
             local archname="$arch_base_name.$extension"
             rm -f $archname
 
             # Create an archieve
-            $cmd > /dev/null
+            create_archieve $format $archname $file
             # Remove source file
             rm -f $file
             
@@ -192,27 +172,21 @@ describe extract_archieve
         # Jump to the folder of temporary files
         cd /tmp
 
-        # Create destination directory 
-        mkdir -p $distdir
-
         # Enable word splitting to parse extensions from the space-separated etxension's list
         enable_word_splitting
 
-        # Iterate over valid archieve extensions
-        for extension in ${supported_extensions[@]}; do
+        # Iterate over valid archieve format
+        for format in ${BASH_UTILS_SUPPORTED_ARCHIEVES[@]}; do
 
             # Create temporary file
             echo $teststring > $file
-            
-            # Get a command for creating the archieve
-            local cmd=$(printf "${ARCHIEVE_COMMANDS[$extension]}" "$(basename "$file")")
             
             # Deduce name of the target archieve
             local archname="$arch_base_name.$extension"
             rm -f $archname
 
             # Create an archieve
-            $cmd > /dev/null
+            create_archieve $format $archname $file
             # Remove source file
             rm -f $file
             
@@ -237,57 +211,6 @@ describe extract_archieve
         done
 
         rm -rf $distdir
-
-    ti
-    
-    it "Check if supported archieves are succesfully extracted (forced type)"
-            
-        # Jump to the folder of temporary files
-        cd /tmp
-
-        # Enable word splitting to parse extensions from the space-separated etxension's list
-        enable_word_splitting
-        
-        # Iterate over valid archieve extensions
-        for extension in ${supported_extensions[@]}; do
-
-            # Create temporary file
-            echo $teststring > $file
-            
-            # Get a command for creating the archieve
-            local cmd=$(printf "${ARCHIEVE_COMMANDS[$extension]}" "$(basename "$file")")
-            
-            # Deduce name of the target archieve
-            local archname="$arch_base_name.$extension"
-            rm -f $archname
-
-            # Create an archieve
-            $cmd > /dev/null
-            # Remove source file
-            rm -f $file
-            
-            # Remove a valid extension from the archieve
-            mv $archname ${archname%.$extension}
-
-            # Extract an archieve
-            extract_archieve --format=$(get_archieve_format "$archname") ${archname%.$extension}
-
-            # Test result
-            local ret=$?
-            assert equal $ret 0
-            [[ $ret == 0 ]] || {
-                rm -f $archname;
-                continue
-            }
-            
-            # Test content of the extracted file
-            assert equal "$(cat "$file")" "$teststring"
-
-            # Remove temporary files
-            rm -f ${archname%.$extension}
-            rm -f $file
-
-        done
 
     ti
 
@@ -361,6 +284,44 @@ describe download_and_extract
         
         # Remove temporaries
         rm -rf $(dirname $archieve_path)
+        rm -rf $arch_extracted_name
+
+    ti
+
+    it "Check with redownload"
+        
+        # Download and extract
+        download_and_extract $url; assert equal $? 0
+        download_and_extract $url; assert equal $? 2
+
+        # Assert, that the archieve was downloaded
+        [[ -f $arch_dflt_name ]]; assert equal $? 0
+        # Assert, that the extracted folder exists
+        [[ -d $arch_extracted_name ]]; assert equal $? 0
+        # Assert, that the folder was extracted properly
+        [[ -f $arch_extracted_name/configure ]]; assert equal $? 0
+        
+        # Remove temporaries
+        rm -rf $arch_dflt_name
+        rm -rf $arch_extracted_name
+
+    ti
+
+    it "Check with forced redownload"
+        
+        # Download and extract
+        download_and_extract $url; assert equal $? 0
+        download_and_extract --force $url; assert equal $? 0
+
+        # Assert, that the archieve was downloaded
+        [[ -f $arch_dflt_name ]]; assert equal $? 0
+        # Assert, that the extracted folder exists
+        [[ -d $arch_extracted_name ]]; assert equal $? 0
+        # Assert, that the folder was extracted properly
+        [[ -f $arch_extracted_name/configure ]]; assert equal $? 0
+        
+        # Remove temporaries
+        rm -rf $arch_dflt_name
         rm -rf $arch_extracted_name
 
     ti
