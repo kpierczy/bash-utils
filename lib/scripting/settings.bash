@@ -3,7 +3,7 @@
 # @file     settings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
-# @modified Thursday, 11th November 2021 11:09:35 pm
+# @modified Friday, 12th November 2021 2:48:03 am
 # @project  BashUtils
 # @brief
 #    
@@ -24,11 +24,11 @@
 function set_aliases_expansion() {
 
     # Arguments
-    local query="$1"
+    local query_="$1"
 
     # Set aliases expansion
-    case $query in
-        on )  shopt -s expand_aliases;;
+    case $query_ in
+        on  ) shopt -s expand_aliases;;
         off ) shopt -u expand_aliases;;
     esac
     

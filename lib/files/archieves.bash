@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 7:11:57 pm
-# @modified Friday, 12th November 2021 1:58:37 am
+# @modified Friday, 12th November 2021 3:10:13 am
 # @project  BashUtils
 # @brief
 #    
@@ -449,7 +449,6 @@ function download_and_extract() {
     local wget_all_flags_=$(echo       \
         "${wget_destination_opt_}"     \
         "${wget_progess_flag_}"        \
-        "${wget_verboseness_flag_}"    \
         "${wget_force_download_flag_}" \
         "${WGET_FLAGS:-}"
     )
@@ -493,9 +492,11 @@ function download_and_extract() {
         return 1
 
     }
-
-    log_info "${ltarget_^} downloaded"
     
+    [[ "$ret_" == "0" ]] &&
+        log_info "${ltarget_^} downloaded" ||
+        log_info "Skipping ${ltarget_} download..." 
+
     # If download step was not skipped, mark it
     [[ "$ret_" != "0" ]] || all_skipped_=0
     
@@ -544,7 +545,7 @@ function download_and_extract() {
     # ---------------- Extract archieve ---------------
 
     # Prepare log target
-    local ltarget_="${LOG_TARGET:-files}"
+    local ltarget_="${options[log_target]:-files}"
 
     # Get extraction directory
     local extract_dir_='.'
@@ -569,8 +570,11 @@ function download_and_extract() {
         return 1
         
     }
-
-    log_info "${ltarget_^} extracted"
+    
+    [[ "$ret_" == "0" ]] &&
+        log_info "${ltarget_^} extracted" ||
+        log_info "Skipping ${ltarget_} extraction..." 
+    
 
     # If extraction step was not skipped, mark it
     [[ "$ret_" != "0" ]] || all_skipped_=0

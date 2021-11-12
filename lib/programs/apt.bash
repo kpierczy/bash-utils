@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Thursday, 11th November 2021 10:57:32 pm
+# @modified Friday, 12th November 2021 2:50:02 am
 # @project  BashUtils
 # @brief
 #    

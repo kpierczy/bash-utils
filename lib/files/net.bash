@@ -3,7 +3,7 @@
 # @file     net.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 9:59:21 pm
-# @modified Thursday, 11th November 2021 4:16:52 pm
+# @modified Friday, 12th November 2021 3:11:41 am
 # @project  BashUtils
 # @brief
 #    
@@ -112,7 +112,7 @@ function wget_and_localize() {
 
     # If non-empty log was produced and error code was returned
     else
-
+        
         # ----------------------------------------------------------
         # @note There is a bug in the `wget` emerging when the file
         #    is downloaded without '--progress-bar' option. Inspite

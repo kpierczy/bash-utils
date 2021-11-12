@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Friday, 12th November 2021 1:54:18 am
+# @modified Friday, 12th November 2021 2:56:31 am
 # @project  BashUtils
 # @brief
 #    
@@ -31,6 +31,9 @@ source $BASH_UTILS_HOME/lib/lib.bash
 # Enable aliases' expansion
 set_aliases_expansion on
 
+# Resource library with enabled aliases' expansion
+source $BASH_UTILS_HOME/lib/lib.bash
+
 # ====================================================== Install dependencies ====================================================== #
 
 # List of dependencies
@@ -44,7 +47,7 @@ declare dependencies=(
 
 # List of Python dependencies
 declare pip_dependencies=(
-    tqdm # Extracting ZIP files
+    tqdm     # Extracting ZIP files
 )
 
 # Install dependencies
