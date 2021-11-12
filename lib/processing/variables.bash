@@ -3,7 +3,7 @@
 # @file     variables.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 2:36:03 am
-# @modified Wednesday, 10th November 2021 7:01:46 pm
+# @modified Friday, 12th November 2021 5:34:09 pm
 # @project  BashUtils
 # @brief
 #    
@@ -65,32 +65,32 @@ function var_set_default() {
 #
 # @options
 #
-#    -n  if given, name of the variable is printed
+#    -n|--name  if given, name of the variable is printed
 #
 # -------------------------------------------------------------------
 function print_var() {
 
     # Arguments
-    local var
+    local var_
 
     # ---------------- Parse arguments ----------------
 
     # Function's options
     local -a opt_definitions=(
-        '-n',name,f
+        '-n|--name',name,f
     )
     
     # Parse arguments to a named array
     parse_options
 
     # Parse arguments
-    var="${posargs[0]}"
+    var_="${posargs[0]}"
 
     # ------------------------------------------------- 
 
     # Print variable
     is_var_set options[name] &&
-        echo "$var=${!var}" ||
-        echo "${!var}"
+        echo "$var_=${!var_}" ||
+        echo "${!var_}"
     
 }

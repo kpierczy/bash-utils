@@ -3,7 +3,7 @@
 # @file     arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Friday, 12th November 2021 12:06:59 am
+# @modified Friday, 12th November 2021 5:53:46 pm
 # @project  BashUtils
 # @brief
 #    
@@ -144,43 +144,77 @@ function substract_arrays() {
 }
 
 # -------------------------------------------------------------------
-# @brief Prints array with name passed as @p arr argument
+# @brief Prints array with name passed as @p arr argument. By 
+#    default, elements of the array are written out one per line.
+#    This behaviour can be changed by setting the elements' separator
 #
 # @param arr
 #    name fo the array to be printed
 #
 # @options
 #
-#    -n  if given, name of the array is printed
+#           -n|--name  if given, name of the array is printed
+#  -s|--separator=STR  separator of the printed elements
 #
 # -------------------------------------------------------------------
 function print_array() {
 
     # Arguments
-    local -n arr
+    local -n arr_
 
     # ---------------- Parse arguments ----------------
 
     # Function's options
     local -a opt_definitions=(
-        '-n',name,f
+        '-n|--name',name,f
+        '-s|--separator',separator
     )
     
     # Parse arguments to a named array
     parse_options
 
     # Parse arguments
-    arr="${posargs[0]}"
+    arr_="${posargs[0]}"
+
+    # Parse elements' separator
+    local separator_=$'\n'
+    is_var_set options[separator] && 
+        separator_="${options[separator]}"
 
     # ------------------------------------------------- 
 
-    # Print name of the array
-    is_var_set options[name] && echo "${posargs[0]}:"
+    local out_
 
-    # Print array
-    for elem in "${arr[@]}"; do
-        echo "$elem"
+    # Print name of the array, if requested
+    is_var_set options[name] && {
+
+        # If separator was given, end name with either space or a new line, depending on it
+        if is_var_set options[separator]; then
+            is_substring "${options[separator]}" $'\n' &&
+                out_="${posargs[0]}:\n" ||
+                out_="${posargs[0]}: "
+        # Else, use a newline (default) after the name
+        else
+            out_="${posargs[0]}:\n"
+        fi
+
+    }
+
+    # If an array is empty, return
+    (( ${#arr_[@]} > 0 )) || return
+
+    local elem_
+
+    # Concatenate output string's elements
+    for elem_ in "${arr_[@]}"; do
+        out_="${out_}${elem_}${separator_}"
     done
+    
+    # Remove the last one separator
+    out_="${out_%%$separator_}"
+
+    # Print result
+    echo -e "${out_}"
 
 }
 

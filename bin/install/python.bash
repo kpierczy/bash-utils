@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 4:29:08 pm
-# @modified Wednesday, 10th November 2021 9:41:17 pm
+# @modified Friday, 12th November 2021 3:46:00 pm
 # @project  BashUtils
 # @brief
 #    
@@ -48,7 +48,7 @@ END
 
 # Rm-repo usage
 get_heredoc rm_repo_usage <<END
-    Description: Removes deadsnakes repository to apt's sources
+    Description: Removes deadsnakes repository from apt's sources
     Usage: python.bash rm-repo
     
     Options:
@@ -58,7 +58,7 @@ END
 
 # Install usage
 get_heredoc install_usage <<END
-    Description: Installs python either from the apt package or form source
+    Description: Installs python either from the apt package or from source
     Usage: python.bash install TYPE VERSION
     
     Arguments:

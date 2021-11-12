@@ -3,7 +3,7 @@
 # @file     options.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Thursday, 11th November 2021 2:21:40 am
+# @modified Friday, 12th November 2021 8:02:31 pm
 # @project  BashUtils
 # @brief
 #    
@@ -224,8 +224,9 @@ function parseopts () {
 
     # Call getopt
     local result
-    is_enhanced_getopt && result=$(wrap_getopt args_ "${getopts_[short]}" "${getopts_[long]}")
-    [[ $? == "0" ]] || return 1
+    if is_enhanced_getopt; then
+         result=$(wrap_getopt args_ "${getopts_[short]}" "${getopts_[long]}") || return 1
+    fi
 
     # Set positional arguments
     eval "set -- $result"
@@ -263,6 +264,183 @@ function parseopts () {
     
 }
 
+# -------------------------------------------------------------------
+# @brief Checks whether the @p string is a short option (in sense
+#    of the `getopt` tool, i.e. if it is a letter with a single
+#    leading dash)
+#
+# @param string
+#    string to be inspected
+#
+# @returns 
+#    @c 0 if @p string is a short option \n
+#    @c 1 otheriwse
+# -------------------------------------------------------------------
+function is_short_option() {
+
+    # Arguments
+    local string_="$1"
+
+    # Check if a short option
+    [[ ${#string_} == "2" ]] &&
+    [[ ${string_:0:1} == "-" ]] &&
+    [[ ${string_:1:1} =~ [[:alpha:]] ]] ||
+    # If not, return error
+    return 1
+
+    # If a valid short option, return success
+    return 0
+
+}
+
+# -------------------------------------------------------------------
+# @brief Checks whether the @p string is a long option (in sense
+#    of the `getopt` tool, i.e. if it is a non-empty string with 
+#    a double leading dash)
+#
+# @param string
+#    string to be inspected
+#
+# @returns 
+#    @c 0 if @p string is a long option \n
+#    @c 1 otheriwse
+# -------------------------------------------------------------------
+function is_long_option() {
+
+    # Arguments
+    local string_="$1"
+
+    # Check if a long option
+    starts_with "$string_ " "--" && 
+    (( $(strlen "${string_:2}") != 0 )) &&
+    is_identifier --extend--charset='-' "${string_:2}" ||
+    # If not, return error
+    return 1
+
+    # If a valid long option, return success
+    return 0
+
+}
+
+# -------------------------------------------------------------------
+# @brief Checks whether the @p string is a short or a long option
+#
+# @param string
+#    string to be inspected
+#
+# @returns 
+#    @c 0 if @p string is an option \n
+#    @c 1 otheriwse
+#
+# @see is_short_option
+# @see is_long_option
+# -------------------------------------------------------------------
+function is_option() {
+
+    # Arguments
+    local string_="$1"
+
+    # Check if an option
+    is_short_option string_ || is_long_option string_
+
+}
+
+# -------------------------------------------------------------------
+# @brief Based on the list of arguments and options' definitions
+#    finds name of the option corresponding to the name of the
+#    key in the @p options hash table returned by the @fun parseopts
+#    function. Nameis written to the stdout
+#
+# @params args
+#    list of arguments to be parsed
+# @params defs
+#    list of valid options' definitions
+# @param key
+#    name of the key to be matched
+#
+# @returns 
+#    @c 0 on success \n
+#    @c 1 either if the option corresponding to the @p key
+#       was not declared in the @p defs list or it does not
+#       appear on the @p args list
+#
+# @note Function returns name of the the last occurrence of the 
+#    option in the @p args list
+# -------------------------------------------------------------------
+function get_option_name() {
+
+    # Arguments
+    local -n args_="$1"
+    local -n defs_="$2"
+    local -n key_="$3"
+
+    # Local iterator
+    local _def_
+    # Name of the option
+    local _name_
+    local _flag_
+
+    # Search a list of definitions to find name(s) corresponding to the given key
+    for _def_ in "${defs_[@]}"; do
+
+        # Set world-splitting separator to comma to extract parts of the option's definition
+        localize_word_splitting
+        push_stack "$IFS"
+        IFS=','
+        # Set positional arguments to the conent of @var defn (@notice auto word-splitting)
+        set -- $_def_
+        # Restor the prevous word-splitting separator
+        pop_stack IFS
+
+        # Parse positional arguments
+        local _def_name_="$1"
+        local _def_key_="$2"
+        local _def_flag_="${3:-}"
+
+        # Check if the key matches
+        if [[ "$key_" == "$_def_key_" ]]; then
+
+            # If so, get it's name and type (flag/non-flag)
+            _name_="$_def_name_"
+            _flag_="$_def_flag_"
+            # And break the loop
+            break
+
+        fi
+
+    done
+
+    # If name was not found on the list of definitions, return error
+    is_var_set_non_empty _name_ || return 1
+
+    # Set world-splitting separator to comma to extract option's names
+    localize_word_splitting
+    push_stack "$IFS"
+    IFS='|'
+    # Set positional arguments to the conent of @var defn (@notice auto word-splitting)
+    set -- $_name_
+    # Restor the prevous word-splitting separator
+    pop_stack IFS
+    # Get list of names fro positional arguments
+    local -a _names_list_=( "$@" )
+
+    # Name of the options found in the arguments' list
+    local _name_found_
+
+    # Iterate list of arguments backward to find the last occurence of the option
+    for ((i = ${#args_[@]} - 1; i >= 0; i--)); do
+        
+        # Get the argument
+        local single_arg_="${args_[$i]}"
+        
+        # @todo
+
+
+    done
+
+
+}
+
 # ============================================================= Aliases ============================================================ #
 
 # -------------------------------------------------------------------
@@ -296,6 +474,216 @@ local -A options
 # Parse options
 parseopts args opt_definitions options posargs || return 1
 '
+
+# ============================================================ Functions =========================================================== #
+
+# -------------------------------------------------------------------
+# @brief Parses and verifies command-line options passed to the 
+#    script performs routines common to many scripts:
+#
+#         - Prints error logs to the stdout if invalid
+#           options passed
+#         - Prints usage message, if the `--help` option
+#           parsed
+#         - Verifies whether required number of positional
+#           arguments has been passed
+#
+# @param args 
+#    name of the array containing arguments to be parsed
+# @param defs
+#    name of the array holding options to be parsed in shape 
+# 
+#     defs=(
+#         '-o|option1',o_flag,f # Flag options
+#         '-s|option2',s_var    # Keyword options
+#     )
+#
+#     Format of the single record in the @p defs array is as 
+#     follows: opt_name, var_name, [f]. 'opt_name' is string
+#     describing command-line shape of the option. Using '|'
+#     one can define both short and long name. 'var_name' is name
+#     of the record that the value of the option will be written
+#     under in the @p opts hash array (if parsed). Optional 'f'
+#     flag marks that the option is a flag (valued in the @p opts
+#     array with '1', if parsed)
+#
+# @param options (out)
+#    name of the hash array that options has to be parsed into
+# @param posargs (out)
+#    name of the array that positional arguments has to be parsed
+#    into
+#
+# @returns 
+#    @c 0 if no error occurred \n
+#    @c 1 if arguments parsing/verification failed \n
+#    @c 2 if usage message was requested with '-h, --help' 
+#         option
+#
+# @environment
+#
+#          USAGE  If set it's content will be printed when the 
+#                 `-h, --help` is parsed (assuming the definition
+#                 of the options is present in the @p defs array)
+#
+#        ARG_NUM  Number of arguments required by the function. 
+#                 If set, function will return 1 when the number of 
+#                 parsed positional arguments differs
+#    ARG_NUM_MIN  Minimal number of arguments. If set - and no 
+#                 ARG_NUM is set - function will return 1 when the 
+#                 number of parsed positional arguments is smaller
+#    ARG_NUM_MAX  Maximum number of arguments. If set - and no 
+#                 ARG_NUM is set - function will return 1 when the 
+#                 number of parsed positional arguments is greater
+#
+#  ARGn_VARIANTS  If set, a name of the list holding valid values for
+#                 the nth positional argument (n in range 1...)
+#       ARGn_MIN  If set, a minimal value of the nth positional 
+#                 argument (n in range 1...)
+#       ARGn_MAX  If set, a maximal value of the nth positional 
+#                 argument (n in range 1...)
+#
+#     x_VARIANTS  If set, a name of the list holding valid values for
+#                 the x option (where x is a name of the key
+#                 in the @p options hash array where the option
+#                 is parsed into)
+#       ARGn_MIN  If set, a minimal value of the x option (where 
+#                 x is a name of the key in the @p options hash
+#                 array where the option is parsed into)
+#       ARGn_MAX  If set, a maximal value of the x option (where 
+#                 x is a name of the key in the @p options hash
+#                 array where the option is parsed into)
+#
+#    LOG_CONTEXT  contex of the printed logs
+#
+# -------------------------------------------------------------------
+function script_parseopts() {
+
+    # Arguments
+    local -n args_="$1"
+    local -n defs_="$2"
+    local -n options_="$3"
+    local -n posargs_="$4"
+
+    # Parse options
+    parseopts args_ defs_ options_ posargs_ || {
+        log_error "Invalid usage"
+        is_var_set_non_empty USAGE && log_error "$USAGE"
+        return 1
+    }
+
+    # Display usage, if requested
+    is_var_set options[help] && {
+        is_var_set_non_empty USAGE && log_error "$USAGE"
+        return 0
+    }
+
+    # ---------- Verify positional arguments ----------
+
+    # Check if required number of arguments was given
+    if is_var_set_non_empty ARG_NUM; then
+
+        (( ${#posargs_[@]} == $ARG_NUM )) || {
+            log_error "Wrong number of arguments"
+            is_var_set_non_empty USAGE && echo "$USAGE"
+            return 1
+        }
+
+    # Check if number of arguments lies in the valid range
+    else
+
+        # Chekc if minimal number of arguments has been given
+        is_var_set_non_empty ARG_NUM_MIN && (( ${#posargs_[@]} >= $ARG_NUM_MIN )) || {
+            log_error "Too fiew arguments"
+            is_var_set_non_empty USAGE && echo "$USAGE"
+            return 1
+        }
+
+        # Chekc if maximal number of arguments has been given
+        is_var_set_non_empty ARG_NUM_MAX && (( ${#posargs_[@]} <= $ARG_NUM_MAX )) || {
+            log_error "Too many arguments"
+            is_var_set_non_empty USAGE && echo "$USAGE"
+            return 1
+        }
+
+    fi
+
+    local arg_num_
+    local arg_num_conjugated_
+    local i
+    
+    # Validate positional arguments
+    for i in "${!posargs_[@]}"; do
+
+        # Get index of the argument
+        arg_num_=$(( i + 1 ))
+
+        # Conjugation argument's number
+        arg_num_conjugated_=$(inflect_numeral $arg_num_)
+
+        # If an argument is allowed to have only a predefined values
+        if is_var_set_non_empty ARG${arg_num_}_VARIANTS; then
+        
+            # Check if argument has an anticipated value
+            is_array_element ARG${arg_num_}_VARIANTS "${posargs_[$i]}" || {
+
+                log_error \
+                    "Invalid value of the $arg_num_conjugated_ argument (${posargs_[$i]})" \
+                    "Valid values are: [ $(print_array ARG${arg_num_}_VARIANTS -s ', ') ]"
+                    
+                is_var_set_non_empty USAGE && echo "$USAGE"
+                return 1
+            }
+
+        # Else, check if argument is in a predefined range
+        else 
+
+            # Check if argument's value is not lesser than a minimal one
+            is_var_set_non_empty ARG${arg_num_}_MIN &&
+            [[ "${posargs_[$i]}" -ge "ARG${arg_num_}_MIN" ]] || {
+
+                log_error \
+                    "$arg_num_conjugated_ too small (${posargs_[$i]})" \
+                    "Minimal value is (ARG${arg_num_}_MIN)"
+                    
+                is_var_set_non_empty USAGE && echo "$USAGE"
+                return 1
+            }
+
+            # Check if argument's value is not greater than a maximal one
+            is_var_set_non_empty ARG${arg_num_}_MAX &&
+            [[ "${posargs_[$i]}" -ge "ARG${arg_num_}_MAX" ]] || {
+
+                log_error \
+                    "$arg_num_conjugated_ too large (${posargs_[$i]})" \
+                    "Minimal value is (ARG${arg_num_}_MAX)"
+                    
+                is_var_set_non_empty USAGE && echo "$USAGE"
+                return 1
+            }
+        fi
+
+    done
+
+    # ----------- Verify optional arguments -----------
+
+    local opt_
+
+    # Validate optional arguments
+    for opt_ in "${!options_[@]}"; do
+
+        # @todo
+        
+        # If an option is allowed to have only a predefined values
+        if is_var_set_non_empty ${opt_}_VARIANTS; then
+        
+        # Else, check if an option is in a predefined range
+        else     
+            
+        fi
+
+    done
+
+}
 
 # -------------------------------------------------------------------
 # @brief Common idiom for parsing script's cmd-line arguments with
