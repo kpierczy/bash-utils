@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Friday, 12th November 2021 2:50:02 am
+# @modified Saturday, 13th November 2021 2:42:16 am
 # @project  BashUtils
 # @brief
 #    
@@ -99,14 +99,15 @@ function install_pkg_list() {
     
     # Parse arguments to a named array
     parse_options
-
+    
     # Parse arguments
     local -n _packages_="${posargs[0]}"
 
     # ----------------- Configure logs ----------------   
+    
     # Keep current configuration of logs on the stack
     push_stack $(get_stdout_logs_status)
-
+    
     # Enable/disable logs depending on the configuration
     is_var_set options[verbose] && 
         enable_stdout_logs || 

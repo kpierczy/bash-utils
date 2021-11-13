@@ -3,7 +3,7 @@
 # @file     logging.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:08:34 am
-# @modified Wednesday, 10th November 2021 5:54:09 pm
+# @modified Saturday, 13th November 2021 1:24:40 am
 # @project  BashUtils
 # @brief
 #    
@@ -299,12 +299,68 @@ function log() {
     
 }
 
-# ============================================================= Aliases ============================================================ #
+# -------------------------------------------------------------------
+# @brief Logs if the variable named @p var is set
+#
+# @param level
+#    log level (@see `log`)
+# @param var
+#    variable to be inspected
+# @param msg...
+#    variable to be inspected
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function log_if_var_set() {
+
+    # Arguments
+    local level_="$1"
+    local var_="$2"
+    local msg_=( "${@:3}" )
+
+    # Log conditionally
+    if is_var_set "$var"; then
+        log "$level_" "${msg_[@]}"
+    fi
+}
+
+# -------------------------------------------------------------------
+# @brief Logs if the variable named @p var is set non empty
+#
+# @param level
+#    log level (@see `log`)
+# @param var
+#    variable to be inspected
+# @param msg...
+#    variable to be inspected
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function log_if_var_set_non_empty() {
+
+    # Arguments
+    local level_="$1"
+    local var_="$2"
+    local msg_=( "${@:3}" )
+
+    # Log conditionally
+    if is_var_set_non_empty "$var"; then
+        log "$level_" "${msg_[@]}"
+    fi
+}
+
+# ======================================================== Helper functions ======================================================== #
 
 # -------------------------------------------------------------------
 # @brief Prints debug log to the stdout
 #
-# @param msg
+# @param msg...
 #    message to be printed
 #
 # @environment
@@ -319,7 +375,7 @@ function log_debug() {
 # -------------------------------------------------------------------
 # @brief Prints info log to the stdout
 #
-# @param msg
+# @param msg...
 #    message to be printed
 #
 # @environment
@@ -334,7 +390,7 @@ function log_info() {
 # -------------------------------------------------------------------
 # @brief Prints warn log to the stdout
 #
-# @param msg
+# @param msg...
 #    message to be printed
 #
 # @environment
@@ -349,7 +405,7 @@ function log_warn() {
 # -------------------------------------------------------------------
 # @brief Prints error log to the stdout
 #
-# @param msg
+# @param msg...
 #    message to be printed
 #
 # @environment
@@ -360,6 +416,151 @@ function log_warn() {
 function log_error() {
     log error "${@}"
 }
+
+# -------------------------------------------------------------------
+# @brief Prints debug log to the stdout if the variable named @p var
+#    is set
+#
+# @param var
+#    name of the variable to be inspected
+# @param msg...
+#    message to be printed
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function log_debug_if_var_set() {
+    log_if_var_set debug "$1" "${@:2}"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints info log to the stdout if the variable named @p var
+#    is set
+#
+# @param var
+#    name of the variable to be inspected
+# @param msg...
+#    message to be printed
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function log_info_if_var_set() {
+    log_if_var_set info "$1" "${@:2}"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints warning log to the stdout if the variable named @p var
+#    is set
+#
+# @param var
+#    name of the variable to be inspected
+# @param msg...
+#    message to be printed
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function log_warn_if_var_set() {
+    log_if_var_set warn "$1" "${@:2}"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints error log to the stdout if the variable named @p var
+#    is set
+#
+# @param var
+#    name of the variable to be inspected
+# @param msg...
+#    message to be printed
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function error_if_var_set() {
+    log_if_var_set error "$1" "${@:2}"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints debug log to the stdout if the variable named @p var
+#    is set non empty
+#
+# @param var
+#    name of the variable to be inspected
+# @param msg...
+#    message to be printed
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function log_debug_if_var_set_non_empty() {
+    log_if_var_set_non_empty debug "$1" "${@:2}"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints info log to the stdout if the variable named @p var
+#    is set non empty
+#
+# @param var
+#    name of the variable to be inspected
+# @param msg...
+#    message to be printed
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function log_info_if_var_set_non_empty() {
+    log_if_var_set_non_empty info "$1" "${@:2}"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints warning log to the stdout if the variable named @p var
+#    is set non empty
+#
+# @param var
+#    name of the variable to be inspected
+# @param msg...
+#    message to be printed
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function log_warn_if_var_set_non_empty() {
+    log_if_var_set_non_empty warn "$1" "${@:2}"
+}
+
+# -------------------------------------------------------------------
+# @brief Prints error log to the stdout if the variable named @p var
+#    is set non empty
+#
+# @param var
+#    name of the variable to be inspected
+# @param msg...
+#    message to be printed
+#
+# @environment
+#
+#    LOG_CONTEXT  context of the log (optional)
+#
+# -------------------------------------------------------------------
+function error_if_var_set_non_empty() {
+    log_if_var_set_non_empty error "$1" "${@:2}"
+}
+
 
 # ============================================================= Aliases ============================================================ #
 

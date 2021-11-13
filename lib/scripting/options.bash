@@ -3,7 +3,7 @@
 # @file     options.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Friday, 12th November 2021 8:02:31 pm
+# @modified Saturday, 13th November 2021 2:44:49 am
 # @project  BashUtils
 # @brief
 #    
@@ -36,59 +36,59 @@
 function parse_option_defs () {
 
     # Arguments
-    local -n _defs_=$1
-    local -n _names_=$2
-    local -n _flags_=$3
-    local -n _getopts_=$4
+    local -n _pod_defs_="$1"
+    local -n _pod_names_="$2"
+    local -n _pod_flags_="$3"
+    local -n _pod_getopts_="$4"
     
     # Initialize IFS word splitter
     local IFS=$IFS
     # Define local variables
-    local _defn_
-    local _opt_
-    local _short_=''
-    local _long_=''
+    local _pod_defn_
+    local _pod_opt_
+    local _pod_short_=''
+    local _pod_long_=''
 
     # Initialize 'getopts' hash array
-    _getopts_=( [long]='' [short]='' )
+    _pod_getopts_=( [long]='' [short]='' )
     
     # Iterate over all arguments/options definitions
-    for _defn_ in "${_defs_[@]}"; do
+    for _pod_defn_ in "${_pod_defs_[@]}"; do
 
         # Set world-splitting-separator to comma to extract parts of the option's definition
         IFS=','
         # Set positional arguments to the conent of @var defn (@notice auto word-splitting)
-        set -- $_defn_
+        set -- $_pod_defn_
 
         # Parse positional arguments
-        local _opt_name_="$1"
-        local _opt_var_="$2"
-        local _opt_flag_="${3:-}"
+        local _pod_opt_name_="$1"
+        local _pod_opt_var_="$2"
+        local _pod_opt_flag_="${3:-}"
 
         # Reconfigure world-splitting-separator to extract short/long name of the option
         IFS='|'
 
         # Iterate over short/long name string (@notice auto word-splitting)
-        for _opt_ in ${_opt_name_[@]}; do
+        for _pod_opt_ in ${_pod_opt_name_[@]}; do
 
             # Write variables name corresponding to the option's short/long name
-            _names_["$_opt_"]="$_opt_var_"
+            _pod_names_["$_pod_opt_"]="$_pod_opt_var_"
 
             # Append option's name to the one of getopt's strings (remove -/-- prefix)
-            case "$_opt_" in
-                -?  ) _short_+=,"${_opt_#?}";;
-                *   ) _long_+=,"${_opt_#??}";;
+            case "$_pod_opt_" in
+                -?  ) _pod_short_+=,"${_pod_opt_#?}";;
+                *   ) _pod_long_+=,"${_pod_opt_#??}";;
             esac
 
             # Check if option is a flag
-            case "$_opt_flag_" in
+            case "$_pod_opt_flag_" in
                 # If keyword argument, append ': ' to the option's name
-                '' ) case "$_opt_" in
-                        -?  ) _short_+=: ;;
-                        *   ) _long_+=:  ;;
+                '' ) case "$_pod_opt_" in
+                        -?  ) _pod_short_+=: ;;
+                        *   ) _pod_long_+=:  ;;
                      esac;;
                 # If flag, wrie '1' to he @p flags hash array
-                * ) _flags_["$_opt_"]=1;;
+                * ) _pod_flags_["$_pod_opt_"]=1;;
             esac
             
         done
@@ -96,8 +96,8 @@ function parse_option_defs () {
     done
 
     # Write options' sets tot the @p getopts (remove prefix comma)
-    _getopts_[short]="${_short_#?}"
-    _getopts_[long]="${_long_#?}"
+    _pod_getopts_[short]="${_pod_short_#?}"
+    _pod_getopts_[long]="${_pod_long_#?}"
 
 }
 
@@ -106,10 +106,13 @@ function parse_option_defs () {
 #     getopt) version of the getopt utility
 # -------------------------------------------------------------------
 is_enhanced_getopt() {
+
+    local rc_
+
     # Check getopt version string and keep return value
-    getopt -T &>/dev/null && rc=$? || rc=$?
+    getopt -T &>/dev/null && rc_=$? || rc_=$?
     # Return result of the comparison to the enchanced getopt's code
-    (( $rc == 4 ))
+    (( $rc_ == 4 ))
 }
 
 # -------------------------------------------------------------------
@@ -134,19 +137,20 @@ is_enhanced_getopt() {
 function wrap_getopt () {
     
     # Arguments
-    local -n _args_="$1"
-    local _short_="$2"
-    local _long_="$3"
+    local -n _wg_args_="$1"
+    local _wg_short_="$2"
+    local _wg_long_="$3"
 
     # Declare local variables
-    local _result_
-    local _ret_
+    local _wg_result_
+    local _wg_ret_
     # Parse 
-    _result_=$(getopt -o "$_short_" ${_long_:+-l} $_long_ -n $0 -- "${_args_[@]}") && _ret_=$? || _ret_=$?
+    _wg_result_=$(getopt -o "$_wg_short_" ${_wg_long_:+-l} $_wg_long_ -n $0 -- "${_wg_args_[@]}") && 
+        _wg_ret_=$? || _wg_ret_=$?
     # Print result of the getopt
-    echo "$_result_"
+    echo "$_wg_result_"
     
-    return $_ret_
+    return $_wg_ret_
     
 }
 
@@ -206,31 +210,31 @@ function wrap_getopt () {
 function parseopts () {
     
     # Arguments
-    local -n args_="$1"
-    local -n defs_="$2"
-    local -n opts_="$3"
-    local -n posargs_="$4"
+    local -n _po_args_="$1"
+    local -n _po_defs_="$2"
+    local -n _po_opts_="$3"
+    local -n _po_posargs_="$4"
     
     # Initialize output arrays
-    local -A flags_
-    local -A getopts_
-    local -A names_
+    local -A _po_flags_
+    local -A _po_getopts_
+    local -A _po_names_
 
     # Reset error
     _err_=0
 
     # Parse @p defs to the form taken by getopt utility
-    parse_option_defs defs_ names_ flags_ getopts_
-
+    parse_option_defs _po_defs_ _po_names_ _po_flags_ _po_getopts_
+    
     # Call getopt
-    local result
+    local _po_result_
     if is_enhanced_getopt; then
-         result=$(wrap_getopt args_ "${getopts_[short]}" "${getopts_[long]}") || return 1
+         _po_result_=$(wrap_getopt _po_args_ "${_po_getopts_[short]}" "${_po_getopts_[long]}") || return 1
     fi
-
+    
     # Set positional arguments
-    eval "set -- $result"
-
+    eval "set -- $_po_result_"
+    
     # Iterate over @p args_ as long as an option is seen
     while [[ "${1:-}" == -?* ]]; do
         
@@ -240,19 +244,19 @@ function parseopts () {
             break
         }
         # If the option passed but not defined, return error
-        is_var_set names_["$1"] || {
+        is_var_set _po_names_["$1"] || {
             _err_=1
             return
         }
         # Else, parse value of the option
-        ! is_var_set flags_["$1"]
+        ! is_var_set _po_flags_["$1"]
         case $? in
             # Parse keyword option
-            0 ) opts_["${names_["$1"]}"]="$2"
+            0 ) _po_opts_["${_po_names_["$1"]}"]="$2"
                 shift
                 ;;
             # Parse flag option
-            * ) opts_["${names_["$1"]}"]=1;;
+            * ) _po_opts_["${_po_names_["$1"]}"]=1;;
         esac
         # Shift to the next arg
         shift
@@ -260,8 +264,8 @@ function parseopts () {
     done
     
     # Set positional arguments to remaining args
-    posargs_=( "$@" )
-    
+    _po_posargs_=( "$@" )
+
 }
 
 # -------------------------------------------------------------------
@@ -424,20 +428,46 @@ function get_option_name() {
     # Get list of names fro positional arguments
     local -a _names_list_=( "$@" )
 
-    # Name of the options found in the arguments' list
-    local _name_found_
-
     # Iterate list of arguments backward to find the last occurence of the option
     for ((i = ${#args_[@]} - 1; i >= 0; i--)); do
         
         # Get the argument
         local single_arg_="${args_[$i]}"
         
-        # @todo
+        # Check if argument is an option; if not, continue scanning
+        starts_with "${single_arg_}" "-" || continue
 
+        # Check if long option found
+        if starts_with "${single_arg_}" "--"; then
+            
+            # If so, remove potential vale of the option trailing everything beyond '='
+            single_arg_="${single_arg_%=*}"
+
+        # Else, if short option found
+        else
+            
+            # Extract an option from the string trayling everything beyond the dash and the first letter
+            single_arg_="${single_arg_:0:2}"
+
+        fi
+
+        local opt_name_
+
+        # Iterate over names of the searched option
+        for opt_name_ in "${_names_list_}"; do
+
+            # If name matches one of the names of the searched option, exit function as success
+            [[ "$opt_name_" == "$single_arg_" ]] && {
+                echo "$opt_name_"
+                return 0
+            }
+
+        done
 
     done
 
+    # If no option found, return error
+    return 1
 
 }
 
@@ -459,8 +489,10 @@ function get_option_name() {
 #
 # @provides
 #
-#    options  hash array of parsed options
+#       args  list containing arguments of the calling 
+#             script/function
 #    posargs  array of parsed non-option arguments
+#    options  hash array of parsed options
 #
 # -------------------------------------------------------------------
 alias parse_options='
@@ -473,360 +505,4 @@ local -A options
 
 # Parse options
 parseopts args opt_definitions options posargs || return 1
-'
-
-# ============================================================ Functions =========================================================== #
-
-# -------------------------------------------------------------------
-# @brief Parses and verifies command-line options passed to the 
-#    script performs routines common to many scripts:
-#
-#         - Prints error logs to the stdout if invalid
-#           options passed
-#         - Prints usage message, if the `--help` option
-#           parsed
-#         - Verifies whether required number of positional
-#           arguments has been passed
-#
-# @param args 
-#    name of the array containing arguments to be parsed
-# @param defs
-#    name of the array holding options to be parsed in shape 
-# 
-#     defs=(
-#         '-o|option1',o_flag,f # Flag options
-#         '-s|option2',s_var    # Keyword options
-#     )
-#
-#     Format of the single record in the @p defs array is as 
-#     follows: opt_name, var_name, [f]. 'opt_name' is string
-#     describing command-line shape of the option. Using '|'
-#     one can define both short and long name. 'var_name' is name
-#     of the record that the value of the option will be written
-#     under in the @p opts hash array (if parsed). Optional 'f'
-#     flag marks that the option is a flag (valued in the @p opts
-#     array with '1', if parsed)
-#
-# @param options (out)
-#    name of the hash array that options has to be parsed into
-# @param posargs (out)
-#    name of the array that positional arguments has to be parsed
-#    into
-#
-# @returns 
-#    @c 0 if no error occurred \n
-#    @c 1 if arguments parsing/verification failed \n
-#    @c 2 if usage message was requested with '-h, --help' 
-#         option
-#
-# @environment
-#
-#          USAGE  If set it's content will be printed when the 
-#                 `-h, --help` is parsed (assuming the definition
-#                 of the options is present in the @p defs array)
-#
-#        ARG_NUM  Number of arguments required by the function. 
-#                 If set, function will return 1 when the number of 
-#                 parsed positional arguments differs
-#    ARG_NUM_MIN  Minimal number of arguments. If set - and no 
-#                 ARG_NUM is set - function will return 1 when the 
-#                 number of parsed positional arguments is smaller
-#    ARG_NUM_MAX  Maximum number of arguments. If set - and no 
-#                 ARG_NUM is set - function will return 1 when the 
-#                 number of parsed positional arguments is greater
-#
-#  ARGn_VARIANTS  If set, a name of the list holding valid values for
-#                 the nth positional argument (n in range 1...)
-#       ARGn_MIN  If set, a minimal value of the nth positional 
-#                 argument (n in range 1...)
-#       ARGn_MAX  If set, a maximal value of the nth positional 
-#                 argument (n in range 1...)
-#
-#     x_VARIANTS  If set, a name of the list holding valid values for
-#                 the x option (where x is a name of the key
-#                 in the @p options hash array where the option
-#                 is parsed into)
-#       ARGn_MIN  If set, a minimal value of the x option (where 
-#                 x is a name of the key in the @p options hash
-#                 array where the option is parsed into)
-#       ARGn_MAX  If set, a maximal value of the x option (where 
-#                 x is a name of the key in the @p options hash
-#                 array where the option is parsed into)
-#
-#    LOG_CONTEXT  contex of the printed logs
-#
-# -------------------------------------------------------------------
-function script_parseopts() {
-
-    # Arguments
-    local -n args_="$1"
-    local -n defs_="$2"
-    local -n options_="$3"
-    local -n posargs_="$4"
-
-    # Parse options
-    parseopts args_ defs_ options_ posargs_ || {
-        log_error "Invalid usage"
-        is_var_set_non_empty USAGE && log_error "$USAGE"
-        return 1
-    }
-
-    # Display usage, if requested
-    is_var_set options[help] && {
-        is_var_set_non_empty USAGE && log_error "$USAGE"
-        return 0
-    }
-
-    # ---------- Verify positional arguments ----------
-
-    # Check if required number of arguments was given
-    if is_var_set_non_empty ARG_NUM; then
-
-        (( ${#posargs_[@]} == $ARG_NUM )) || {
-            log_error "Wrong number of arguments"
-            is_var_set_non_empty USAGE && echo "$USAGE"
-            return 1
-        }
-
-    # Check if number of arguments lies in the valid range
-    else
-
-        # Chekc if minimal number of arguments has been given
-        is_var_set_non_empty ARG_NUM_MIN && (( ${#posargs_[@]} >= $ARG_NUM_MIN )) || {
-            log_error "Too fiew arguments"
-            is_var_set_non_empty USAGE && echo "$USAGE"
-            return 1
-        }
-
-        # Chekc if maximal number of arguments has been given
-        is_var_set_non_empty ARG_NUM_MAX && (( ${#posargs_[@]} <= $ARG_NUM_MAX )) || {
-            log_error "Too many arguments"
-            is_var_set_non_empty USAGE && echo "$USAGE"
-            return 1
-        }
-
-    fi
-
-    local arg_num_
-    local arg_num_conjugated_
-    local i
-    
-    # Validate positional arguments
-    for i in "${!posargs_[@]}"; do
-
-        # Get index of the argument
-        arg_num_=$(( i + 1 ))
-
-        # Conjugation argument's number
-        arg_num_conjugated_=$(inflect_numeral $arg_num_)
-
-        # If an argument is allowed to have only a predefined values
-        if is_var_set_non_empty ARG${arg_num_}_VARIANTS; then
-        
-            # Check if argument has an anticipated value
-            is_array_element ARG${arg_num_}_VARIANTS "${posargs_[$i]}" || {
-
-                log_error \
-                    "Invalid value of the $arg_num_conjugated_ argument (${posargs_[$i]})" \
-                    "Valid values are: [ $(print_array ARG${arg_num_}_VARIANTS -s ', ') ]"
-                    
-                is_var_set_non_empty USAGE && echo "$USAGE"
-                return 1
-            }
-
-        # Else, check if argument is in a predefined range
-        else 
-
-            # Check if argument's value is not lesser than a minimal one
-            is_var_set_non_empty ARG${arg_num_}_MIN &&
-            [[ "${posargs_[$i]}" -ge "ARG${arg_num_}_MIN" ]] || {
-
-                log_error \
-                    "$arg_num_conjugated_ too small (${posargs_[$i]})" \
-                    "Minimal value is (ARG${arg_num_}_MIN)"
-                    
-                is_var_set_non_empty USAGE && echo "$USAGE"
-                return 1
-            }
-
-            # Check if argument's value is not greater than a maximal one
-            is_var_set_non_empty ARG${arg_num_}_MAX &&
-            [[ "${posargs_[$i]}" -ge "ARG${arg_num_}_MAX" ]] || {
-
-                log_error \
-                    "$arg_num_conjugated_ too large (${posargs_[$i]})" \
-                    "Minimal value is (ARG${arg_num_}_MAX)"
-                    
-                is_var_set_non_empty USAGE && echo "$USAGE"
-                return 1
-            }
-        fi
-
-    done
-
-    # ----------- Verify optional arguments -----------
-
-    local opt_
-
-    # Validate optional arguments
-    for opt_ in "${!options_[@]}"; do
-
-        # @todo
-        
-        # If an option is allowed to have only a predefined values
-        if is_var_set_non_empty ${opt_}_VARIANTS; then
-        
-        # Else, check if an option is in a predefined range
-        else     
-            
-        fi
-
-    done
-
-}
-
-# -------------------------------------------------------------------
-# @brief Common idiom for parsing script's cmd-line arguments with
-#    the user-visible log. Alias provides a hash array @a options
-#    containing set of parsed options. It also sets positional 
-#    arguments of the script to @a posargs array returned by 
-#    @fun parseopts function
-#
-# @environment
-#
-#  opt_definitions  array containing options' definition 
-#            usage  usage heredoc string
-#          ARG_NUM  number of required positional arguments (not verified
-#                   if undefined)
-#
-# @provides
-#
-#    options  hash array of parsed options
-#
-# -------------------------------------------------------------------
-alias parse_script_options='
-# Disable word-splitting to parse positional arguments in a proper way
-push_stack "$IFS"
-disable_word_splitting
-
-# Parse arguments to a named array
-local -a args=( "$@" )
-
-# Restore previous mode of the word-splitting
-pop_stack IFS
-
-# Prepare names hash arrays for positional arguments and parsed options
-local -a posargs
-local -A options
-
-# Parse options
-parseopts args opt_definitions options posargs || {
-    log_error "Invalid usage"
-    echo $usage
-    return 1
-}
-
-# Display usage, if requested
-is_var_set options[help] && {
-    echo $usage
-    return 0
-}
-
-# Set positional arguments (except cmd)
-set -- ${posargs[@]}
-
-# Verify number of given arguments
-is_var_set_non_empty ARG_NUM && (( $# >= $ARG_NUM )) || {
-    log_error "Too few arguments"
-    echo $usage
-    return 1
-}
-'
-
-# -------------------------------------------------------------------
-# @brief Common idiom for parsing script's cmd-line arguments for
-#    multi-commands scripts.
-#
-#    Alias provides a hash array @a options containing set of 
-#    parsed options. It also sets positional arguments of the script
-#    to @a posargs array returned by @fun parseopts function ($1 is set
-#    to the first positional argument after the command's name)
-#
-# @environment
-#
-#  opt_definitions  array containing options' definition 
-#            usage  usage heredoc string
-#         COMMANDS  list of command provided by the script
-#     "$CMD"_usage  usage heredoc string(s) for script's CMD command; if no
-#                   CMD_usage variable exists for the parse command, the
-#                   default 'usage' is assummed
-#   $"CMD"_ARG_NUM  number of required positional arguments required by
-#                   CMD command (not verified if undefined)
-#
-# @provides
-#
-#        cmd  name of the command requested on command line
-#    options  hash array of parsed options
-#
-# @note Alias replaces all "-" in the name of parsed commands to "_"
-#    and so elements of the COMMANDS array has to be in the same 
-#    format
-# -------------------------------------------------------------------
-alias parse_script_options_multicmd='
-# Disable word-splitting to parse positional arguments in a proper way
-push_stack "$IFS"
-disable_word_splitting
-
-# Parse arguments to a named array
-local -a args=( "$@" )
-
-# Restore previous mode of the word-splitting
-pop_stack IFS
-
-# Prepare names hash arrays for positional arguments and parsed options
-local -a posargs
-local -A options
-
-# Parse options
-parseopts args opt_definitions options posargs || {
-    log_error "Invalid usage"
-    echo $usage
-    return 1
-}
-
-# Parse command
-local cmd=${1:-}
-
-# Change all "-" to "_" in the name of the command 
-cmd=${cmd//-/_}
-
-# Get name of the variable holding the usage string of the command
-local cmd_usage=usage; [[ "$cmd"_usage != _usage ]] && cmd_usage="$cmd"_usage
-
-# Check if a valid command given
-is_array_element COMMANDS $cmd || is_var_set options[help] || {
-    log_error "Invalid command given ($cmd)"
-    echo $usage
-    return 1
-}
-
-# Display usage, if requested
-is_var_set options[help] && {
-    is_var_set_non_empty cmd && echo $usage || echo ${!cmd_usage}
-    return 0
-}
-
-# Set positional arguments
-set -- ${posargs[@]:1}
-
-# Set number of arguments required by the command
-local CMD_ARG_NUM_REF="$cmd"_ARG_NUM
-
-# Verify number of given arguments
-! is_var_set_non_empty $CMD_ARG_NUM_REF || (( $# >= ${!CMD_ARG_NUM_REF} )) || {
-    echo $CMD_ARG_NUM_REF
-    log_error "Too few arguments"
-    echo ${!cmd_usage}
-    return 1
-}
 '

@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Friday, 12th November 2021 2:56:31 am
+# @modified Saturday, 13th November 2021 2:16:54 am
 # @project  BashUtils
 # @brief
 #    
@@ -49,7 +49,6 @@ declare dependencies=(
 declare pip_dependencies=(
     tqdm     # Extracting ZIP files
 )
-
 # Install dependencies
 install_pkg_list -yv --su dependencies || return 1
 # Install Python dependencies

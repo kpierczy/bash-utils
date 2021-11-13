@@ -3,7 +3,7 @@
 # @file     hash_arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Friday, 12th November 2021 5:34:17 pm
+# @modified Saturday, 13th November 2021 2:25:06 am
 # @project  BashUtils
 # @brief
 #    

@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 4:29:08 pm
-# @modified Friday, 12th November 2021 3:46:00 pm
+# @modified Saturday, 13th November 2021 4:55:30 am
 # @project  BashUtils
 # @brief
 #    
@@ -63,7 +63,7 @@ get_heredoc install_usage <<END
     
     Arguments:
 
-           TYPE  type fo the installation to be performed ('src' or 'pkg')
+           TYPE  type for the installation to be performed ('src' or 'pkg')
         VERSION  python's version to be installed
 
     Options:

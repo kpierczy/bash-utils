@@ -3,7 +3,7 @@
 # @file     stack.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 9:00:58 pm
-# @modified Thursday, 11th November 2021 2:22:23 am
+# @modified Saturday, 13th November 2021 2:42:36 am
 # @project  BashUtils
 # @brief
 #    
@@ -71,7 +71,7 @@ function push_stack() {
 
     # Arguments
     local elem_
-
+    
     # ---------------- Parse arguments ----------------
 
     # Function's options
