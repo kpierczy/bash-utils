@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 4:29:08 pm
-# @modified Saturday, 13th November 2021 4:55:30 am
+# @modified Saturday, 13th November 2021 3:00:12 pm
 # @project  BashUtils
 # @brief
 #    
@@ -20,7 +20,7 @@ source $BASH_UTILS_HOME/source_me.bash
 # Script's usage
 get_heredoc usage <<END
     Description: Set of handy utiltiies related to Python installation
-    Usage: python.bash COMMAND [ARGS...]
+    Usage: python.bash [OPTIONS...] -- COMMAND [ARGS...]
 
     Commands:
 
@@ -240,29 +240,51 @@ set_python_alternative() {
 
 main() {
 
+    # Arguments definitions
+    local -A arg_def=( [id]="ARGA" [name]="arg" [type]="string"  [help]="arg help" [variants]="add_repo|rm_repo|install|<*set_alternatives*>" )
+    local -A brg_def=( [id]="ARGB" [name]="brg" [type]="integer" [help]="brg help" [range]="0-1000"                                           )
+    local -A crg_def=( [id]="ARGC" [name]="crg" [type]="path"    [help]="crg help"                                                            )
+
+    # Options definitions
+    local -A a_opt_def=( [id]="-a|--opt-a" [name]='opta' [help]="opta help" [type]='string'  [variants]=('opt_var1|opt_var2|<*opt_var3*>') )
+    local -A b_opt_def=( [id]="-b|--opt-b" [name]='optb' [help]="optb help" [type]='integer' [range]="[0-1000]"                            )
+    local -A c_opt_def=( [id]="-c|--opt-c" [name]='optc' [help]="optc help" [type]='path'                                                  )
+    local -A d_opt_def=( [id]="-d|--opt-d" [name]='optd' [help]="optd help" [type]='flag'                                                  )
+
+    # Environment definitions
+    local -A a_env_def=( [id]="ENVA" [name]='a' [help]="enva help" [type]='string'  [variants]=('env_var1|env_var2|<*env_var3*>') )
+    local -A b_env_def=( [id]="ENVB" [name]='b' [help]="envb help" [type]='integer' [range]="[0-1000]"                            )
+    local -A c_env_def=( [id]="ENVC" [name]='c' [help]="envc help" [type]='path'                                                  )
+
+    # Compile arguments definitions
+    local -a arg_definitions=(arg_def brg_def crg_def)
+    # Compile options definitions
+    local -a opt_definitions=(a_opt_def b_opt_def c_opt_def d_opt_def)
+
     # ---------------------------------- Configuration ----------------------------------
 
-    # Commands imlemented by the script
-    local -a COMMANDS=(
-        add_repo
-        rm_repo
-        install
-        set_alternative
-    )
+    # Link USAGE message
+    local -n USAGE=usage
 
-    # Number of required arguments
-    local install_ARG_NUM=2
-    local set_alternative_ARG_NUM=1
+    # Commands imlemented by the script
+    local -a arguments=(
+        cmd
+    )
+    # Set minimum number of arguments for parser
+    local ARG_NUM_MIN=1
 
     # Options
-    local opt_definitions=(
+    local -a opt_definitions=(
         '--help',help,f
     )
 
-    # ------------------------------------ Processing -----------------------------------
+    # Make options' parsing verbose
+    local VERBOSE_PARSEARGS=1
 
-    # Parsed options
-    parse_script_options_multicmd
+    # Parse arguments
+    parse_arguments
+    
+    # ------------------------------------ Processing -----------------------------------
     
     # Perform corresponding routine
     case $cmd in

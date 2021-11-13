@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     arguments.bash
+# @file     arguments_old.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 12:25:13 am
-# @modified Saturday, 13th November 2021 3:34:57 am
+# @modified Saturday, 13th November 2021 2:37:41 pm
 # @project  BashUtils
 # @brief
 #    
@@ -591,7 +591,7 @@ function parseargs() {
 #    # `parseargs` function (@see `parseargs`)
 #    ...
 #
-#    # Parse arguments safely
+#    # Parse arguments
 #    parse_arguments
 #
 #    # Use posargs list to get positional arguments
@@ -638,7 +638,7 @@ function parseargs() {
 #    # `parseargs` function (@see `parseargs`)
 #    ...
 #
-#    # Parse arguments safely
+#    # Parse arguments
 #    parse_arguments
 #
 #    # Use posargs list to get positional arguments

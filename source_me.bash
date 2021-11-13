@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Saturday, 13th November 2021 2:16:54 am
+# @modified Saturday, 13th November 2021 5:20:50 am
 # @project  BashUtils
 # @brief
 #    
@@ -14,7 +14,7 @@
 # ====================================================================================================================================
 
 # Check bash version (required >= 4.2)
-if (( BASH_VERSINFO[1] < 2 )) && (( BASH_VERSINFO[0] <= 4 )); then
+if (( BASH_VERSINFO[1] < 3 )) && (( BASH_VERSINFO[0] <= 4 )); then
     echo "Bash Lib requires bash v4 or greater"
     echo "Current Bash Version: ${BASH_VERSION}"
     exit 1

@@ -2,14 +2,14 @@
 This project provides a set of simple yet useful tools for developers working in the Linux environment on a regular basis. It consists of two main parts:
   - a library of functions and aliases designed to speed up process of creating bash scripts; there are also some tools aimed to be used directy from the command line - these are mainly related to software used by the author
   - a set of scripts performing tasks that have popped out suprisingly often in the author's work over past few years
-The project has been developed on the Ubuntu 20.04LTS syste with bash in version 5.0.17, bu as far as the author knows it should play well with bash in versions not lower than 4.2.
+The project has been developed on the Ubuntu 20.04LTS syste with bash in version 5.0.17, bu as far as the author knows it should play well with bash in versions not lower than 4.3.
 
 # Content                                                                                 
 
 <pre>
 ├── `.vscode`            BashUtils is developed using Visual Studio Code. This directory is not a core <br/>
 │                        part of the library but provides my current configuration of the environment. <br/>
-│                        I leavy it here with hope that some of extensions that I use will turn out to <br/>
+│                        I leav it here with hope that some of extensions that I use will turn out to  <br/>
 │                        be helpful also in your daily routine!                                        <br/>
 │                                                                                                      <br/>
 ├── `bin`                bash script implementing simple configuration/installation routines           <br/>
