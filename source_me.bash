@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Saturday, 13th November 2021 5:20:50 am
+# @modified Sunday, 14th November 2021 9:09:52 pm
 # @project  BashUtils
 # @brief
 #    
@@ -13,12 +13,16 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
+# ========================================================== Requirements ========================================================== #
+
 # Check bash version (required >= 4.2)
 if (( BASH_VERSINFO[1] < 3 )) && (( BASH_VERSINFO[0] <= 4 )); then
-    echo "Bash Lib requires bash v4 or greater"
+    echo "BashUtils lib requires bash v4 or greater"
     echo "Current Bash Version: ${BASH_VERSION}"
-    exit 1
+    return 1
 fi
+
+# ============================================================== Setup ============================================================= #
 
 # Set library home path
 BASH_UTILS_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")"
@@ -33,6 +37,15 @@ set_aliases_expansion on
 
 # Resource library with enabled aliases' expansion
 source $BASH_UTILS_HOME/lib/lib.bash
+
+# ===================================================== Additional requirements ==================================================== #
+
+# Check `getopt` version
+getopt -T &>/dev/null
+if (( $? != 4 )); then
+    echo "BashUtils lib requires so called 'enhanced' (or GNU) getop version to work"
+    return 1
+fi
 
 # ====================================================== Install dependencies ====================================================== #
 

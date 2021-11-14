@@ -67,3 +67,9 @@ To use the project, just download it and source `source_ma.bash` file every time
 
 # Dependencies
 BashUtils uses [shpec](https://github.com/rylnd/shpec) (version 0.3.1) to implement unit tests for the library. Unit tests for bash scripts? Yeah, I have never expected that I would every write something like that too .-. 
+
+# Plan
+
+1. Finish "parseargs" module
+2. Rewrite options' parsing usage in the library
+3. Rewrite /bin scripts to follow the new library scheme

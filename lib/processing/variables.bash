@@ -3,7 +3,7 @@
 # @file     variables.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 2:36:03 am
-# @modified Friday, 12th November 2021 5:34:09 pm
+# @modified Sunday, 14th November 2021 2:14:18 pm
 # @project  BashUtils
 # @brief
 #    
@@ -22,8 +22,8 @@
 # -------------------------------------------------------------------
 function is_var_set() {
     local var=$1
-    # return $([[ -v  $var ]])    # Bash >= 4.2
-    return $([[ -n  ${!var+x} ]]) # Portable
+    # return $([[ -v  $var ]])   # Bash >= 4.2
+    return $([[ -n ${!var+x} ]]) # Portable
 }
 
 # -------------------------------------------------------------------

@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     parseargs_aliases.bash
+# @file     dictionaries.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
-# @date     Saturday, 13th November 2021 7:55:48 pm
-# @modified Saturday, 13th November 2021 7:56:41 pm
+# @date     Sunday, 14th November 2021 10:04:37 pm
+# @modified Sunday, 14th November 2021 10:05:22 pm
 # @project  BashUtils
 # @brief
 #    
-#    Set of aliases wrapping call to the `parseargs` function in a more user-friendly way
+#    Se of tools aiming introduction of dictionary-like representation of data in the scripts
 #    
-# @see parseargs.bash
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
+
+# ============================================================ Functions =========================================================== #
+
 

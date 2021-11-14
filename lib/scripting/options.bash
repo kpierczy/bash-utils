@@ -3,7 +3,7 @@
 # @file     options.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Saturday, 13th November 2021 2:44:49 am
+# @modified Sunday, 14th November 2021 7:39:26 pm
 # @project  BashUtils
 # @brief
 #    
@@ -210,10 +210,10 @@ function wrap_getopt () {
 function parseopts () {
     
     # Arguments
-    local -n _po_args_="$1"
-    local -n _po_defs_="$2"
-    local -n _po_opts_="$3"
-    local -n _po_posargs_="$4"
+    local -n _po_args_="${1:-}"
+    local -n _po_defs_="${2:-}"
+    local -n _po_opts_="${3:-}"
+    local -n _po_posargs_="${4:-}"
     
     # Initialize output arrays
     local -A _po_flags_
