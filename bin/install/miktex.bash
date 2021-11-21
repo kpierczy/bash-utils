@@ -3,7 +3,7 @@
 # @file     miktex.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Friday, 5th November 2021 6:40:39 pm
-# @modified Sunday, 21st November 2021 5:34:01 pm
+# @modified Sunday, 21st November 2021 11:45:36 pm
 # @project  BashUtils
 # @brief
 #    
@@ -147,6 +147,9 @@ main() {
         '--help',help,f
         '-U',user,f
     )
+
+    # Make options' parsing verbose
+    local VERBOSE_PARSEARGS=1    
 
     # Parse arguments
     parse_arguments

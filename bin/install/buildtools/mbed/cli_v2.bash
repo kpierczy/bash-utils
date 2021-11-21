@@ -3,7 +3,7 @@
 # @file     cli_v2.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 8:34:01 pm
-# @modified Sunday, 21st November 2021 9:03:48 pm
+# @modified Sunday, 21st November 2021 11:24:07 pm
 # @project  BashUtils
 # @brief
 #    
@@ -40,9 +40,9 @@ LOG_CONTEXT="mbed"
 install() {
 
     # Dependencies of the Mbed CLI
-    locla -a dependencies=( ninja-build )
+    local -a dependencies=( ninja-build )
     # Install dependencies
-    install_pkg_list --su -y -v -U dependencies || {
+    install_pkg_list --su -y -v dependencies || {
         log_error "Failed to install dependencies"
         exit 1
     }
@@ -64,10 +64,10 @@ install() {
             while read requirement; do
 
                 # Filter  only package's name
-                package=$(echo "$requirement" | awk -F '=|>|<|\[' '{print $1;}')
+                package=$(echo "$requirement" | awk -F '[=><\[]' '{print $1;}' 2> /dev/null)
 
                 # Check whether package is aimed for Linux
-                if ! is_substring $requirement 'platform_system!="Linux"' && ! is_substring $requirement "platform_system=='Windows'" then
+                if ! is_substring $requirement 'platform_system!="Linux"' && ! is_substring $requirement "platform_system=='Windows'"; then
 
                     # If so, check if package is installed
                     if ! echo $packages | grep -i $package > /dev/null; then
@@ -91,7 +91,7 @@ install() {
     fi
 
     # Install CLI
-    install_pkg --su -y -v -U "mbed-tools" || {
+    pip_install -v -U "mbed-tools" || {
         log_error "Failed to install CLI"
         exit 1
     }

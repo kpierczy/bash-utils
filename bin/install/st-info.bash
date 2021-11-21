@@ -3,7 +3,7 @@
 # @file     st-info.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 6:16:17 pm
-# @modified Sunday, 21st November 2021 9:57:21 pm
+# @modified Monday, 22nd November 2021 12:30:11 am
 # @project  BashUtils
 # @brief
 #    
@@ -20,7 +20,7 @@ source $BASH_UTILS_HOME/source_me.bash
 
 get_heredoc usage <<END
     Description: Installs ST-Info utility for STM microcontrollers
-    Usage: cmake.bash TYPE
+    Usage: cmake.bash VERSION
 
     Arguments
 
@@ -28,11 +28,12 @@ get_heredoc usage <<END
 
     Options:
 
-        --help     displays this usage message
-        --prefix   Installation directory of the cmake (default /opt/cmake)
-        --url      custom URL to be used for downloading (default: official github)
-        --cleanup  if set, the downloaded archieve will be removed after being downloaded
-
+            --help     displays this usage message
+            --prefix   Installation directory of the cmake (default /opt/cmake)
+            --url      custom URL to be used for downloading (default: official github)
+            --cleanup  if set, the downloaded archieve will be removed after being downloaded
+        --copy-config  if given, configuration of the USB devices from the ST-Info source files
+                       will be copied into the system
 END
 
 # ============================================================ Constants =========================================================== #
@@ -51,30 +52,37 @@ install() {
 
     # Evaluate the target URL
     local URL=$(eval "echo $URL_SCHEME")
-
+    
     # Name of the directory extracted from the archieve
-    local TARGET=${URL##*/}
-          TARGET=${TARGET%.tar.gz}
-
-    # Name fo the configruation script
-    local CONFIG_TOOL='make clean; make release'
+    local TARGET=stlink-$VERSION
+    
+    # Disable configruation step
+    local CONFIG_TOOL=''
+    # Configuration command
+    local BUILD_TOOL='make clean release'
     # Configruation flags
     local INSTALL_FLAGS="DESTDIR=${options[prefix]:-$DEFAULT_PREFIX}"
 
     # Download and isntall CMake
-    download_build_and_install $URL     \
-        --verbose                      \
-        --arch-dir=/tmp                \
-        --extract-dir=/tmp             \
-        --show-progress                \
-        --src-dir=$TARGET              \
-        --build-dir=/tmp/$TARGET/build \
-        --log-target="ST-Info"         \
+    download_build_and_install $URL \
+        --verbose-tools             \
+        --verbose                   \
+        --arch-dir=/tmp             \
+        --extract-dir=/tmp          \
+        --show-progress             \
+        --src-dir=$TARGET           \
+        --build-dir=/tmp/$TARGET    \
+        --log-target="ST-Info"      \
         --force
+
+    # If USB configureation was requested to be copied to the system, copy it
+    is_var_set_non_empty options[copy_config] &&
+        sudo cp /tmp/$TARGET/config/udev/rules.d/* /etc/udev/rules.d
 
     # If option given, remove archieve
     is_var_set_non_empty options[cleanup] &&
-        rm /tmp/${TARGET}*.tar.gz
+        rm /tmp/v${VERSION}.tar.gz        &&
+        rm -rf /tmp/$TARGET
         
 }
 
@@ -91,13 +99,17 @@ main() {
     )
 
     # Options
-    local build-essential=(
+    local -a opt_definitions=(
         '--help',help,f
         '--prefix',prefix
         '--url',url
         '--cleanup',cleanup,f
+        '--copy-config',copy_config
     )
 
+    # Make options' parsing verbose
+    local VERBOSE_PARSEARGS=1
+    
     # Parsed options
     parse_arguments
 
@@ -109,10 +121,10 @@ main() {
         cmake
         rpm
         libusb-1.0-0-dev
-        libgtk-3-dev-3-dev
+        libgtk-3-dev
         pandoc
     )
-
+    
     # Install dependencies
     install_pkg_list --allow-local-app --su -y -v -U dependencies || {
         log_error "Failed to download ST-Info's dependencies"

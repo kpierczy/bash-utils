@@ -3,7 +3,7 @@
 # @file     serialplot.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 5:09:51 pm
-# @modified Sunday, 21st November 2021 5:16:24 pm
+# @modified Sunday, 21st November 2021 11:40:52 pm
 # @project  BashUtils
 # @brief
 #    
@@ -51,7 +51,7 @@ install() {
 
     # Download the homebrew
     wget $URL                          \
-        --no-verbose                   \
+        --quiet                        \
         --output-document=$DESTINATION \
         --show-progress || 
     {

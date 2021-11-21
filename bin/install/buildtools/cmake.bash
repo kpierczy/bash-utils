@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Sunday, 21st November 2021 9:57:21 pm
+# @modified Sunday, 21st November 2021 11:16:02 pm
 # @project  BashUtils
 # @brief
 #    
@@ -45,7 +45,7 @@ LOG_CONTEXT="cmake"
 # ========================================================== Configruation ========================================================= #
 
 # Installation directory for the CMake
-declare DEFAULT_PREFIX='/opt'
+declare DEFAULT_PREFIX='/opt/cmake'
 # Scheme of the URL of the CMake source code
 declare SRC_URL_SCHEME='https://github.com/Kitware/CMake/releases/download/v$VERSION/cmake-$VERSION.tar.gz'
 # Scheme of the URL of the CMake binary variant
@@ -100,11 +100,11 @@ install_bin() {
     local PREFIX="${options[prefix]:-$DEFAULT_PREFIX}"
 
     # Download and extract the toolchain
-    download_and_extract $URL  \
-        --arch-dir=/tmp        \
-        --extract-dir=$PREFIX  \
-        --show-progress        \
-        --verbose              \
+    download_and_extract $URL            \
+        --arch-dir=/tmp                  \
+        --extract-dir=$(dirname $PREFIX) \
+        --show-progress                  \
+        --verbose                        \
         --log-target="CMake"
     [[ $? == 0 ]] || exit 1
 
@@ -113,8 +113,7 @@ install_bin() {
           TARGET=${TARGET%.tar.gz}
 
     # Rename toolchain's folder
-    is_var_set_non_empty options[dirname] &&
-        mv $(dirname $PREFIX)/$TARGET $PREFIX
+    mv $(dirname $PREFIX)/$TARGET $PREFIX
 
     # If option given, remove archieve
     is_var_set_non_empty options[cleanup] &&

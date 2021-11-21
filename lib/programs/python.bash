@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified Friday, 12th November 2021 12:29:00 am
+# @modified Sunday, 21st November 2021 11:30:07 pm
 # @project  BashUtils
 # @brief
 #    
@@ -27,8 +27,8 @@ function is_pip_package_installed() {
     # Arguments
     local package_="$1"
      
-    # Check if installed
-    python3 -c "import $package_" &> /dev/null && return 0 || return 1
+    # Check if installed (Change all '-' to '_')
+    python3 -c "import ${package_//-/_}" &> /dev/null && return 0 || return 1
     
 }
 
@@ -199,7 +199,7 @@ function pip_install() {
     )
 
     # Parse arguments
-    opt_definitions
+    parse_options
 
     # Parse packages to be installed into an array
     local -a packages_=( "${posargs[@]}" )
@@ -212,7 +212,7 @@ function pip_install() {
     substract_arrays args packages_ options_list_
 
     # Call implementation 
-    pip_install_list "${options_list_[@]}" "${packages_[@]}"
+    pip_install_list "${options_list_[@]}" "packages_"
     
 }
 

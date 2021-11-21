@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Sunday, 21st November 2021 10:16:47 pm
+# @modified Monday, 22nd November 2021 12:18:52 am
 # @project  BashUtils
 # @brief
 #    
@@ -323,6 +323,8 @@ function perform_build_action() {
         install   ) action_tool_="${INSTALL_TOOL:-make install}";;
     esac
 
+
+
     # Get action flags
     local action_flags_=''
     case "$action_" in
@@ -395,9 +397,11 @@ function perform_build_action() {
     is_var_set LOG_TABLE[INIT] && log_info "${LOG_TABLE[INIT]}"
 
     local ret_
-
-    # Configure the build directory
+    
+    # Perform action on the build directory
     if is_var_set options[verbose_tools]; then
+    pwd
+        echo "$action_tool_ $target_ $action_flags_"
         $action_tool_ $target_ $action_flags_ && ret_=$? || ret_=$?
     else
         $action_tool_ $target_ $action_flags_ &> /dev/null && ret_=$? || ret_=$?
@@ -692,7 +696,8 @@ function build_source() {
 # @environment
 #
 #        INSTALL_TOOL  name of the tool performing installation
-#                      (default: make install)
+#                      (default: make install); if set to empty string, 
+#                      build step is skipped
 #       INSTALL_FLAGS  list containing flags passed to the 
 #                      installation tool
 #         LOG_CONTEXT  log context used when verbose installation 
@@ -812,11 +817,14 @@ function install_source() {
 #
 #         CONFIG_TOOL  name of the program/script residing in the 
 #                      @p src_dir directory performing configuration
-#                      (default: configure)
+#                      (default: configure); if set to empty string, 
+#                      configuration step is skipped
 #          BUILD_TOOL  name of the program/script used to build the
-#                      source code (default: make)
+#                      source code (default: make); if set to empty string, 
+#                      build step is skipped
 #        INSTALL_TOOL  name of the program/script used to install the
-#                      built source code (default: make install)
+#                      built source code (default: make install); if set 
+#                      to empty string, install step is skipped
 #        CONFIG_FLAGS  list containing flags passed to the 
 #                      configuration tool
 #         BUILD_FLAGS  list containing flags passed to the build tool
@@ -902,50 +910,64 @@ function build_and_install() {
     # ------------------- Configure -------------------
     
     # Perform configuration
-    configure_source $config_flags_ && ret_=$? || ret_=$?
-    
-    # If error occurred, exit
-    [[ "$ret_" == "1" ]] && return 1
-    # If a new configuration was performed, mark the folder as not-built and not-installed
-    [[ "$ret_" == "0" ]] && {
-        remove_directory_marker "$build_dir_" "build" "$target_"
-        remove_directory_marker "$build_dir_" "install"   "$target_"
-        all_skipped_=0
-    }
+    if ! is_var_set CONFIG_TOOL || is_var_set_non_empty CONFIG_TOOL; then
 
-    # If up-to 'configure' defined, return success
-    if is_var_set_non_empty options[up_to]; then
-        [[ "${options[up_to]}" == "configure" ]] && return 0
+        configure_source $config_flags_ && ret_=$? || ret_=$?
+        
+        # If error occurred, exit
+        [[ "$ret_" == "1" ]] && return 1
+        # If a new configuration was performed, mark the folder as not-built and not-installed
+        [[ "$ret_" == "0" ]] && {
+            remove_directory_marker "$build_dir_" "build" "$target_"
+            remove_directory_marker "$build_dir_" "install"   "$target_"
+            all_skipped_=0
+        }
+
+        # If up-to 'configure' defined, return success
+        if is_var_set_non_empty options[up_to]; then
+            [[ "${options[up_to]}" == "configure" ]] && return 0
+        fi
+
     fi
 
     # --------------------- Build ---------------------
 
-    # Perform building
-    build_source $build_flags_ && ret_=$? || ret_=$?
-    # If erro occurred, exit
-    [[ "$ret_" == "1" ]] && return 1
-    # If a new configuration was performed, mark the folder as not-installed
-    [[ "$ret_" == "0" ]] && {
-        remove_directory_marker "$build_dir_" "install" "$target_"
-        all_skipped_=0
-    }
+    # Perform configuration
+    if ! is_var_set BUILD_TOOL || is_var_set_non_empty BUILD_TOOL; then
 
-    # If up-to 'build' defined, return success
-    if is_var_set_non_empty options[up_to]; then
-        [[ "${options[up_to]}" == "build" ]] && return 0
+        # Perform building
+        build_source $build_flags_ && ret_=$? || ret_=$?
+        # If erro occurred, exit
+        [[ "$ret_" == "1" ]] && return 1
+        # If a new configuration was performed, mark the folder as not-installed
+        [[ "$ret_" == "0" ]] && {
+            remove_directory_marker "$build_dir_" "install" "$target_"
+            all_skipped_=0
+        }
+
+        # If up-to 'build' defined, return success
+        if is_var_set_non_empty options[up_to]; then
+            [[ "${options[up_to]}" == "build" ]] && return 0
+        fi
+
     fi
 
     # -------------------- Install --------------------
     
-    # Perform installation
-    install_source $install_flags_ && ret_=$? || ret_=$?
-    # If erro occurred, exit
-    [[ "$ret_" == "1" ]] && return 1
-    # Update information about skipping all steps
-    [[ "$ret_" == "0" ]] && all_skipped_=0
+    # Perform configuration
+    if ! is_var_set INSTALL_TOOL || is_var_set_non_empty INSTALL_TOOL; then
 
-    # Return status code
-    [[ "$all_skipped_" == "1" ]] && return 2 || return 0
+        # Perform installation
+        install_source $install_flags_ && ret_=$? || ret_=$?
+        # If erro occurred, exit
+        [[ "$ret_" == "1" ]] && return 1
+        # Update information about skipping all steps
+        [[ "$ret_" == "0" ]] && all_skipped_=0
+
+        # Return status code
+        [[ "$all_skipped_" == "1" ]] && return 2 || return 0
+
+    fi
 
 }
 
@@ -1015,11 +1037,14 @@ function build_and_install() {
 #                      flags passed by the function)
 #         CONFIG_TOOL  name of the program/script residing in the 
 #                      @p src_dir directory performing configuration
-#                      (default: configure)
+#                      (default: configure); if set to empty string, 
+#                      configuration step is skipped
 #          BUILD_TOOL  name of the program/script used to build the
-#                      source code (default: make)
+#                      source code (default: make); if set to empty string, 
+#                      build step is skipped
 #        INSTALL_TOOL  name of the program/script used to install the
-#                      built source code (default: make install)
+#                      built source code (default: make install); if set 
+#                      to empty string, install step is skipped
 #        CONFIG_FLAGS  list containing flags passed to the 
 #                      configuration tool
 #         BUILD_FLAGS  list containing flags passed to the build tool

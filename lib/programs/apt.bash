@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Sunday, 21st November 2021 6:34:49 pm
+# @modified Sunday, 21st November 2021 11:23:15 pm
 # @project  BashUtils
 # @brief
 #    
@@ -107,6 +107,13 @@ function install_pkg_list() {
     # Parse arguments
     local -n _packages_="${posargs[0]}"
 
+    # ------------ Configure word-splitting -----------   
+
+    # Make changes to the word-splitting local
+    localize_word_splitting
+    # Enable default woprd splitting
+    enable_word_splitting
+
     # ----------------- Configure logs ----------------   
     
     # Keep current configuration of logs on the stack
@@ -150,13 +157,13 @@ function install_pkg_list() {
             local skip_install_=0
         fi
 
-        # If package not isntalled, install
+        # If package not installed, install
         if [[ ${skip_install_} == 0 ]] && ! is_pkg_installed $package_ ; then
 
-            # Log info, if verbose
             log_info "Installing $package_ ..."
+            
             # Install package
-            if ${user_mode_} apt ${apt_cmd_} ${apt_flags_} $package_; then
+            if "${user_mode_}" apt "${apt_cmd_}" ${apt_flags_} "$package_"; then
                 log_info "$package_ installed"
             else
                 log_error "$package_ could not be installed"
@@ -189,7 +196,10 @@ function install_pkg_list() {
 #      -v   print verbose log
 #    --vi   print verbose log if package is already installed
 #      -U   use `apt upgrade` to install packages
-# 
+#  -a, --allow-local-app  if set, before checking whether the package is installed, the
+#                         function will check whether the appllication with the given
+#                         name and if so, it will skip installation
+#
 # @environment
 #  
 #     APT_FLAGS  Additional flags that will be prepended to the apt
@@ -210,11 +220,12 @@ function install_pkg() {
         '--vi',verbose_installed,f
         '-y',non_interactive,f
         '-U',upgrade,f
+        '-a|--allow-local-app',allow_local,f
     )
 
     # Parse arguments
-    opt_definitions
-
+    parse_options
+    
     # Parse packages to be installed into an array
     local -a packages_=( "${posargs[@]}" )
 
@@ -226,6 +237,6 @@ function install_pkg() {
     substract_arrays args packages_ options_list_
 
     # Call implementation 
-    install_pkg_list "${options_list_[@]}" "${packages_[@]}"
+    install_pkg_list "${options_list_[@]}" packages_
 
 }
