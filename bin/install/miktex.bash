@@ -3,7 +3,7 @@
 # @file     miktex.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Friday, 5th November 2021 6:40:39 pm
-# @modified Tuesday, 9th November 2021 7:25:29 pm
+# @modified Sunday, 21st November 2021 5:34:01 pm
 # @project  BashUtils
 # @brief
 #    
@@ -127,34 +127,29 @@ upgrade_miktex() {
 
 main() {
 
+    local -n USAGE=usage
+
     # Arguments
     local cmd
 
-    # Commands
-    local COMMANDS=(
+    # Arguments
+    local -a arguments=(
+        cmd
+    )
+    local -a ARG1_VARIANTS=(
         install
         update
         upgrade
     )
 
     # Options
-    local defs=(
+    local opt_definitions=(
         '--help',help,f
         '-U',user,f
     )
 
-    # Parsed options
-    parse_script_options
-
-    # Parse argument
-    cmd=${$1:-}
-
-    # Validate argument
-    is_array_element COMMANDS $cmd || {
-        log_error "Invalid usage"
-        echo $usage
-        return 1
-    }
+    # Parse arguments
+    parse_arguments
     
     # Perform corresponding routine
     case $cmd in

@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Wednesday, 10th November 2021 6:30:00 pm
+# @modified Sunday, 21st November 2021 9:28:29 pm
 # @project  BashUtils
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
@@ -284,29 +284,18 @@ uninstall_ros() {
 main() {
 
     # Arguments
-    local action
-    local src
+    local -a arguments=(
+        action
+        src
+    )
 
     # Options
-    local defs=(
+    local opt_definitions=(
         '--help',help,f
     )
 
     # Parsed options
-    parse_script_options
-
-    # Parse arguments
-    action=${1:-}
-    src=${2:-}
-
-    # Verify arguments
-    [[ $#      == "2"                                 ]] &&
-    [[ $action == "install" || $action == "uninstall" ]] &&
-    [[ $src    == "bin"     || $src    == "pkg"       ]] || { 
-        log_error "Usage error"
-        echo $usage
-        return 1
-    }
+    parse_arguments
 
     # Verify distro
     is_array_element ROS2_SUPPORTED_DISTROS  "$ROS2_DISTRO" || {

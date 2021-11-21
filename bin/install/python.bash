@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 4:29:08 pm
-# @modified Saturday, 13th November 2021 3:00:12 pm
+# @modified Sunday, 21st November 2021 9:26:46 pm
 # @project  BashUtils
 # @brief
 #    
@@ -239,27 +239,6 @@ set_python_alternative() {
 # ============================================================== Main ============================================================== #
 
 main() {
-
-    # Arguments definitions
-    local -A arg_def=( [id]="ARGA" [name]="arg" [type]="string"  [help]="arg help" [variants]="add_repo|rm_repo|install|<*set_alternatives*>" )
-    local -A brg_def=( [id]="ARGB" [name]="brg" [type]="integer" [help]="brg help" [range]="0-1000"                                           )
-    local -A crg_def=( [id]="ARGC" [name]="crg" [type]="path"    [help]="crg help"                                                            )
-
-    # Options definitions
-    local -A a_opt_def=( [id]="-a|--opt-a" [name]='opta' [help]="opta help" [type]='string'  [variants]=('opt_var1|opt_var2|<*opt_var3*>') )
-    local -A b_opt_def=( [id]="-b|--opt-b" [name]='optb' [help]="optb help" [type]='integer' [range]="[0-1000]"                            )
-    local -A c_opt_def=( [id]="-c|--opt-c" [name]='optc' [help]="optc help" [type]='path'                                                  )
-    local -A d_opt_def=( [id]="-d|--opt-d" [name]='optd' [help]="optd help" [type]='flag'                                                  )
-
-    # Environment definitions
-    local -A a_env_def=( [id]="ENVA" [name]='a' [help]="enva help" [type]='string'  [variants]=('env_var1|env_var2|<*env_var3*>') )
-    local -A b_env_def=( [id]="ENVB" [name]='b' [help]="envb help" [type]='integer' [range]="[0-1000]"                            )
-    local -A c_env_def=( [id]="ENVC" [name]='c' [help]="envc help" [type]='path'                                                  )
-
-    # Compile arguments definitions
-    local -a arg_definitions=(arg_def brg_def crg_def)
-    # Compile options definitions
-    local -a opt_definitions=(a_opt_def b_opt_def c_opt_def d_opt_def)
 
     # ---------------------------------- Configuration ----------------------------------
 

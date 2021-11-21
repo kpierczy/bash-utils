@@ -3,7 +3,7 @@
 # @file     arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Saturday, 13th November 2021 2:25:11 am
+# @modified Sunday, 21st November 2021 3:34:30 pm
 # @project  BashUtils
 # @brief
 #    
@@ -160,7 +160,7 @@ function substract_arrays() {
 function print_array() {
 
     # Arguments
-    local -n arr_
+    local arr_
 
     # ---------------- Parse arguments ----------------
 
@@ -174,7 +174,7 @@ function print_array() {
     parse_options
 
     # Parse arguments
-    arr_="${posargs[0]}"
+    local -n arr_="${posargs[0]}"
 
     # Parse elements' separator
     local separator_=$'\n'
@@ -183,7 +183,7 @@ function print_array() {
 
     # ------------------------------------------------- 
 
-    local out_
+    local out_=''
 
     # Print name of the array, if requested
     is_var_set options[name] && {

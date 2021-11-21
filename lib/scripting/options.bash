@@ -3,7 +3,7 @@
 # @file     options.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Sunday, 14th November 2021 7:39:26 pm
+# @modified Sunday, 21st November 2021 2:59:23 pm
 # @project  BashUtils
 # @brief
 #    

@@ -3,12 +3,13 @@
 # @file     boost.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 1:13:17 pm
-# @modified Tuesday, 9th November 2021 7:25:29 pm
+# @modified Sunday, 21st November 2021 10:18:09 pm
 # @project  BashUtils
 # @brief
 #    
 #    Script installs Boost library
 #    
+# @fixme
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
@@ -19,7 +20,7 @@ source $BASH_UTILS_HOME/source_me.bash
 
 get_heredoc usage <<END
     Description: Installs Boost library
-    Usage: boost.bash TYPE [TARGET]
+    Usage: boost.bash TYPE [VERSION] [TARGET]
 
     Arguments:
 
@@ -27,6 +28,8 @@ get_heredoc usage <<END
 
                   pkg  installas Boost from apt package
                   src  installas Boost from source
+
+        VERSION version of the boost to be installed in the 'src' variant
 
         TARGET  target to be installed in source variant
           
@@ -36,15 +39,13 @@ get_heredoc usage <<END
 
     Options:
       
-        --help  displays this usage message
 
-    Environment:
-
-            BOOST_VERSION  Version of the Boost to be installed (src variant)
-             BOOST_PREFIX  Installation prefix of the Boost (src variant)
-    BOOST_BOOTSTRAP_FLAGS  Set of additional flags to be passed to boost bootstrap
-      BOOST_COMPILE_FLAGS  Set of additional flags to be passed to boost compilation
-
+                         --help  displays this usage message
+                   --prefix=DIR  installation prefix when the 'src' variant is installed (default: .)
+        --with-config-flags=STR  string containing configruation flags to be passed to the 
+                                 boost's bootstrap step
+       --with-compile-flags=STR  string containing configruation flags to be passed to the 
+                                 boost's compilation step
 END
 
 # ============================================================ Constants =========================================================== #
@@ -52,20 +53,9 @@ END
 # Logging context of the script
 LOG_CONTEXT="boost"
 
-# ========================================================== Configruation ========================================================= #
-
-# Version of the boost to be installed (src variant)
-var_set_default BOOST_VERSION ''
-# Installation prefix of the boost library (src variant)
-var_set_default BOOST_PREFIX '.'
-# Set of additional flags to be passed to boost bootstrap
-var_set_default BOOST_BOOTSTRAP_FLAGS ''
-# Set of additional flags to be passed to boost compilation
-var_set_default BOOST_COMPILE_FLAGS ''
-
 # ============================================================ Functions =========================================================== #
 
-install_boost_pkg() {
+install_pkg() {
 
     # Boost package to be installed
     local BOOST_PKG="libboost-all-dev"
@@ -75,7 +65,7 @@ install_boost_pkg() {
 
     # Install package
     log_info "Installing boost package ..."
-    sudo apt update && sudo apt install $BOOST_PKG || {
+    sudo apt update && sudo apt install -y $BOOST_PKG || {
         log_error "Failed o install $BOOST_PKG" package
         return 1
     }
@@ -84,86 +74,76 @@ install_boost_pkg() {
     
 }
 
-install_boost_source() {
+install_source() {
     
-    # URL of the boost to download sources from (src variant)
-    local URL="https://sourceforge.net/projects/boost/files/boost/$BOOST_VERSION/boost_${BOOST_VERSION//./_}.tar.bz2/download"
+    # Scheme of the URL of the boost to download sources 
+    local URL_SCHEME='https://sourceforge.net/projects/boost/files/boost/$version/boost_${version//./_}.tar.bz2/download'
     # Boost download directory
     local DOWNLOAD_DIR="/tmp"
     # Supported targets
-    local TARGETS=(
+    local -a TARGETS=(
         headers
         stage
         full
     )
-
+    
     # Verify target argument
-    is_var_set_non_empty target && is_array_element $target TARGETS ||
-    {
+    is_var_set_non_empty target && is_array_element TARGETS $target || {
         log_error "Invalid target given ($target)"
         echo $usage
         return 1
     }
 
     # Verify if boost version given
-    is_var_set_non_empty BOOST_VERSION || {
+    is_var_set_non_empty version || {
         log_error "No boost version given"
         return 1
     }
 
-    # Prepare download names
-    URL=${URL%/download}
-    prepare_names_for_downloaded_archieve
-    URL="$URL/download"
-    # Path to the extracted Boost files
-    local EXTRACTED_PATH=$DOWNLOAD_DIR/$EXTRACTED_NAME
+    # Evaluate the target URL
+    local URL=$(eval "echo $URL_SCHEME")
 
-    # Download and extract Boost
-    ARCH_NAME="boost_${BOOST_VERSION//./_}.tar.bz2" LOG_CONTEXT=$LOG_CONTEXT LOG_TARGET="Boost" \
-    download_and_extract -v                                                                     \
-        $URL/download $DOWNLOAD_DIR $DOWNLOAD_DIR || return 1
+    # Name of the directory extracted from the archieve
+    local TARGET=${URL##*/}
+          TARGET=${TARGET%.tar.bz2*}
 
-    pushd $EXTRACTED_PATH
+    # Get installation prefix
+    local PREFIX=${options[prefix]:-.}
 
-    log_info "Initializing Boost's bootstrap routine ..."
-
-    # Prepare bootstrap flags
-    local bootflags=''
-    bootflags+=--with-python=python3
-    bootflags+=--prefix=PREFIX=$BOOST_PREFIX
-
-    # Bootstrap boost
-    ./bootstrap.sh $bootflags $BOOST_BOOTSTRAP_FLAGS ||
-    {
-        log_error "Failed to bootstrap Boost"
-        popd
-        return 1
-    }
-
-    log_info "Boost sucesfully bootstrapped"
-    log_info "Bulding Boost ..."
-
-    # Select build type
-    local build_type=''
-    local build_flags=''
+    # Name of the configruation script
+    local CONFIG_TOOL='bootstrap'
+    # Prepare configuration flags
+    local CONFIG_FLAGS=''
+    CONFIG_FLAGS+="--with-python=python3 "
+    CONFIG_FLAGS+="--prefix=$PREFIX "
+    CONFIG_FLAGS+="${options[config_flags]:-.} "
+    # Name of the compilation script
+    local BUILD_TOOL='./b2'
+    # Prepare compilation target and 
     case $target in
-        headers ) build_type="headers"; build_flags="--prefix=$BOOST_PREFIX";;
-        stage   ) build_type="stage";   build_flags="--stagedir=$BOOST_PREFIX/lib";;
-        full    ) build_type="install"; build_flags="--prefix=$BOOST_PREFIX";;
+        headers ) local target="headers"; local BUILD_FLAGS="--prefix=$PREFIX";;
+        stage   ) local target="stage";   local BUILD_FLAGS="--stagedir=$PREFIX/lib";;
+        full    ) local target="install"; local BUILD_FLAGS="--prefix=$PREFIX";;
     esac
+    BUILD_FLAGS+=" ${options[compile_flags]:-}"
 
-    # Preapre target directory
-    mkdir -p $BOOST_PREFIX
+    # Download and isntall CMake
+    WGET_FLAGS='--no-clobber'          \
+    download_build_and_install $URL    \
+        --verbose                      \
+        --arch-path=/tmp/$TARGET       \
+        --extract-dir=/tmp             \
+        --show-progress                \
+        --src-dir=$TARGET              \
+        --target=$target               \
+        --build-dir=/tmp/$TARGET/build \
+        --log-target="Boost"           \
+        --up-to=build                  \
+        --force
 
-    # Build boost
-    ./b2 $build_type $build_flags $BOOST_COMPILE_FLAGS ||
-    {
-        log_error "Failed to build Boost"
-        popd
-        return 1
-    }
-
-    log_info "Sucesfully buit Boost"
+    # If option given, remove archieve
+    is_var_set_non_empty options[cleanup] &&
+        rm /tmp/${TARGET}*.tar.bz2
 
 }
 
@@ -171,41 +151,41 @@ install_boost_source() {
 
 main() {
     
-    # Arguments
-    local itype
+    # Link USAGE message
+    local -n USAGE=usage
 
     # Requirewd number of arguments
-    local ARG_NUM=1
-    
-    # Commands
-    local ITYPES=(
+    local ARG_NUM_MIN=1
+    local -a arguments=(
+        itype
+        version
+        target
+    )
+    # Valid variants of the `itype` argument
+    local ARG1_VARIANTS=(
         pkg
         src
     )
 
     # Options
-    local defs=(
+    local opt_definitions=(
         '--help',help,f
+        '--prefix',prefix
+        '--with-config-flags',config_flags
+        '--with-compile-flags',compile_flags
+        '--cleanup',cleanup,f
     )
 
+    # Make options' parsing verbose
+    local VERBOSE_PARSEARGS=1
+    
     # Parsed options
-    parse_script_options
-
-    # Parse argument
-    itype=${1:-}
-    target=${2:-}
-
-    # Validate argument
-    is_array_element ITYPES $itype || {
-        log_error "Invalid usage"
-        echo $usage
-        return 1
-    }
+    parse_arguments
     
     # Perform corresponding routine
     case $itype in
-        pkg) install_boost_pkg;;
-        src) install_boost_source;;
+        pkg ) install_pkg;;
+        src ) install_source;;
     esac
     
 }

@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     cmake.bash
+# @file     st-info.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
-# @date     Thursday, 4th November 2021 3:14:23 pm
+# @date     Sunday, 21st November 2021 6:16:17 pm
 # @modified Sunday, 21st November 2021 9:57:21 pm
 # @project  BashUtils
 # @brief
 #    
-#    Installation script for the CMake
+#    Installs ST-Info utility from source
 #    
-# @source
+# @source https://github.com/stlink-org/stlink
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
@@ -19,20 +19,18 @@ source $BASH_UTILS_HOME/source_me.bash
 # ============================================================== Usage ============================================================= #
 
 get_heredoc usage <<END
-    Description: Installs CMake build tool
+    Description: Installs ST-Info utility for STM microcontrollers
     Usage: cmake.bash TYPE
 
     Arguments
 
-           TYPE  installation type (either 'src' for installation from sources, or 'bin'
-                 for binary package installation)
         VERSION  version of the CMake to be installed
 
     Options:
 
         --help     displays this usage message
         --prefix   Installation directory of the cmake (default /opt/cmake)
-        --url      custom URL to be used for downloading (default: official CMake github)
+        --url      custom URL to be used for downloading (default: official github)
         --cleanup  if set, the downloaded archieve will be removed after being downloaded
 
 END
@@ -40,33 +38,28 @@ END
 # ============================================================ Constants =========================================================== #
 
 # Logging context of the script
-LOG_CONTEXT="cmake"
+LOG_CONTEXT="st-info"
 
 # ========================================================== Configruation ========================================================= #
 
-# Installation directory for the CMake
-declare DEFAULT_PREFIX='/opt'
-# Scheme of the URL of the CMake source code
-declare SRC_URL_SCHEME='https://github.com/Kitware/CMake/releases/download/v$VERSION/cmake-$VERSION.tar.gz'
-# Scheme of the URL of the CMake binary variant
-declare BIN_URL_SCHEME='https://github.com/Kitware/CMake/releases/download/v$VERSION/cmake-$VERSION-linux-$ARCH.tar.gz'
+# Scheme of the URL of the source code
+declare URL_SCHEME='https://github.com/stlink-org/stlink/archive/refs/tags/v$VERSION.tar.gz'
 
 # ============================================================== Main ============================================================== #
 
-install_src() {
+install() {
 
     # Evaluate the target URL
-    local URL=$(eval "echo $SRC_URL_SCHEME")
-
+    local URL=$(eval "echo $URL_SCHEME")
 
     # Name of the directory extracted from the archieve
     local TARGET=${URL##*/}
           TARGET=${TARGET%.tar.gz}
 
     # Name fo the configruation script
-    local CONFIG_TOOL='bootstrap'
+    local CONFIG_TOOL='make clean; make release'
     # Configruation flags
-    local CONFIG_FLAGS="--prefix=${options[prefix]:-$DEFAULT_PREFIX}"
+    local INSTALL_FLAGS="DESTDIR=${options[prefix]:-$DEFAULT_PREFIX}"
 
     # Download and isntall CMake
     download_build_and_install $URL     \
@@ -76,50 +69,13 @@ install_src() {
         --show-progress                \
         --src-dir=$TARGET              \
         --build-dir=/tmp/$TARGET/build \
-        --log-target="CMake"           \
+        --log-target="ST-Info"         \
         --force
 
     # If option given, remove archieve
     is_var_set_non_empty options[cleanup] &&
         rm /tmp/${TARGET}*.tar.gz
         
-}
-
-install_bin() {
-
-    # Get system's architecture
-    case $(get_system_arch) in
-        x86_64          ) local ARCH='x86_64';;
-        arm64 | aarch64 ) local ARCH='aarch64';;
-        *               ) log_error "Architecture's not supported ($(get_system_arch))"
-                          exit 1;;
-    esac
-    # Evaluate the target URL
-    local URL=$(eval "echo $BIN_URL_SCHEME")
-
-    local PREFIX="${options[prefix]:-$DEFAULT_PREFIX}"
-
-    # Download and extract the toolchain
-    download_and_extract $URL  \
-        --arch-dir=/tmp        \
-        --extract-dir=$PREFIX  \
-        --show-progress        \
-        --verbose              \
-        --log-target="CMake"
-    [[ $? == 0 ]] || exit 1
-
-    # Name of the directory extracted from the archieve
-    local TARGET=${URL##*/}
-          TARGET=${TARGET%.tar.gz}
-
-    # Rename toolchain's folder
-    is_var_set_non_empty options[dirname] &&
-        mv $(dirname $PREFIX)/$TARGET $PREFIX
-
-    # If option given, remove archieve
-    is_var_set_non_empty options[cleanup] &&
-        rm /tmp/${TARGET}*.tar.gz
-
 }
 
 # ============================================================== Main ============================================================== #
@@ -129,19 +85,13 @@ main() {
     local -n USAGE=usage
 
     # Arguments
+    local ARG_NUM=1
     local -a arguments=(
-        installation_type
         VERSION
     )
 
-    # Variants of the first arguments
-    local -a ARG1_VARIANTS=(
-        src
-        bin
-    )
-
     # Options
-    local opt_definitions=(
+    local build-essential=(
         '--help',help,f
         '--prefix',prefix
         '--url',url
@@ -152,19 +102,25 @@ main() {
     parse_arguments
 
     # Dependencies of the script
-    local -a dependencies=( build-essential )
+    local -a dependencies=(
+        gcc
+        build-essential
+        git
+        cmake
+        rpm
+        libusb-1.0-0-dev
+        libgtk-3-dev-3-dev
+        pandoc
+    )
 
     # Install dependencies
     install_pkg_list --allow-local-app --su -y -v -U dependencies || {
-        log_error "Failed to download CMake's dependencies"
+        log_error "Failed to download ST-Info's dependencies"
         exit 1
     }
 
-    # Run installation script
-    case $installation_type in
-        src ) install_src;;
-        bin ) install_bin;;
-    esac
+    # Run installation routine
+    install
 
 }
 

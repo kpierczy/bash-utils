@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Friday, 12th November 2021 5:20:53 am
+# @modified Sunday, 21st November 2021 10:16:47 pm
 # @project  BashUtils
 # @brief
 #    
@@ -805,6 +805,8 @@ function install_source() {
 #                      in the logs (if not given, the default logs
 #                      will be printed based on the build
 #                      directory)
+#         --up-to=STR  if given, function conducts stepd only up to the
+#                      STR (can be one of [configure, compile, install])
 #
 # @environment
 #
@@ -838,6 +840,7 @@ function build_and_install() {
         '-m|--mark',mark,f
         '-f|--force',force,f
         '--log-target',log_target
+        '--up-to',up_to
     )
     
     # Parse arguments to a named array
@@ -910,6 +913,10 @@ function build_and_install() {
         all_skipped_=0
     }
 
+    # If up-to 'configure' defined, return success
+    if is_var_set_non_empty options[up_to]; then
+        [[ "${options[up_to]}" == "configure" ]] && return 0
+    fi
 
     # --------------------- Build ---------------------
 
@@ -922,6 +929,11 @@ function build_and_install() {
         remove_directory_marker "$build_dir_" "install" "$target_"
         all_skipped_=0
     }
+
+    # If up-to 'build' defined, return success
+    if is_var_set_non_empty options[up_to]; then
+        [[ "${options[up_to]}" == "build" ]] && return 0
+    fi
 
     # -------------------- Install --------------------
     
@@ -957,7 +969,7 @@ function build_and_install() {
 #                       configuration, building and isntallation
 #       --arch-dir=DIR  directory where the archive will be downloaded
 #                       (default: '.')
-#      --arch-path=DIR  path to the archieve after being downloaded; if 
+#     --arch-path=PATH  path to the archieve after being downloaded; if 
 #                       given, overwrites --archdir option (by default,
 #                       name of the downloaded archieve is not modified)
 #    --extract-dir=DIR  directory where the archieve will be extracted;
@@ -992,6 +1004,9 @@ function build_and_install() {
 #                      in the logs (if not given, the default logs
 #                      will be printed based on the build
 #                      directory)
+#         --up-to=STR  if given, function conducts stepd only up to the
+#                      STR (can be one of [download, configure, compile,
+#                      install])
 #
 # @environment
 #
@@ -1012,7 +1027,7 @@ function build_and_install() {
 #                      installation tool
 #
 # -------------------------------------------------------------------
-function download_buil_and_install() {
+function download_build_and_install() {
 
     # Arguments
     local url_
@@ -1033,6 +1048,7 @@ function download_buil_and_install() {
         '-t|--target',target
         '-m|--mark',mark,f
         '--log-target',log_target
+        '--up-to',up_to
     )
     
     # Parse arguments to a named array
@@ -1118,7 +1134,12 @@ function download_buil_and_install() {
     local build_mark_flag_="."
     is_var_set options[mark] &&
         build_mark_flag_="--mark"
-    
+
+    # Establish whether steps performed by the function are limited
+    local up_to_flag=''
+    is_var_set_non_empty options[up_to] && 
+        up_to_flag="${options[up_to]}"
+
     # Compile build flags
     local build_all_flags_=$(echo      \
         "${verbose_flag_}"             \
@@ -1128,7 +1149,8 @@ function download_buil_and_install() {
         "${build_source_dir_}"         \
         "${build_build_dir_}"          \
         "${build_target_}"             \
-        "${build_mark_flag_}"
+        "${build_mark_flag_}"          \
+        "${up_to_flag}"
     )
 
     # ------------ Enable word splitting -------------- 
@@ -1147,6 +1169,11 @@ function download_buil_and_install() {
 
     # If downloading and/or extraction wasn't skipped, mark it
     [[ $ret_ != "2" ]] && all_skipped_=0
+
+    # If up-to 'download' defined, return success
+    if is_var_set_non_empty options[up_to]; then
+        [[ "${options[up_to]}" == "download" ]] && return 0
+    fi
 
     # ---------------- Build sources ------------------ 
 

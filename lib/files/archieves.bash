@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 7:11:57 pm
-# @modified Friday, 12th November 2021 3:10:13 am
+# @modified Sunday, 21st November 2021 3:49:11 pm
 # @project  BashUtils
 # @brief
 #    
@@ -235,7 +235,7 @@ function need_extract() {
 
     # Check if directory exists
     [[ -d "${dir_}" ]] || return 0
-
+    
     # Select an appropriate test basing on the file's format
     case "$format_" in
 
@@ -243,6 +243,9 @@ function need_extract() {
         "tar.gz"  | "tar.bz2" |  "tar.xz"  |  "tar" ) 
 
             local ret_
+
+            # @note comparison fails if files differ with respect to UID and GID
+            # @fixme
 
             # Compare directory and archieve
             tar --compare --file="$archieve_" --directory="$dir_" &> /dev/null && ret_=$? || ret_=$?
@@ -336,7 +339,7 @@ function extract_archieve() {
 
     # Select tool for extraction
     local tool_="extract_${format_%.*}_archieve"
-
+    
     # Extract archieve
     ${tool_} $verbose_flag --directory="${options[dir]:-.}" "$archieve_"
 

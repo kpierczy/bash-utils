@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Saturday, 13th November 2021 2:42:16 am
+# @modified Sunday, 21st November 2021 6:34:49 pm
 # @project  BashUtils
 # @brief
 #    
@@ -57,7 +57,7 @@ function is_pkg_installed() {
 
 # ======================================================= Modifying functions ====================================================== #
 
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------
 # @brief Installs packages listed on the @p packages list using apt
 #
 # @param packages
@@ -69,18 +69,21 @@ function is_pkg_installed() {
 #
 # @options
 #    
-#    --su   installs packages as super user
-#      -y   installs packages in non-interactive mode
-#      -v   print verbose log
-#    --vi   print verbose log if package is already installed
-#      -U   use `apt upgrade` to install packages
+#                   --su  installs packages as super user
+#                     -y  installs packages in non-interactive mode
+#                     -v  print verbose log
+#                   --vi  print verbose log if package is already installed
+#                     -U  use `apt upgrade` to install packages
+#  -a, --allow-local-app  if set, before checking whether the package is installed, the
+#                         function will check whether the appllication with the given
+#                         name and if so, it will skip installation
 # 
 # @environment
 #  
 #     APT_FLAGS  Additional flags that will be prepended to the apt
 #                flags set by the function
 # 
-# -------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------
 function install_pkg_list() {
     
     # Arguments
@@ -95,6 +98,7 @@ function install_pkg_list() {
         '--vi',verbose_installed,f
         '-y',non_interactive,f
         '-U',upgrade,f
+        '-a|--allow-local-app',allow_local,f
     )
     
     # Parse arguments to a named array
@@ -139,8 +143,15 @@ function install_pkg_list() {
     # Iterate over packages
     for package_ in "${_packages_[@]}"; do
         
+        # Check if application named 'package_' is accessible from the local context
+        if is_var_set_non_empty options[allow_local] && is_app_installed "$package_"  ; then
+            local skip_install_=1
+        else
+            local skip_install_=0
+        fi
+
         # If package not isntalled, install
-        if ! is_pkg_installed $package_; then
+        if [[ ${skip_install_} == 0 ]] && ! is_pkg_installed $package_ ; then
 
             # Log info, if verbose
             log_info "Installing $package_ ..."

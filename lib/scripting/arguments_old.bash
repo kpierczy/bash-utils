@@ -3,7 +3,7 @@
 # @file     arguments_old.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 12:25:13 am
-# @modified Saturday, 13th November 2021 2:37:41 pm
+# @modified Sunday, 21st November 2021 4:34:29 pm
 # @project  BashUtils
 # @brief
 #    
@@ -11,6 +11,9 @@
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
+
+# Source dependencies
+source $BASH_UTILS_HOME/lib/processing/variables.bash
 
 # ========================================================= Helper aliases ========================================================= #
 
@@ -21,8 +24,8 @@
 #    variable itself is defined
 # -------------------------------------------------------------------
 alias __echo_usage_if_verbose='
-    is_var_defined_not_empty _pa_options_[verbose] && 
-    is_var_defined_not_empty USAGE &&
+    is_var_set_non_empty _pa_options_[verbose] && 
+    is_var_set_non_empty USAGE &&
     echo "$USAGE"
 '
 
@@ -220,9 +223,9 @@ function parseargs() {
     
     # If options' definitions given
     if is_var_set_non_empty _pa_options_[opt_definitions]; then
-
+    
         # Parse options
-        parseopts _callers_args_ _callers_defs_ _callers_options_ _callers_posargs_ || {
+        parseopts _callers_args_ _callers_opt_definitions_ _callers_options_ _callers_posargs_ || {
 
             # Echo error with usage message
             log_error "Invalid usage"
@@ -259,7 +262,7 @@ function parseargs() {
 
     # Check if required number of arguments was given
     if is_var_set_non_empty ARG_NUM; then
-
+        
         (( ${#_callers_posargs_[@]} == $ARG_NUM )) || {
             
             # Echo error with usage message
@@ -275,31 +278,35 @@ function parseargs() {
     # Check if number of arguments lies in the valid range
     else
 
-        # Chekc if minimal number of arguments has been given
-        is_var_set_non_empty ARG_NUM_MIN && (( ${#_callers_posargs_[@]} >= $ARG_NUM_MIN )) || {
-
-            # Echo error with usage message
-            log_error "Too fiew arguments"
-            __echo_usage_if_verbose
-            # Restore logging configuration
-            restore_log_config_from_default_stack
-            # Return error
-            return 1
-
-        }
-
-        # Chekc if maximal number of arguments has been given
-        is_var_set_non_empty ARG_NUM_MAX && (( ${#_callers_posargs_[@]} <= $ARG_NUM_MAX )) || {
+        # Check if minimal number of arguments has been given
+        if is_var_set_non_empty ARG_NUM_MIN; then
+            (( ${#_callers_posargs_[@]} >= $ARG_NUM_MIN )) || {
             
-            # Echo error with usage message
-            log_error "Too many arguments"
-            __echo_usage_if_verbose
-            # Restore logging configuration
-            restore_log_config_from_default_stack
-            # Return error
-            return 1
+                # Echo error with usage message
+                log_error "Too fiew arguments"
+                __echo_usage_if_verbose
+                # Restore logging configuration
+                restore_log_config_from_default_stack
+                # Return error
+                return 1
 
-        }
+            }
+        fi
+
+        # Check if maximal number of arguments has been given
+        if is_var_set_non_empty ARG_NUM_MAX; then
+            (( ${#_callers_posargs_[@]} <= $ARG_NUM_MAX )) || {
+            
+                # Echo error with usage message
+                log_error "Too many arguments"
+                __echo_usage_if_verbose
+                # Restore logging configuration
+                restore_log_config_from_default_stack
+                # Return error
+                return 1
+
+            }
+        fi
 
     fi
 
@@ -343,36 +350,38 @@ function parseargs() {
             local arg_max_val_ref_="ARG${arg_idx_}_MAX"
 
             # Check if argument's value is not lesser than a minimal one
-            is_var_set_non_empty "$arg_min_val_ref_" &&
-            [[ "${_callers_posargs_[$i_]}" -ge "${!arg_min_val_ref_}" ]] || {
-                    
-                # Echo error with usage message
-                log_error \
-                    "$arg_idx_conjugated_ positional argument too small (${_callers_posargs_[$i_]})" \
-                    "Minimal value is (${!arg_min_val_ref_})"
-                __echo_usage_if_verbose
-                # Restore logging configuration
-                restore_log_config_from_default_stack
-                # Return error
-                return 1
+            if is_var_set_non_empty "$arg_min_val_ref_"; then
+                [[ "${_callers_posargs_[$i_]}" -ge "${!arg_min_val_ref_}" ]] || {
+                        
+                    # Echo error with usage message
+                    log_error \
+                        "$arg_idx_conjugated_ positional argument too small (${_callers_posargs_[$i_]})" \
+                        "Minimal value is (${!arg_min_val_ref_})"
+                    __echo_usage_if_verbose
+                    # Restore logging configuration
+                    restore_log_config_from_default_stack
+                    # Return error
+                    return 1
 
-            }
+                }
+            fi
 
             # Check if argument's value is not greater than a maximal one
-            is_var_set_non_empty "$arg_max_val_ref_" &&
-            [[ "${_callers_posargs_[$i_]}" -ge "${!arg_max_val_ref_}" ]] || {
+            if is_var_set_non_empty "$arg_max_val_ref_"; then
+                [[ "${_callers_posargs_[$i_]}" -ge "${!arg_max_val_ref_}" ]] || {
 
-                # Echo error with usage message
-                log_error \
-                    "$arg_idx_conjugated_ positional argument too large (${_callers_posargs_[$i_]})" \
-                    "Maximal value is (${!arg_max_val_ref_})"
-                __echo_usage_if_verbose
-                # Restore logging configuration
-                restore_log_config_from_default_stack
-                # Return error
-                return 1
+                    # Echo error with usage message
+                    log_error \
+                        "$arg_idx_conjugated_ positional argument too large (${_callers_posargs_[$i_]})" \
+                        "Maximal value is (${!arg_max_val_ref_})"
+                    __echo_usage_if_verbose
+                    # Restore logging configuration
+                    restore_log_config_from_default_stack
+                    # Return error
+                    return 1
 
-            }
+                }
+            fi
             
         fi
 
@@ -389,7 +398,7 @@ function parseargs() {
         for _callers_opt_ in "${!_callers_options_[@]}"; do
             
             # Get name of the option typed by the user in case of reporting an error
-            local _callers_opt_name_=$(get_option_name "${_callers_args_}" "${_callers_defs_}" "${_callers_opt_}")
+            local _callers_opt_name_=$(get_option_name _callers_args_ _callers_opt_definitions_ _callers_opt_)
             # Check if error occurred (should not happen, as the option was sucesfully parsed by `parseopts`)
             [[ $? == 0 ]] || {
 
@@ -427,36 +436,38 @@ function parseargs() {
                 local opt_max_val_ref_="${_callers_opt_}_MAX"
 
                 # Check if options's value is not lesser than a minimal one
-                is_var_set_non_empty "$opt_min_val_ref_" &&
-                [[ "${_callers_opt_}" -ge "${!opt_min_val_ref_}" ]] || {
-                        
-                    # Echo error with usage message
-                    log_error \
-                        "$_callers_opt_name_ option too small (${_callers_options_[$_callers_opt_]})" \
-                        "Minimal value is (${!opt_min_val_ref_})"
-                    __echo_usage_if_verbose
-                    # Restore logging configuration
-                    restore_log_config_from_default_stack
-                    # Return error
-                    return 1
+                if is_var_set_non_empty "$opt_min_val_ref_"; then
+                    [[ "${_callers_opt_}" -ge "${!opt_min_val_ref_}" ]] || {
+                            
+                        # Echo error with usage message
+                        log_error \
+                            "$_callers_opt_name_ option too small (${_callers_options_[$_callers_opt_]})" \
+                            "Minimal value is (${!opt_min_val_ref_})"
+                        __echo_usage_if_verbose
+                        # Restore logging configuration
+                        restore_log_config_from_default_stack
+                        # Return error
+                        return 1
 
-                }
+                    }
+                fi
 
                 # Check if options's value is not greater than a maximal one
-                is_var_set_non_empty "$opt_max_val_ref_" &&
-                [[ "${_callers_opt_}" -ge "${!opt_max_val_ref_}" ]] || {
+                if is_var_set_non_empty "$opt_max_val_ref_"; then
+                    [[ "${_callers_opt_}" -ge "${!opt_max_val_ref_}" ]] || {
 
-                    # Echo error with usage message
-                    log_error \
-                        "$_callers_opt_name_ option too large (${_callers_options_[$_callers_opt_]})" \
-                        "Maximal value is (${!opt_max_val_ref_})"
-                    __echo_usage_if_verbose
-                    # Restore logging configuration
-                    restore_log_config_from_default_stack
-                    # Return error
-                    return 1
-                    
-                }
+                        # Echo error with usage message
+                        log_error \
+                            "$_callers_opt_name_ option too large (${_callers_options_[$_callers_opt_]})" \
+                            "Maximal value is (${!opt_max_val_ref_})"
+                        __echo_usage_if_verbose
+                        # Restore logging configuration
+                        restore_log_config_from_default_stack
+                        # Return error
+                        return 1
+                        
+                    }
+                fi
 
             fi
 
@@ -677,7 +688,12 @@ is_var_set_non_empty opt_definitions[0] && parseargs_options+=( "--options-defs=
 is_var_set_non_empty opt_definitions[0] && parseargs_options+=( "--options-dst=options" )
 
 # Parse options
-parseargs args posargs || return 1
+local __ret_
+parseargs ${parseargs_options[@]} -- args posargs && __ret_="$?" || __ret_="$?"
+# Return 0 if help requested
+[[ "$__ret_" == 2 ]] && return 0 ||
+# Return 1 if parsing error occurred
+[[ "$__ret_" != 0 ]] && return 1
 
 # Parse positional arguments into the named values
 if is_var_set_non_empty arguments[0]; then

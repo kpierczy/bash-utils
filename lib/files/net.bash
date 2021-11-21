@@ -3,7 +3,7 @@
 # @file     net.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 9:59:21 pm
-# @modified Friday, 12th November 2021 3:11:41 am
+# @modified Sunday, 21st November 2021 3:37:11 pm
 # @project  BashUtils
 # @brief
 #    
@@ -48,14 +48,13 @@ function wget_and_localize() {
     logfile_="$(mktemp)" || return 1
 
     # Check if progress is to be displayed
-    local show_progres_flag_=''
-    is_var_set options[show_progress] &&
-        show_progres_flag_="--show-progress"
-    
-    local ret_
+    local -a __args_=( "$@" )
+    if is_array_element __args_ "--show-progress"; then
+        local show_progres_flag_="--show-progress" 
+    fi
     
     # Download requested file
-    wget "$@" --output-file="$logfile_" --no-verbose "$show_progres_flag_" && ret_=$? || ret_=$?
+    wget "$@" --output-file="$logfile_" --no-verbose "${show_progres_flag_:-}" && ret_=$? || ret_=$?
     
     # ----------------- Localize the file -----------------
     
@@ -64,11 +63,29 @@ function wget_and_localize() {
     
     # If file was successfully downloaded, parse the log file
     if [[ "$ret_" == "0" ]]; then
-    
-        # Parse the file
+
+        # Try to parse the downloaded file
         out_file_=$(cut -d '"' -f2 < $logfile_)
-        # Return success status code
-        ret_=0
+        # Return success status code if name was parsed sucesfully
+        if is_var_set_non_empty out_file_; then
+            ret_=0
+        # Else, check whether file was already downloaded
+        else
+
+            # In case file was already downloaded, reproduce logfile with --verbose flag
+            wget "$@" --output-file="$logfile_" --verbose &> /dev/null
+            # Read content of the logfile
+            log_=$(cat $logfile_)
+            # Remove text around the name of the file to be extracted
+            local prefixless_=${log_#File }
+            local suffixless_=${prefixless_% already*}
+            # Get the ROI (remove '' around the file's name)
+            out_file_=${suffixless_:1:-1}
+            # Return status code
+            is_var_set_non_empty out_file_ && 
+                ret_=2 || ret_=1
+
+        fi
         
     # If error code was returned, check whether an empty/buggy log was produced
     #
