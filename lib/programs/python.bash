@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified Sunday, 21st November 2021 11:30:07 pm
+# @modified Monday, 22nd November 2021 11:49:20 am
 # @project  BashUtils
 # @brief
 #    
@@ -127,9 +127,12 @@ function pip_install_list() {
 
     # Iterate over packages
     for package_ in "${_packages_[@]}"; do
+
+        # Parse package name (remove version requirement, if given)
+        local package_name_="${package_%>*}"
         
         # If package not isntalled, install
-        if ! is_pip_package_installed $package_; then
+        if ! is_pip_package_installed "$package_name_"; then
 
             # Log info, if verbose
             log_info "Installing $package_ ..."

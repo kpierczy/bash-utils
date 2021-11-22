@@ -2,7 +2,7 @@
 # @file     git.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:39:47 pm
-# @modified Wednesday, 10th November 2021 7:49:39 pm
+# @modified Monday, 22nd November 2021 9:57:30 pm
 # @project  BashUtils
 # @brief
 #    
@@ -103,6 +103,50 @@ gitrmm() {
     # Remove files of the submodule
     rm -rf ${path_} ${path_}_tmp
     
+    # If @var PROJECT_HOME set, back to initial directory
+    is_var_set PROJECT_HOME && popd
+
+}
+
+# -------------------------------------------------------------------
+# @brief Commits and pushes changes from the git submodule to the
+#   module's repository (pushes to origin master)
+#
+# @param message
+#    commit message
+# @param path (optional, default: .)
+#    local path to the submoduled repository (relative to 
+#    project's home directory)
+#
+# @environment
+#
+#    @var PROJECT_HOME (path)
+#       absolute path tot he git project's root (default: .)
+#
+# -------------------------------------------------------------------
+git_push_submodule_changes_to_master() {
+
+    # Arguments
+    local message_="$1"
+    local path_="${2:-.}"
+
+    # If @var PROJECT_HOME set, jump to repo's root
+    is_var_set PROJECT_HOME && pushd "$PROJECT_HOME"
+    # Enter the submodule
+    pushd "$path_"
+
+    # Commit changes
+    git commit -m "$message_"
+    # Merge detached changes with master
+    git branch tmp-branch
+    git checkout master
+    git merge tmp-branch
+    # Push to master
+    git push
+    # Remove temporary branch
+    git branch -d tmp-branch
+    
+    popd    
     # If @var PROJECT_HOME set, back to initial directory
     is_var_set PROJECT_HOME && popd
 
