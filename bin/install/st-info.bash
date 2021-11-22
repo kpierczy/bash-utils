@@ -3,7 +3,7 @@
 # @file     st-info.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 6:16:17 pm
-# @modified Monday, 22nd November 2021 12:30:11 am
+# @modified Monday, 22nd November 2021 9:18:58 am
 # @project  BashUtils
 # @brief
 #    
@@ -126,7 +126,7 @@ main() {
     )
     
     # Install dependencies
-    install_pkg_list --allow-local-app --su -y -v -U dependencies || {
+    install_pkg_list --allow-local-app --su -y -v dependencies || {
         log_error "Failed to download ST-Info's dependencies"
         exit 1
     }
