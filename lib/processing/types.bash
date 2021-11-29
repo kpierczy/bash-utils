@@ -3,7 +3,7 @@
 # @file     types.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 1:12:37 pm
-# @modified Sunday, 14th November 2021 6:56:19 pm
+# @modified Monday, 29th November 2021 2:36:11 pm
 # @project  BashUtils
 # @brief
 #    
@@ -199,7 +199,7 @@ function is_hash_array() {
     attributes_="$(get_entity_type $1)" || return 1
 
     # Check if entity is NOT an array
-    ! is_substring "$attributes_" "A" || return 2
+    is_substring "$attributes_" "A" || return 2
 
     return 0
 }

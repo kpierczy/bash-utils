@@ -3,7 +3,7 @@
 # @file     cli_v2.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 8:34:01 pm
-# @modified Sunday, 21st November 2021 11:24:07 pm
+# @modified Monday, 29th November 2021 1:27:13 pm
 # @project  BashUtils
 # @brief
 #    
@@ -56,7 +56,7 @@ install() {
             # @note Here the list of installed Python packages is acquired directly from the `pip list`
             #    and no @fun is_pip_package_installed() function is used. As a call to `pip list` is
             #    quite time-consuming, such approach makes the whole script noticeably faster
-
+    
             # Get list of all packages
             packages=$(python3 -m pip list 2> /dev/null)
 
@@ -73,7 +73,7 @@ install() {
                     if ! echo $packages | grep -i $package > /dev/null; then
 
                         # If ANY package's not installed, install requirements
-                        log "Updating Mbed python dependencies..."
+                        log_info "Updating Mbed python dependencies..."
                         PIP_FLAGS='-r' pip_install -v ${options[mbed_root]}/requirements.txt
                         break
                         
@@ -97,10 +97,10 @@ install() {
     }
 
     # Write path to the CLI's binaries, if requested
-    is_var_set_non_empty options[print_path] && {
+    if is_var_set_non_empty options[print_path]; then
         echo "~/.local/bin" >&3
-    }
-    
+    fi
+
 }
 
 # ============================================================== Main ============================================================== #

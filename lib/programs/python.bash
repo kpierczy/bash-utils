@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified Monday, 22nd November 2021 11:49:20 am
+# @modified Monday, 29th November 2021 10:36:10 am
 # @project  BashUtils
 # @brief
 #    
@@ -68,7 +68,7 @@ function get_pip_package_version() {
 #    
 #      -v   print verbose log
 #    --vi   print verbose log if package is already installed
-#      -U   use `apt upgrade` to install packages
+#      -U   use `-U` flag to install packages
 #
 # @environment
 #

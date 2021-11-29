@@ -2,7 +2,7 @@
 # @file     git.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:39:47 pm
-# @modified Monday, 22nd November 2021 9:57:30 pm
+# @modified Monday, 29th November 2021 1:52:51 pm
 # @project  BashUtils
 # @brief
 #    
@@ -54,7 +54,7 @@ function gitaddm() {
     # -------------------------------------------------
 
     # If @var PROJECT_HOME set, jump to repo's root
-    is_var_set PROJECT_HOME && pushd $PROJECT_HOME
+    is_var_set PROJECT_HOME && pushd $PROJECT_HOME > /dev/null
 
     # Prepare (optional) branch flag
     if is_var_set options[branch]; then
@@ -67,7 +67,7 @@ function gitaddm() {
     git submodule add $git_opts_ $url_ $path_
     
     # If @var PROJECT_HOME set, back to initial directory
-    is_var_set PROJECT_HOME && popd
+    is_var_set PROJECT_HOME && popd > /dev/null
     
 }
 
@@ -90,7 +90,7 @@ gitrmm() {
     local path_="$1"
 
     # If @var PROJECT_HOME set, jump to repo's root
-    is_var_set PROJECT_HOME && pushd $PROJECT_HOME
+    is_var_set PROJECT_HOME && pushd $PROJECT_HOME > /dev/null
 
     # Change name of the submodule to the temporary one
     mv ${path_} ${path_}_tmp
@@ -104,7 +104,7 @@ gitrmm() {
     rm -rf ${path_} ${path_}_tmp
     
     # If @var PROJECT_HOME set, back to initial directory
-    is_var_set PROJECT_HOME && popd
+    is_var_set PROJECT_HOME && popd > /dev/null
 
 }
 
@@ -131,9 +131,9 @@ git_push_submodule_changes_to_master() {
     local path_="${2:-.}"
 
     # If @var PROJECT_HOME set, jump to repo's root
-    is_var_set PROJECT_HOME && pushd "$PROJECT_HOME"
-    # Enter the submodule
-    pushd "$path_"
+    is_var_set PROJECT_HOME && pushd "$PROJECT_HOME" > /dev/null
+    
+    pushd "$path_" > /dev/null
 
     # Commit changes
     git commit -m "$message_"
@@ -146,8 +146,9 @@ git_push_submodule_changes_to_master() {
     # Remove temporary branch
     git branch -d tmp-branch
     
-    popd    
+    popd > /dev/null
+    
     # If @var PROJECT_HOME set, back to initial directory
-    is_var_set PROJECT_HOME && popd
+    is_var_set PROJECT_HOME && popd > /dev/null
 
 }

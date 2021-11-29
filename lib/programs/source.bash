@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Monday, 22nd November 2021 12:18:52 am
+# @modified Monday, 29th November 2021 11:49:51 am
 # @project  BashUtils
 # @brief
 #    
@@ -224,6 +224,10 @@ function is_targeted_action() {
 #                      verbose logs
 #     --verbose-tools  if set, prints output of the tools used for
 #                      action
+#   --log-target=NAME  name of the target to be configured printed
+#                      in the logs (if not given, the default logs
+#                      will be printed based on the source and build
+#                      directories)
 #
 # @environment
 #
