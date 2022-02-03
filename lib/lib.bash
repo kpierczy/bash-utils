@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:45:51 am
 # @modified Thursday, 11th November 2021 2:20:51 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    File consolidating `source` calls to all scripts defined in the library

@@ -94,7 +94,7 @@ categories:
     from the caller's context are visible in the context of the called function unless they are explicitly hidden by the
     definition with the matching name in the function's body. It is often a pain in the neck for programmers working
     with more robust languages than bash scripting language. However there are situatuions where such a feature may be
-    taken as an advantage. An example is a "logging" module from the BashUtils project. It's `log` function produces
+    taken as an advantage. An example is a "logging" module from the bash-utils project. It's `log` function produces
     an additional context information (which is in fact just a string describing from what part of the system the log
     comes from) when the LOG_CONTEXT variable is defined. As the `log` function cannot tell the difference whether the 
     variable has been declared globally or locally in the upper context, this mechanism provides an easy way to unify

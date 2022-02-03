@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 2:36:03 am
 # @modified Sunday, 14th November 2021 2:14:18 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of general utilities related to variables' manipulation

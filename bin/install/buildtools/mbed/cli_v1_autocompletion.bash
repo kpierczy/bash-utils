@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 5:01:29 pm
 # @modified Sunday, 21st November 2021 8:35:27 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installs autocompletion script for MBed CLI v1

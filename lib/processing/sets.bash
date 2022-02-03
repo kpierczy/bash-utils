@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 5:56:11 pm
 # @modified Wednesday, 10th November 2021 6:18:22 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of tools designed to manipulate on sets (arrays with unique elements)

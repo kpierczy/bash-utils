@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 11th November 2021 10:54:02 pm
 # @modified Friday, 12th November 2021 12:31:49 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Simple script extracting zip with a progress bar

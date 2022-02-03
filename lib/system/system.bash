@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 2:15:51 pm
 # @modified Sunday, 21st November 2021 2:19:35 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of system related to the general inspection of the host system

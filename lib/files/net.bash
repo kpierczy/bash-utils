@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 9:59:21 pm
 # @modified Sunday, 21st November 2021 3:37:11 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of tools related to manipulating files in remote servers

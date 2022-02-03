@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 1:51:48 pm
 # @modified Sunday, 21st November 2021 4:20:56 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installs the given version of the ARM-Embedded-Toolchain

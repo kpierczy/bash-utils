@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
 # @modified Sunday, 21st November 2021 2:58:52 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Handy functions aimed to configure script's environment

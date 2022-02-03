@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
 # @modified Sunday, 21st November 2021 9:28:29 pm
-# @project  BashUtils
+# @project  bash-utils
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
 # @brief

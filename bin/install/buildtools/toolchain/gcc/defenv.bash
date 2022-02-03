@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 7th November 2021 3:08:11 pm
 # @modified Sunday, 7th November 2021 3:08:43 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Default environment variables for GCC toolchain builtool

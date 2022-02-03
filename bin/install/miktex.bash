@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Friday, 5th November 2021 6:40:39 pm
 # @modified Sunday, 21st November 2021 11:45:36 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Script installs MiKTeX on the Ubuntu-based systems

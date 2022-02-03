@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 2:57:02 am
 # @modified Friday, 12th November 2021 12:31:54 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Script produces a bash-format array containing definitions of all options switches of the given programs

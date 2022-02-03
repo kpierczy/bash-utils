@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 12:25:13 am
 # @modified Sunday, 21st November 2021 4:34:29 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of tools related to parsing arguments by the bash functions and scripts

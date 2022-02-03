@@ -4,10 +4,10 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
 # @modified Sunday, 14th November 2021 9:09:52 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
-#    Main source script of the BashUtils project. Sourcing it will provide a shell with all functions and aliases defined in the
+#    Main source script of the bash-utils project. Sourcing it will provide a shell with all functions and aliases defined in the
 #    project's library as well ass will exted PATH with directories holding helper scripts and programms.
 #    
 # @copyright Krzysztof Pierczyk © 2021
@@ -17,7 +17,7 @@
 
 # Check bash version (required >= 4.2)
 if (( BASH_VERSINFO[1] < 3 )) && (( BASH_VERSINFO[0] <= 4 )); then
-    echo "BashUtils lib requires bash v4 or greater"
+    echo "bash-utils lib requires bash v4 or greater"
     echo "Current Bash Version: ${BASH_VERSION}"
     return 1
 fi
@@ -43,7 +43,7 @@ source $BASH_UTILS_HOME/lib/lib.bash
 # Check `getopt` version
 getopt -T &>/dev/null
 if (( $? != 4 )); then
-    echo "BashUtils lib requires so called 'enhanced' (or GNU) getop version to work"
+    echo "bash-utils lib requires so called 'enhanced' (or GNU) getop version to work"
     return 1
 fi
 

@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 7:11:57 pm
 # @modified Sunday, 21st November 2021 3:49:11 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of tools related to archieve files

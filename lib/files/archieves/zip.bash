@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 11th November 2021 9:27:03 pm
 # @modified Friday, 12th November 2021 1:41:36 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of tools related to ZIP archieves

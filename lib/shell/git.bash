@@ -3,7 +3,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:39:47 pm
 # @modified Monday, 29th November 2021 1:52:51 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Sourcing this script provides user's terminal with handy git-related commands

@@ -3,7 +3,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 9:28:52 pm
 # @modified Thursday, 11th November 2021 1:01:59 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Functions related to inspecting applications installed in the system

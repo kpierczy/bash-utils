@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 4:36:43 pm
 # @modified Sunday, 21st November 2021 8:36:26 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installs OpenOCD progremmer/debugger software from the binary package

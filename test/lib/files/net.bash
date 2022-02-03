@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 1:58:33 am
 # @modified Thursday, 11th November 2021 4:15:26 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Test suite for functions from lib/files/net.bash module

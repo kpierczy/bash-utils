@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 5:16:31 pm
 # @modified Wednesday, 10th November 2021 5:25:16 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Test suite for string-maniuplation tools

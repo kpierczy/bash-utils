@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 8:34:01 pm
 # @modified Monday, 29th November 2021 1:27:13 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installs Mbed CLI v2

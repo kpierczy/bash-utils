@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 6:14:24 pm
 # @modified Thursday, 11th November 2021 1:18:36 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Functions performing general-purpose manipulations concerning applying a function to a collection

@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 6:16:17 pm
 # @modified Monday, 22nd November 2021 9:18:58 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installs ST-Info utility from source

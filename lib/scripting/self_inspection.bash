@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
 # @modified Wednesday, 10th November 2021 7:08:44 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of general-use functions and aliases that can be exploited to inspect state of the calling script

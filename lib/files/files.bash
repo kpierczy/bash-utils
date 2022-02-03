@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
 # @modified Thursday, 11th November 2021 1:19:30 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of handy functions related to files' manipulation

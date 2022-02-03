@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:08:34 am
 # @modified Saturday, 13th November 2021 1:24:40 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of general logging utilities

@@ -3,7 +3,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:31:34 pm
 # @modified Thursday, 11th November 2021 2:52:58 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Sourcing this script provides user's terminal with handy docker-related commands

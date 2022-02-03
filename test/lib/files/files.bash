@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 1:05:39 am
 # @modified Wednesday, 10th November 2021 4:56:05 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Test suite for functions from lib/files/files.bash module

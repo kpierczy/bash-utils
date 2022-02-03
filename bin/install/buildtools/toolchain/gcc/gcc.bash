@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:28:20 pm
 # @modified Wednesday, 10th November 2021 5:45:34 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Script installing GCC toolchain's comonents

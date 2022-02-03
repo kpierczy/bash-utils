@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
 # @modified Monday, 29th November 2021 11:49:51 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of tools related to building software from source

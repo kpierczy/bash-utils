@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 7:33:06 pm
 # @modified Sunday, 14th November 2021 9:24:22 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Options-parsing routines of the "parseargs" module

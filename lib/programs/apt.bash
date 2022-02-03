@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
 # @modified Sunday, 21st November 2021 11:23:15 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of functions performing basic routines related to apt packages

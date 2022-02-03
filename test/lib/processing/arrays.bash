@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:42:12 pm
 # @modified Tuesday, 9th November 2021 2:45:15 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Test suite for arrays-related tools

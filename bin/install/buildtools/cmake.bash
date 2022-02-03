@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
 # @modified Sunday, 21st November 2021 11:16:02 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installation script for the CMake

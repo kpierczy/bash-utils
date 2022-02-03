@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 4:29:08 pm
 # @modified Sunday, 21st November 2021 9:26:46 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installs the given version of the Python

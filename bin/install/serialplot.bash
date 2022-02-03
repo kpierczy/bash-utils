@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 5:09:51 pm
 # @modified Sunday, 21st November 2021 11:40:52 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installs seriaplot app

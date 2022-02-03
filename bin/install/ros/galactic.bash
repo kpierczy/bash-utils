@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 8:55:12 pm
 # @modified Wednesday, 10th November 2021 5:45:34 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    ROS2-Galactic-specific installation routines

@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 4:05:49 am
 # @modified Wednesday, 10th November 2021 5:54:32 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of routines providing an interface for bash script's tracing

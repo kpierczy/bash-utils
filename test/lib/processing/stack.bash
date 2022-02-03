@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 11:13:15 pm
 # @modified Thursday, 11th November 2021 1:32:21 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Test suite for bash implementation of the stack

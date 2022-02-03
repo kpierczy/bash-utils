@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 9:47:05 pm
 # @modified Wednesday, 10th November 2021 6:41:12 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of functions related to - wait for it - functions

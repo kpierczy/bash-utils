@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
 # @modified Friday, 12th November 2021 12:25:06 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of handy utilities used for creating helper scripts and functions

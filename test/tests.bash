@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 3:24:06 am
 # @modified Wednesday, 10th November 2021 6:52:48 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Composition of all bash tests. To run the testsuite, source `source_me.bash` file and run `shpec` with the name of the testfile

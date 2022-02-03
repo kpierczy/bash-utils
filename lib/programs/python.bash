@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
 # @modified Monday, 29th November 2021 10:36:10 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of functions managing python3 packages

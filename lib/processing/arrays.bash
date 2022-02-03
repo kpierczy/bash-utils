@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
 # @modified Sunday, 21st November 2021 3:34:30 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of tools related to bash array

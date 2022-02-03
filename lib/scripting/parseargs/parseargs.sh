@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 2:37:47 pm
 # @modified Sunday, 14th November 2021 6:19:11 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Main file of the "parseargs" module

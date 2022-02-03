@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 1:51:42 am
 # @modified Wednesday, 10th November 2021 7:10:26 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of functions related to the strict-mode-driven bash scripts development

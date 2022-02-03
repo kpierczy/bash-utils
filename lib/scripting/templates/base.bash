@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 4:14:44 pm
 # @modified Friday, 5th November 2021 2:20:35 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Basic script template covering disabling words-splitting, performing exit-on-source routine and entering the strict mode. 

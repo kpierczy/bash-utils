@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 2:24:35 pm
 # @modified Sunday, 14th November 2021 2:47:00 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    List of functions related to parsing process of the UBAD table

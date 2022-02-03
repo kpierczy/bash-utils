@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 1:12:37 pm
 # @modified Monday, 29th November 2021 2:36:11 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of simple tools related to the inspection of the type of the bash entity

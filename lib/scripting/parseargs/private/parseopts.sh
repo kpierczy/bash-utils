@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 12:49:58 pm
 # @modified Sunday, 14th November 2021 9:26:18 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Simplified version of the @fun parseopts` function aimed to be used by the @fun parseopts itself

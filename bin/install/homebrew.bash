@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 4:02:56 pm
 # @modified Sunday, 21st November 2021 8:47:19 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installs homebrew packages manager

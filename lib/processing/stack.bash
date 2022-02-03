@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 9:00:58 pm
 # @modified Saturday, 13th November 2021 2:42:36 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Bash implementation of simple stack mechanisms

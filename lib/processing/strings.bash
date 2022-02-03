@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 4:50:15 pm
 # @modified Friday, 12th November 2021 7:59:54 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Set of tools related to bash strings

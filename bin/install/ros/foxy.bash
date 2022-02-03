@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 8:55:12 pm
 # @modified Friday, 5th November 2021 4:42:10 am
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    ROS2-Foxy-specific installation routines

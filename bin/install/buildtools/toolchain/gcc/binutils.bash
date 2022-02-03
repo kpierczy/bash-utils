@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
 # @modified Sunday, 7th November 2021 3:06:10 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Installation routines for binutils tool

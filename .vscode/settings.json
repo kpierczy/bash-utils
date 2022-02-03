@@ -123,7 +123,7 @@
         }
     ],
     "psi-header.variables": [
-        ["projectname", "BashUtils"]
+        ["projectname", "bash-utils"]
     ],
     "psi-header.templates": [
         {

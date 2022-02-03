@@ -4,7 +4,7 @@
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 1:13:17 pm
 # @modified Sunday, 21st November 2021 10:18:09 pm
-# @project  BashUtils
+# @project  bash-utils
 # @brief
 #    
 #    Script installs Boost library
