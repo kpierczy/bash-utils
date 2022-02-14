@@ -3,7 +3,7 @@
 # @file     hash_arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Saturday, 13th November 2021 2:25:06 am
+# @modified Monday, 14th February 2022 5:54:27 pm
 # @project  bash-utils
 # @brief
 #    
@@ -53,4 +53,35 @@ function print_hash_array() {
         printf "[%s]=%s\n" "$key" "${arr_[$key]}"
     done
 
+}
+
+# -------------------------------------------------------------------
+# @brief Checks whether hash array named @p harray has a field named
+#    @p field defined
+#
+# @param harray
+#    name fo the hash array to be verified
+# @param field
+#    field of the @p harray to be checked
+#
+# @returns
+#    @c 0 if @p harray has a field names @p field
+#    @c 1 otherwise
+#    @c 2 if @p harray is not a hash array
+# -------------------------------------------------------------------
+function has_hash_array_field() {
+
+    # Parse arguments
+    local harray_="$1"
+    local field_="$2"
+
+    # Check if @p harray is a hash_array
+    is_hash_array $harray_ || return 2
+
+    # Get reference to the array
+    local -n harray_ref="$harray_"
+    # Check if @p field is defined
+    [ ${harray_ref[$field_]+x} ] || return 1
+
+    return 0
 }

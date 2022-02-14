@@ -3,7 +3,7 @@
 # @file     settings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
-# @modified Sunday, 21st November 2021 2:58:52 pm
+# @modified Monday, 14th February 2022 8:15:00 pm
 # @project  bash-utils
 # @brief
 #    
@@ -107,3 +107,8 @@ function disable_globbing() {
 #    to the current function
 # -------------------------------------------------------------------
 alias localize_word_splitting='local IFS=$IFS'
+
+# -------------------------------------------------------------------
+# @brief Limits changes to the bash options by defining '-' as local
+# -------------------------------------------------------------------
+alias localize_bash_options='local -'

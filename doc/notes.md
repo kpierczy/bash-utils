@@ -8,6 +8,7 @@
 7. [What is PPA](https://itsfoss.com/ppa-guide/)
 8. [Debian SourceList](https://wiki.debian.org/SourcesList)
 9. [Repositories (Ubuntu)](https://help.ubuntu.com/community/Repositories)
+10. [Bash pattern matching](https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Pattern-Matching)
 
 # Libraries
 1. [bash-lib (cyberark)](https://github.com/cyberark/bash-lib)

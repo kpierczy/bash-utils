@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Monday, 14th February 2022 3:51:52 pm
+# @modified Monday, 14th February 2022 8:13:13 pm
 # @project  bash-utils
 # @brief
 #    
@@ -34,6 +34,8 @@ source $BASH_UTILS_HOME/lib/lib.bash
 
 # Enable aliases' expansion
 set_aliases_expansion on
+# Enable globbing' expansion
+enable_globbing
 
 # Resource library with enabled aliases' expansion
 source $BASH_UTILS_HOME/lib/lib.bash

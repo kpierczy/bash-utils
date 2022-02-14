@@ -6,20 +6,20 @@ as well as in the extensive multi-tool scripts requiring automated validation of
 'usage' message.
 
 Module is designed around variables' references (declare -n) introduced in bash 4.3. Public API contains a single high level
-function  @fun parseargs and three low level functions - @fun parsepargs, @fun parseopts and @fun parsenvs - that are 
-components of the @fun parseargs function as well as a set of aliases that establish a helper interface for calling thses
-functions in various environments. In the simplest form @fun parseargs takes two arguments - @p args containing name of the
+function @fun `parseargs` and three low level functions - @fun `parsepargs`, @fun `parseopts` and @fun `parsenvs` - that are 
+components of the @fun `parseargs` function as well as a set of aliases that establish a helper interface for calling thses
+functions in various environments. In the simplest form @fun `parseargs` takes two arguments - @p args containing name of the
 array holding arguments to be parsed and @p pargs (from 'positional arguments') containing name of the output array where the
 parsed positional arguments should be stored - and copies content of the array named @p args into the array named @p pargs. 
-Although in this form it is not the most usefull tool, this is the simplest definition of what 'to parse arguments' mean.
+Although in this form it is not the most usefull tool, this is the simplest definition of what 'to parse arguments' means.
 
 The module incorporates also some helper methods that can turn out to be usefull when playing with arguments' parsing in bash.
 
 ## Arguments' description
 
 To let user describe arguments of their functions and scripts in a more declarative - and so, in opitnion of the author, more 
-readable - form "parseargs" introduces a Unified Bash Arguments Description format (UBAD for short). If your are the a newbie
-in the bash world, don't bother nomenclature. UBAD is just a fancy name gathering for two concpets:
+readable - form, "parseargs" introduces a **Unified Bash Arguments Description** format (UBAD for short). If your are the a newbie
+in the bash world, don't bother nomenclature. UBAD is just a fancy name gathering two concpets:
 
     (1) definition of the data format (called 'UBAD table') describing an argument that in other languages would be called 
         a 'dictionary' or a 'structure' with the strictly defined keys or fields
@@ -27,15 +27,19 @@ in the bash world, don't bother nomenclature. UBAD is just a fancy name gatherin
 
 In general the structure of the UBAD table (1) is following:
 
+<code>
+
     declare -A ubad_table=(
-            [format]=STR
-            [name]=STR
-            [type]=STR
-            [defaut]=STR_OR_INT
+        [format]=STR
+        [name]=STR
+        [type]=STR
+        [defaut]=STR_OR_INT
         [variants]=LIST
-            [range]=PAIR
-            [help]=STR
+        [range]=PAIR
+        [help]=STR
     )
+
+</code>
 
 Most of fields of the structure (or using bash nomenclature - this "hash table") are optional and although you can probably 
 figure out their meaning, their properties are extensivey described below. UBAD descriptors are gathered into arrays
@@ -90,7 +94,7 @@ categories:
     function/script and in contrast to positional arguments always begin with a hyphenh. "parseargs" uses standard GNU
     `getopt` convention for defining optional arguments (in fact it uses `getopt` underthehood)
     
-    3) environmental arguments (envs) - as we all know bash has very poor namespacing capabilities. This mean that variables
+    3) environmental arguments (envs) - as we all know bash has very poor namespacing capabilities. This means that variables
     from the caller's context are visible in the context of the called function unless they are explicitly hidden by the
     definition with the matching name in the function's body. It is often a pain in the neck for programmers working
     with more robust languages than bash scripting language. However there are situatuions where such a feature may be
@@ -104,7 +108,7 @@ categories:
     passed to the function/script as the third type of arguments. Be carefull though, 'environmental arguments' are NOT
     the same as the Linux environmental variables!
     
-@fun parseopts function uses three types of UBAD lists - 'args-definitions', 'opts-definitions' and 'envs-definitions' - to 
+@fun `parseopts` function uses three types of UBAD lists - 'args-definitions', 'opts-definitions' and 'envs-definitions' - to 
 acquire arguments' descriptions. Order of the UBAD tables in the 'args-definitions' list determines order of described 
 positional arguments. Results of the parsing routine are written into three hash arrays and two array:
 
@@ -116,8 +120,8 @@ positional arguments. Results of the parsing routine are written into three hash
 
 ## UBAD Table
 
-Having described types of argument distinguidhed by the module we can move to the description of the structure of the UBAD 
-table. Underlying section tends to descibe subsequent fields in a way that is exhaustive for the topic and hopefully not for
+Having described types of argument distinguished by the module we can move to the description of the structure of the UBAD 
+table. Underlying section tends to describe subsequent fields in a way that is exhaustive for the topic and hopefully not for
 the user :)
 
 [format] (optional/required)

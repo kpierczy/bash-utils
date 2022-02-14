@@ -3,7 +3,7 @@
 # @file     types.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 1:12:37 pm
-# @modified Monday, 29th November 2021 2:36:11 pm
+# @modified Monday, 14th February 2022 8:23:06 pm
 # @project  bash-utils
 # @brief
 #    
@@ -54,39 +54,6 @@ function get_entity_type() {
 }
 
 # ---------------------------------------------------------------------------------------
-# @brief Checks whether a bash entity named @p entity is a simple string
-#
-# @param variable
-#    name of the entity to be inspected
-#
-# @returns
-#    @c 0 on succes \n
-#    @c 1 if entity does not exist \n
-#    @c 2 if entity is not a string
-# ---------------------------------------------------------------------------------------
-function is_string() {
-
-    # Arguments
-    local entity_="$1"
-
-    # List of entitie's attributes
-    local attributes_
-    # Get list of entitie's attributes
-    attributes_="$(get_entity_type $1)" || return 1
-
-    # Check if entity is undefined type (hence, assume it's string)
-    is_substring "$attributes_" "-" || return 1
-    # Check if entity is NOT an integer
-    ! is_substring "$attributes_" "i" || return 1
-    # Check if entity is NOT an array
-    ! is_substring "$attributes_" "a" || return 1
-    # Check if entity is NOT an assosiative array
-    ! is_substring "$attributes_" "A" || return 1
-
-    return 0
-}
-
-# ---------------------------------------------------------------------------------------
 # @brief Checks whether a bash entity named @p entity is a string
 #
 # @param entity
@@ -118,6 +85,7 @@ function is_string() {
 
     return 0
 }
+
 
 # ---------------------------------------------------------------------------------------
 # @brief Checks whether a bash entity named @p entity is an integer
@@ -171,8 +139,8 @@ function is_array() {
     # Get list of entitie's attributes
     attributes_="$(get_entity_type $1)" || return 1
 
-    # Check if entity is NOT an array
-    ! is_substring "$attributes_" "a" || return 2
+    # Check if entity is an array
+    is_substring "$attributes_" "a" || return 2
 
     return 0
 }
@@ -198,7 +166,7 @@ function is_hash_array() {
     # Get list of entitie's attributes
     attributes_="$(get_entity_type $1)" || return 1
 
-    # Check if entity is NOT an array
+    # Check if entity is a hash array
     is_substring "$attributes_" "A" || return 2
 
     return 0

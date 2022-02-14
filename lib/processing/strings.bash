@@ -3,7 +3,7 @@
 # @file     strings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 4:50:15 pm
-# @modified Friday, 12th November 2021 7:59:54 pm
+# @modified Monday, 14th February 2022 7:33:06 pm
 # @project  bash-utils
 # @brief
 #    
@@ -161,6 +161,8 @@ function strlen() {
 #                             @p string may be non-letter and 
 #                             non-underscore character from the 
 #                             allowed charset
+#   -n|--no-numbers           if set no numbers are allowed in the 
+#                             name 
 #
 # -------------------------------------------------------------------
 function is_identifier() {
@@ -174,6 +176,7 @@ function is_identifier() {
     local -a opt_definitions=(
         '-e|--charset',charset
         '-a|--allow-non-std-front',non_std_start,f
+        '-n|--no-numbers',no_numbers,f
     )
     
     # Parse arguments to a named array
@@ -185,6 +188,7 @@ function is_identifier() {
     # Parse options
     local extended_charset_="${options[charset]:-}"
     local non_std_start_="${options[non_std_start]:-}"
+    local no_numbers="${options[no_numbers]:-}"
 
     # ------------------------------------------------- 
 
@@ -236,8 +240,11 @@ function is_identifier() {
         # Get the character
         local character_=${string_:$i:1}
 
-        # Check if alphanumeric of underscore
-        [[ $character_ =~ [[:alnum:]]|_ ]] ||
+        # Check if alphabetic/alphanumeric or underscore
+        is_var_set_non_empty no_numbers && 
+            [[ $character_ =~ [[:alpha:]]|_ ]] ||
+        ! is_var_set_non_empty no_numbers && 
+            [[ $character_ =~ [[:alnum:]]|_ ]] ||
         # Check if one of extended characters
         is_array_element extended_charset_list_ $character_ ||
         # Else, return error
@@ -248,4 +255,127 @@ function is_identifier() {
     # If no erronous character found, return success
     return 0
     
+}
+
+# -------------------------------------------------------------------
+# @brief Checks whether the @p string represents a number
+# 
+# @param string
+#    string to be evaluated
+#
+# @options
+#
+#   -u|--unsigned If set, function matches only numbers without 
+#                 a leading sign
+# @returns 
+#    @retval @c 0 if @p string represents a number
+#    @retval @c 1 otherwise
+# -------------------------------------------------------------------
+function represents_number() {
+    
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-u|--unsigned',unsigned,f
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # Parse arguments
+    local string_="${posargs[0]}"
+
+    # Parse options
+    local unsigned="${options[unsigned]:-}"
+    
+    # ------------------------------------------------- 
+
+    local pattern_=''
+
+    # Select pattern
+    if is_var_set_non_empty unsigned; then
+        pattern_='^[0-9]+([.][0-9]+)?$'
+    else
+        pattern_='^[+-]?[0-9]+([.][0-9]+)?$'
+    fi
+
+    # Match pattern
+    [[ $string_ =~ $pattern_ ]] || return 1
+}
+
+# -------------------------------------------------------------------
+# @brief Checks whether the @p string represents an integer
+# 
+# @param string
+#    string to be evaluated
+#
+# @options
+#
+#   -u|--unsigned If set, function matches only numbers without 
+#                 a leading sign
+#
+# @returns 
+#    @retval @c 0 if @p string represents a number
+#    @retval @c 1 otherwise
+# -------------------------------------------------------------------
+function represents_integer() {
+    
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-u|--unsigned',unsigned,f
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # Parse arguments
+    local string_="${posargs[0]}"
+
+    # Parse options
+    local unsigned="${options[unsigned]:-}"
+
+    # ------------------------------------------------- 
+
+    local pattern_=''
+
+    # Select pattern
+    if is_var_set_non_empty unsigned; then
+        pattern_='^[0-9]+$'
+    else
+        pattern_='^[+-]?[0-9]+$'
+    fi
+
+    # Match pattern
+    [[ $string_ =~ $pattern_ ]] || return 1
+}
+
+# -------------------------------------------------------------------
+# @brief Checks whether @p string is any of @p ...
+# 
+# @param string
+#    string to be evaluated
+# @param ...
+#    list of strings to be compared against
+#
+# @returns 
+#    @c 0 if @p string is equal to any of @p ...
+#    @c 1 otherwise
+# -------------------------------------------------------------------
+function is_any_of() {
+
+    # Arguments
+    local string_="$1"
+    local -a elements_=("${@:2}")
+    # Local variables
+    local e_
+    
+    # Check array
+    for e_ in "${elements_[@]}"; do
+        [[ "$e_" == "$string_" ]] && return 0
+    done
+
+    return 1
 }
