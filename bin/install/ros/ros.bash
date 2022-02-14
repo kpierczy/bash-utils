@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Sunday, 21st November 2021 9:28:29 pm
+# @modified Monday, 14th February 2022 3:17:58 pm
 # @project  bash-utils
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
@@ -38,10 +38,10 @@ get_heredoc usage <<END
     Environment:
 
         ROS2_INSTALLATION_PATH  installation path of the ROS when 'bin' installation/uninstallation
-                                is performed (default: /opt/ros/foxy)
+                                is performed (default: /opt/ros/galactic)
                    ROS2_DISTRO  distribution to be installed. Currently supported are:
                                     - foxy
-                                    - galactic
+                                    - galactic (default)
 END
 
 # ============================================================ Constants =========================================================== #
@@ -57,12 +57,12 @@ LOG_CONTEXT="ros2"
 
 # ========================================================== Configruation ========================================================= #
 
+# Distributon to be installed
+var_set_default ROS2_DISTRO 'galactic'
 # Default destination of the ROS2
-ROS2_DEFAULT_INSTALLATION_PATH='/opt/ros/foxy'
+ROS2_DEFAULT_INSTALLATION_PATH="/opt/ros/$ROS2_DISTRO"
 # Destination of the ROS2
 var_set_default ROS2_INSTALLATION_PATH "$ROS2_DEFAULT_INSTALLATION_PATH"
-# Distributon to be installed
-var_set_default ROS2_DISTRO ''
 
 # ============================================================ Functions =========================================================== #
 

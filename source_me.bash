@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Sunday, 14th November 2021 9:09:52 pm
+# @modified Monday, 14th February 2022 3:51:52 pm
 # @project  bash-utils
 # @brief
 #    
@@ -25,7 +25,7 @@ fi
 # ============================================================== Setup ============================================================= #
 
 # Set library home path
-BASH_UTILS_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")"
+export BASH_UTILS_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
 # ============================================================= Sources ============================================================ #
 
@@ -77,6 +77,8 @@ append_path "$BASH_UTILS_HOME/dep/shpec/bin"
 
 # Add ./bin directory PATH
 append_path "$BASH_UTILS_HOME/bin"
+# Add variable pointing to the ./bin directory
+declare BASH_UTILS_BIN_HOME="$BASH_UTILS_HOME/bin"
 
 # Add ./scripts directory PATH
 append_path "$BASH_UTILS_HOME/scripts"

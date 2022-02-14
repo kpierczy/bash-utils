@@ -3,7 +3,7 @@
 # @file     general.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:16:12 am
-# @modified Friday, 12th November 2021 12:25:06 am
+# @modified Monday, 14th February 2022 3:39:14 pm
 # @project  bash-utils
 # @brief
 #    
@@ -153,4 +153,11 @@ function append_path() {
     is_substring "$PATH" "$path_" || 
         PATH="$PATH:$path_"
         
+}
+
+# -------------------------------------------------------------------
+# @brief Prints current $PATH line by line
+# -------------------------------------------------------------------
+function print_path() {
+    sed 's/:/\n/g' <<< "$PATH"
 }

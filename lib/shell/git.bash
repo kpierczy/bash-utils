@@ -2,7 +2,7 @@
 # @file     git.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:39:47 pm
-# @modified Monday, 29th November 2021 1:52:51 pm
+# @modified Monday, 14th February 2022 4:11:17 pm
 # @project  bash-utils
 # @brief
 #    
@@ -118,6 +118,11 @@ gitrmm() {
 #    local path to the submoduled repository (relative to 
 #    project's home directory)
 #
+# @options
+#
+#    --all if given, function will call `git add *` in the root directory 
+#          of the submodule before committing
+#
 # @environment
 #
 #    @var PROJECT_HOME (path)
@@ -127,14 +132,33 @@ gitrmm() {
 git_push_submodule_changes_to_master() {
 
     # Arguments
-    local message_="$1"
-    local path_="${2:-.}"
+    local message_
+    local path_
+
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '--all',all,f
+    )
+    
+    # Parse arguments to a named array
+    parse_options
+
+    # Parse arguments
+    local message_="${posargs[0]}"
+    local path_="${posargs[1]}"
+
+    # -------------------------------------------------
 
     # If @var PROJECT_HOME set, jump to repo's root
     is_var_set PROJECT_HOME && pushd "$PROJECT_HOME" > /dev/null
     
     pushd "$path_" > /dev/null
 
+    # If '-a' option given, add all changes to the next commit
+    is_var_set options[all] && git add *
+    
     # Commit changes
     git commit -m "$message_"
     # Merge detached changes with master
