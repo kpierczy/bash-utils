@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 7:11:57 pm
-# @modified Sunday, 21st November 2021 3:49:11 pm
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -15,7 +15,7 @@
 # Source dependencies
 source $BASH_UTILS_HOME/lib/files/archieves/tar.bash
 source $BASH_UTILS_HOME/lib/files/archieves/zip.bash
-source $BASH_UTILS_HOME/lib/scripting/options.bash
+source $BASH_UTILS_HOME/lib/scripting/parseargs/short/parseopts.bash
 source $BASH_UTILS_HOME/lib/scripting/settings.bash
 
 # ============================================================ Constant ============================================================ #
@@ -145,7 +145,7 @@ function create_archieve() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     format_="${posargs[0]}"
@@ -218,7 +218,7 @@ function need_extract() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     archieve_="${posargs[0]}"
@@ -303,7 +303,7 @@ function extract_archieve() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local archieve_="${posargs[0]}"
@@ -411,7 +411,7 @@ function download_and_extract() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
     
     # Parse arguments
     url_="${posargs[0]}"

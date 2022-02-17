@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Sunday, 21st November 2021 11:23:15 pm
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -102,7 +102,7 @@ function install_pkg_list() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
     
     # Parse arguments
     local -n _packages_="${posargs[0]}"
@@ -224,7 +224,7 @@ function install_pkg() {
     )
 
     # Parse arguments
-    parse_options
+    parse_options_s
     
     # Parse packages to be installed into an array
     local -a packages_=( "${posargs[@]}" )

@@ -3,7 +3,7 @@
 # @file     arguments_old.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 12:25:13 am
-# @modified Sunday, 21st November 2021 4:34:29 pm
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -166,7 +166,7 @@ alias __echo_usage_if_verbose='
 #      some_other_MAX=2000
 #
 #      # Let the function parse and validate your arguments
-#      parseargs                        \
+#      parseargs_s                      \
 #        --verbose                      \
 #        --options-defs=opt_definitions \
 #        --options-dst=options          \
@@ -197,7 +197,7 @@ function parseargs() {
     local -A _pa_options_
 
     # Parse options
-    parseopts _pa_args_ _pa_opt_definitions_ _pa_options_ _pa_posargs_ || return 1
+    parseopts_s _pa_args_ _pa_opt_definitions_ _pa_options_ _pa_posargs_ || return 1
 
     # Parse arguments
     local -n _callers_args_="${_pa_posargs_[0]}"
@@ -225,7 +225,7 @@ function parseargs() {
     if is_var_set_non_empty _pa_options_[opt_definitions]; then
     
         # Parse options
-        parseopts _callers_args_ _callers_opt_definitions_ _callers_options_ _callers_posargs_ || {
+        parseopts_s _callers_args_ _callers_opt_definitions_ _callers_options_ _callers_posargs_ || {
 
             # Echo error with usage message
             log_error "Invalid usage"
@@ -398,14 +398,14 @@ function parseargs() {
         for _callers_opt_ in "${!_callers_options_[@]}"; do
             
             # Get name of the option typed by the user in case of reporting an error
-            local _callers_opt_name_=$(get_option_name _callers_args_ _callers_opt_definitions_ _callers_opt_)
-            # Check if error occurred (should not happen, as the option was sucesfully parsed by `parseopts`)
+            local _callers_opt_name_=$(get_option_name_s _callers_args_ _callers_opt_definitions_ _callers_opt_)
+            # Check if error occurred (should not happen, as the option was sucesfully parsed by `parseopts_s`)
             [[ $? == 0 ]] || {
 
                 # Echo error message
                 log_error \
-                    "Critial error occurred `get_option_name` was not able to find an option" \
-                    "already parsed byt `parseopts`. Please report a bug."
+                    "Critial error occurred `get_option_name_s` was not able to find an option" \
+                    "already parsed byt `parseopts_s`. Please report a bug."
                 # Return error
                 return 1
                 
@@ -489,9 +489,9 @@ function parseargs() {
 # -------------------------------------------------------------------
 # @brief Common idiom for parsing arguments of the function/script
 #    taking some options. This is an extended version of the 
-#    `parse_options` alias. For newer designs it is recommended to 
-#    use `parse_arguments` instead. Had said that the 
-#    `parse_arguments` alias is still handy in the implementation
+#    `parse_options_s` alias. For newer designs it is recommended to 
+#    use `parse_arguments_s` instead. Had said that the 
+#    `parse_arguments_s` alias is still handy in the implementation
 #    of simpler or more generic functions/scripts that does not 
 #    need additional functionalities provided by the `parseargs`
 #    function
@@ -500,7 +500,7 @@ function parseargs() {
 #    or script) into the @var args array. If the context defines
 #    a @var opt_definitions array containing definitions of the 
 #    options, then body of the alias will try to parse expected
-#    options from the @var args array using `parseopts` function. If
+#    options from the @var args array using `parseopts_s` function. If
 #    it fails, alias will call `return 1`. Otherwise the results
 #    will be placed in the @var posargs list (positional arguments)
 #    and the @var options hash array (parsed options)
@@ -551,7 +551,7 @@ function parseargs() {
 #    of arguments it is strongly advise to still declare both of 
 #    these variables localy as empty arrays. This hides possibly
 #    identically named arrays declared in the context of the 
-#    upstream function that uses it while also using `parse_arguments`
+#    upstream function that uses it while also using `parse_arguments_s`
 #    alias. In turn there is no risk of parsing process failing
 #    while trying to parse options from the upper context 
 #    (@see example (1))
@@ -571,7 +571,7 @@ function parseargs() {
 #    local -a arguments
 #    
 #    # Parse arguments safely
-#    parse_arguments
+#    parse_arguments_s
 #
 #    # Use posargs list to get positional arguments
 #    echo "Positional arguments num: ${#posargs[@]}"
@@ -603,7 +603,7 @@ function parseargs() {
 #    ...
 #
 #    # Parse arguments
-#    parse_arguments
+#    parse_arguments_s
 #
 #    # Use posargs list to get positional arguments
 #    echo "Positional arguments num: ${#posargs[@]}"
@@ -650,7 +650,7 @@ function parseargs() {
 #    ...
 #
 #    # Parse arguments
-#    parse_arguments
+#    parse_arguments_s
 #
 #    # Use posargs list to get positional arguments
 #    echo "Positional arguments num: ${#posargs[@]}"
@@ -673,7 +673,7 @@ function parseargs() {
 #    fi
 #    
 # -------------------------------------------------------------------
-alias parse_arguments='
+alias parse_arguments_s='
 # Parse arguments to a named array
 local -a args=( "$@" )
 
@@ -689,7 +689,7 @@ is_var_set_non_empty opt_definitions[0] && parseargs_options+=( "--options-dst=o
 
 # Parse options
 local __ret_
-parseargs ${parseargs_options[@]} -- args posargs && __ret_="$?" || __ret_="$?"
+parseargs_s${parseargs_options[@]} -- args posargs && __ret_="$?" || __ret_="$?"
 # Return 0 if help requested
 [[ "$__ret_" == 2 ]] && return 0 ||
 # Return 1 if parsing error occurred

@@ -2,7 +2,7 @@
 # @file     git.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:39:47 pm
-# @modified Monday, 14th February 2022 4:11:17 pm
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -45,7 +45,7 @@ function gitaddm() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local url_="${posargs[0]}"
@@ -143,7 +143,7 @@ git_push_submodule_changes_to_master() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local message_="${posargs[0]}"

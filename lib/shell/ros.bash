@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified Wednesday, 10th November 2021 8:07:49 pm
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  Winder
 # @brief
 #    
@@ -50,7 +50,7 @@ function colbuild() {
     )
 
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Set list of packages as positional arguments
     set -- "${posargs[@]}"

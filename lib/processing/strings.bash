@@ -3,7 +3,7 @@
 # @file     strings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 4:50:15 pm
-# @modified Monday, 14th February 2022 7:33:06 pm
+# @modified Thursday, 17th February 2022 5:57:24 pm
 # @project  bash-utils
 # @brief
 #    
@@ -180,7 +180,7 @@ function is_identifier() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     string_="${posargs[0]}"
@@ -281,7 +281,7 @@ function represents_number() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local string_="${posargs[0]}"
@@ -329,7 +329,7 @@ function represents_integer() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local string_="${posargs[0]}"
@@ -378,4 +378,91 @@ function is_any_of() {
     done
 
     return 1
+}
+
+# -------------------------------------------------------------------
+# @brief Trimms the string
+# 
+# @param string
+#    string to be trimmed
+#
+# @outputs
+#    trimmed string
+# -------------------------------------------------------------------
+function trimm_string() {
+
+    # Arguments
+    local string_="$1"
+    
+    # Trim string from both sides
+    string_="${string_##*( )}"
+    string_="${string_%%*( )}"
+
+    echo "$string_"
+}
+
+# -------------------------------------------------------------------
+# @brief Trimms the string hold in the variable
+# 
+# @param string
+#    name of the variable to be trimmed
+# -------------------------------------------------------------------
+function trimm_var() {
+
+    # Arguments
+    local -n string_="$1"
+    
+    # Trim string from both sides
+    string_="${string_##*( )}"
+    string_="${string_%%*( )}"
+}
+
+# -------------------------------------------------------------------
+# @brief Splits string using @p delimiter and writes elements to the
+#    @p out array
+# 
+# @param string
+#    string to be splitted
+# @param delimiter
+#    delimiter (set of delimiters) to be used
+# @param out
+#    name of the output array
+# -------------------------------------------------------------------
+function split() {
+
+    # Arguments
+    local string_="$1"
+    local delimiter_="$2"
+    local -n out_="$3"
+    
+    # Change default separator to list's delimiter
+    local IFS="$delimiter_"
+    # Parse list into the output array
+    read -ra out_ <<< "$string_"
+}
+
+# -------------------------------------------------------------------
+# @brief Splits string using @p delimiter and writes elements to the
+#    @p out array. Trims output elements
+# 
+# @param string
+#    string to be splitted
+# @param delimiter
+#    delimiter (set of delimiters) to be used
+# @param out
+#    name of the output array
+# -------------------------------------------------------------------
+function split_and_trimm() {
+
+    # Arguments
+    local string__="$1"
+    local delimiter_="$2"
+    local -n out_="$3"
+    
+    # Split string
+    split "$string__" "$delimiter_" "$3"
+    # Trim result
+    for idx in "${!out_[@]}";do
+        out_[$idx]="$(trimm_string ${out_[$idx]})"
+    done
 }

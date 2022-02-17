@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Monday, 14th February 2022 8:13:13 pm
+# @modified Thursday, 17th February 2022 1:46:21 pm
 # @project  bash-utils
 # @brief
 #    
@@ -29,15 +29,12 @@ export BASH_UTILS_HOME="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
 # ============================================================= Sources ============================================================ #
 
-# Source library
-source $BASH_UTILS_HOME/lib/lib.bash
-
-# Enable aliases' expansion
-set_aliases_expansion on
 # Enable globbing' expansion
-enable_globbing
+shopt -s extglob
+# Enable aliases' expansion
+shopt -s expand_aliases
 
-# Resource library with enabled aliases' expansion
+# Source library
 source $BASH_UTILS_HOME/lib/lib.bash
 
 # ===================================================== Additional requirements ==================================================== #

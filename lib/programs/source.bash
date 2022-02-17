@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Monday, 29th November 2021 11:49:51 am
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -286,7 +286,7 @@ function perform_build_action() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     action_="${posargs[0]}"
@@ -493,7 +493,7 @@ function configure_source() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
     
     # -------------- Prepare environment --------------  
 
@@ -608,7 +608,7 @@ function build_source() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # -------------- Prepare environment --------------  
 
@@ -724,7 +724,7 @@ function install_source() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # -------------- Prepare environment --------------  
 
@@ -856,7 +856,7 @@ function build_and_install() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     local ret_
 
@@ -1081,7 +1081,7 @@ function download_build_and_install() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     url_="${posargs[0]}"

@@ -3,7 +3,7 @@
 # @file     arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Sunday, 21st November 2021 3:34:30 pm
+# @modified Thursday, 17th February 2022 8:11:58 pm
 # @project  bash-utils
 # @brief
 #    
@@ -171,7 +171,7 @@ function print_array() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local -n arr_="${posargs[0]}"
@@ -187,7 +187,7 @@ function print_array() {
 
     # Print name of the array, if requested
     is_var_set options[name] && {
-
+        
         # If separator was given, end name with either space or a new line, depending on it
         if is_var_set options[separator]; then
             is_substring "${options[separator]}" $'\n' &&
@@ -197,11 +197,16 @@ function print_array() {
         else
             out_="${posargs[0]}:\n"
         fi
-
     }
 
     # If an array is empty, return
-    (( ${#arr_[@]} > 0 )) || return
+    (( ${#arr_[@]} > 0 )) || {
+
+        # Print name, if requested (without additional newline)
+        is_var_set options[name] && echo -e "${out_:0:-2}"
+
+        return
+    } 
 
     local elem_
 
@@ -209,7 +214,7 @@ function print_array() {
     for elem_ in "${arr_[@]}"; do
         out_="${out_}${elem_}${separator_}"
     done
-    
+
     # Remove the last one separator
     out_="${out_%%$separator_}"
 
@@ -241,4 +246,340 @@ function files_lines_to_array() {
     # Read file line by line array
     IFS=$'\n' read -d '' -ra arr_ < "$file_"
 
+}
+
+# -------------------------------------------------------------------
+# @brife Finds maximal element in the array
+#
+# @param array
+#    array to be inspacted
+# -------------------------------------------------------------------
+function max_elem() {
+
+    # Parse arguments
+    local -n array="$1"
+
+    local max; ((max=0-2**32))
+
+    # Iterate over array to find the largest one
+    for elem in "${array[@]}"; do
+        if (( $max < ${elem} )); then
+            max=${elem}
+        fi
+    done
+
+    echo $max
+}
+
+# -------------------------------------------------------------------
+# @brife Finds length of the smallest in the array
+#
+# @param array
+#    array to be inspacted
+# -------------------------------------------------------------------
+function min_elem() {
+
+    # Parse arguments
+    local -n array="$1"
+
+    local min; ((min=-2**32))
+
+    # Iterate over array to find the largest one
+    for elem in "${array[@]}"; do
+        if (( $min > ${elem} )); then
+            min=${elem}
+        fi
+    done
+
+    echo $max_elem
+}
+
+# -------------------------------------------------------------------
+# @brife Finds length of the longest element in the array
+#
+# @param array
+#    array to be inspacted
+# -------------------------------------------------------------------
+function max_len() {
+
+    # Parse arguments
+    local -n array="$1"
+
+    local max=0
+
+    # Iterate over array to find the longest one
+    for elem in "${array[@]}"; do
+        if (( $max < ${#elem} )); then
+            max=${#elem}
+        fi
+    done
+
+    echo $max
+}
+
+# -------------------------------------------------------------------
+# @brife Finds length of the shortest element in the array
+#
+# @param array
+#    array to be inspacted
+# -------------------------------------------------------------------
+function min_len() {
+
+    # Parse arguments
+    local -n array="$1"
+
+    local min; ((min=2**32))
+
+    # Iterate over array to find the longest one
+    for elem in "${array[@]}"; do
+        if (( $min > ${#elem} )); then
+            min=${#elem}
+        fi
+    done
+
+    echo $min
+}
+
+# -------------------------------------------------------------------
+# @brife Finds first occurence of the element in the array
+#
+# @param array
+#    name of the array to be inspacted
+# @param element
+#    element to be found
+#
+# @returns
+#   @c 0 on success
+#   @c 1 on failure
+#
+# @outputs Index of the found element on success
+# -------------------------------------------------------------------
+function find_first_starting_with() {
+
+    # Parse arguments
+    local -n array="$1"
+    local element="$2"
+
+    # Iterate list of arguments forward to find the first occurence of the element
+    for ((i = 0; i <= ${#array[@]} - 1; i++)); do
+        
+        # Get the argument
+        local array_elem="${array[$i]}"
+        
+        # Check if argument is an option; if not, continue scanning
+        [[ "${array_elem}" == "$element" ]] || continue
+
+        # If element start found, output index
+        echo $i
+
+        return 0
+        
+    done
+
+    # If no option found, return error
+    return 1
+}
+
+# -------------------------------------------------------------------
+# @brife Finds last occurence of the element in the array
+#
+# @param array
+#    name of the array to be inspacted
+# @param element
+#    element to be found
+#
+# @returns
+#   @c 0 on success
+#   @c 1 on failure
+#
+# @outputs Index of the found element on success
+# -------------------------------------------------------------------
+function find_last() {
+
+    # Parse arguments
+    local -n array="$1"
+    local element="$2"
+
+    # Iterate list of arguments backward to find the last occurence of the element
+    for ((i = ${#array[@]} - 1; i >= 0; i--)); do
+        
+        # Get the argument
+        local array_elem="${array[$i]}"
+        
+        # Check if argument is an option; if not, continue scanning
+        [[ "${array_elem}" == "$element" ]] || continue
+
+        # If element found, output index
+        echo $i
+
+        return 0
+        
+    done
+
+    # If no option found, return error
+    return 1
+}
+
+# -------------------------------------------------------------------
+# @brife Finds first occurence of the element in the array that 
+#    starts with @P element_start
+#
+# @param array
+#    name of the array to be inspacted
+# @param element_start
+#    element to be found
+#
+# @returns
+#   @c 0 on success
+#   @c 1 on failure
+#
+# @outputs Index of the found element on success
+# -------------------------------------------------------------------
+function find_first_starting_with() {
+
+    # Parse arguments
+    local -n array="$1"
+    local element_start="$2"
+
+    # Iterate list of arguments forward to find the first occurence of the element
+    for ((i = 0; i <= ${#array[@]} - 1; i++)); do
+        
+        # Get the argument
+        local array_elem="${array[$i]}"
+        
+        # Check if argument is an option; if not, continue scanning
+        starts_with "${array_elem}" "$element_start" || continue
+
+        # If element start found, output index
+        echo $i
+
+        return 0
+        
+    done
+
+    # If no option found, return error
+    return 1
+}
+
+# -------------------------------------------------------------------
+# @brife Finds last occurence of the element in the array that 
+#    starts with @P element_start
+#
+# @param array
+#    name of the array to be inspacted
+# @param element_start
+#    element to be found
+#
+# @returns
+#   @c 0 on success
+#   @c 1 on failure
+#
+# @outputs Index of the found element on success
+# -------------------------------------------------------------------
+function find_last_starting_with() {
+
+    # Parse arguments
+    local -n array="$1"
+    local element_start="$2"
+
+    # Iterate list of arguments backward to find the last occurence of the element
+    for ((i = ${#array[@]} - 1; i >= 0; i--)); do
+        
+        # Get the argument
+        local array_elem="${array[$i]}"
+        
+        # Check if argument is an option; if not, continue scanning
+        starts_with "${array_elem}" "$element_start" || continue
+
+        # If element start found, output index
+        echo $i
+
+        return 0
+        
+    done
+
+    # If no option found, return error
+    return 1
+}
+
+# -------------------------------------------------------------------
+# @brife Finds first occurence of the element in the array that 
+#    ends with @P element_start
+#
+# @param array
+#    name of the array to be inspacted
+# @param element_end
+#    element to be found
+#
+# @returns
+#   @c 0 on success
+#   @c 1 on failure
+#
+# @outputs Index of the found element on success
+# -------------------------------------------------------------------
+function find_first_ending_with() {
+
+    # Parse arguments
+    local -n array="$1"
+    local element_start="$2"
+
+    # Iterate list of arguments forward to find the first occurence of the element
+    for ((i = 0; i <= ${#array[@]} - 1; i++)); do
+        
+        # Get the argument
+        local array_elem="${array[$i]}"
+        
+        # Check if argument is an option; if not, continue scanning
+        ends_with "${array_elem}" "$element_end" || continue
+
+        # If element end found, output index
+        echo $i
+
+        return 0
+        
+    done
+
+    # If no option found, return error
+    return 1
+}
+
+# -------------------------------------------------------------------
+# @brife Finds last occurence of the element in the array that 
+#    ends with @P element_start
+#
+# @param array
+#    name of the array to be inspacted
+# @param element_end
+#    element to be found
+#
+# @returns
+#   @c 0 on success
+#   @c 1 on failure
+#
+# @outputs Index of the found element on success
+# -------------------------------------------------------------------
+function find_last_ending_with() {
+
+    # Parse arguments
+    local -n array="$1"
+    local element_start="$2"
+
+    # Iterate list of arguments backward to find the last occurence of the element
+    for ((i = ${#array[@]} - 1; i >= 0; i--)); do
+        
+        # Get the argument
+        local array_elem="${array[$i]}"
+        
+        # Check if argument is an option; if not, continue scanning
+        ends_with "${array_elem}" "$element_end" || continue
+
+        # If element end found, output index
+        echo $i
+
+        return 0
+        
+    done
+
+    # If no option found, return error
+    return 1
 }

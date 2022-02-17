@@ -3,7 +3,7 @@
 # @file     ubad_table.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 3:13:57 pm
-# @modified Monday, 14th February 2022 8:54:35 pm
+# @modified Thursday, 17th February 2022 5:57:33 pm
 # @project  bash-utils
 # @brief
 #    
@@ -12,7 +12,7 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# ============================================================ Functions =========================================================== #
+# ============================================================ Checkers ============================================================ #
 
 # ---------------------------------------------------------------------------------------
 # @brief Checks whether optional field of the UBAD table entity named @p entity are valid
@@ -46,48 +46,42 @@ function are_optional_fields_of_ubad_table_valid() {
     has_hash_array_field "$entity_" "type" && type_="${harray_[type]}"
 
     # Perform additional check only for integer-typed argument
-    if is_any_of "$type_" 'i' 'integer'; then
+    if is_ubad_arg_integer "$type_"; then
 
         # Check whether [default] field is valid (if defined)
-        has_hash_array_field "$entity_" "default" || is_ubad_integer "${harray_[default]}" || return 1
-
-        # Limit modifications of the IFS word-splitter to the local scope
-        localize_word_splitting
+        ! has_hash_array_field "$entity_" "default" || is_ubad_integer "${harray_[default]}" || return 1
         
         # Check whether [variants] field is valid (if defined)
         if has_hash_array_field "$entity_" "variants"; then
 
-            # Get enumerated variants
-            local variants_="${harray_[default]}"
+            # Parse variants
+            local parsed_variants
+            parse_vatiants             \
+                "${harray_[variants]}" \
+                "default"              \
+                parsed_variants
 
-            # Set world-splitting-separator to ' ' + '|' automaticaly parse option's names
-            IFS='|'
-            # Set positional arguments to the option's names
-            set -- $variants_
-
-            # A single variant
-            local variant_
-
+            local variant
+            
             # Iterate variants and check if they are integers
-            for variant_ in "$@"; do
-                is_ubad_integer "${variant_}" || return 1
+            for variant in "${parse_vatiants[@]}"; do
+                is_ubad_integer "${variant}" || return 1
             done
         
         # Otherwise, check whether [range] field is valid (if defined)
         elif has_hash_array_field "$entity_" "range"; then
 
-            # Assert range has valid form
-            [[ "${harray_[range]}" == *:* ]] || rteurn 1
-
-            # Get range's string
-            local range_="${harray_[range]}"
-            # Get range's limits
-            local min_="${range_%:*}"
-            local max_="${range_#*:}"
-
+            # Parse range's limits
+            local min
+            local max
+            parse_range             \
+                "${harray_[range]}" \
+                "default"           \
+                min max
+                
             # Check if both values are integers
-            is_ubad_integer "${min_}" || return 1
-            is_ubad_integer "${max_}" || return 1
+            is_ubad_integer "${min}" || return 1
+            is_ubad_integer "${max}" || return 1
             
         fi
 
@@ -240,4 +234,79 @@ function is_ubad_table() {
         *       ) return 2 ;;
     esac
 
+}
+
+# ============================================================= Parsers ============================================================ #
+
+# ---------------------------------------------------------------------------------------
+# @brief Parses list of variants associated with the argument
+#
+# @param string
+#    string containing list of variants
+# @param parse_mode
+#    parse mode (either 'default' - list element's will be trimmed - or 'raw' - list 
+#    element's will NOT be trimmed)
+# @param variants [out]
+#    name of the array that the parsed variants will be written into
+# ---------------------------------------------------------------------------------------
+function parse_vatiants() {
+
+    # Parse arguments
+    local __parse_vatiants_string_="$1"
+    local __parse_vatiants_parse_mode_="$2"
+    local __parse_vatiants_variants_="$3"
+    
+    # Delimiter
+    local delimiter="|"
+    # Basic splitting method
+    local method='split_and_trimm'
+
+    # If raw parsing mode is requested, split without trimming
+    if [[ "$__parse_vatiants_parse_mode_" == "raw" ]]; then
+        method='split'
+    fi
+
+    # Perform command
+    $method "$__parse_vatiants_string_" "$delimiter" "$__parse_vatiants_variants_"
+}
+
+# ---------------------------------------------------------------------------------------
+# @brief Parses valid range associated with the argument
+#
+# @param string
+#    string containing range
+# @param parse_mode
+#    parse mode (either 'default' - list element's will be trimmed - or 'raw' - list 
+#    element's will NOT be trimmed)
+# @param min [out]
+#    name of the variable where the left limit of the range will be written
+# @param mian [out]
+#    name of the variable where the right limit of the range will be written
+# ---------------------------------------------------------------------------------------
+function parse_range() {
+
+    # Parse arguments
+    local    __parse_range_string_="$1"
+    local    __parse_range_parse_mode_="$2"
+    local -n __parse_range_min_="$3"
+    local -n __parse_range_max_="$4"
+    
+    # Delimiter
+    local delimiter=":"
+    # Basic splitting method
+    local method='split_and_trimm'
+    # Result array
+    local -a limits
+
+    # If raw parsing mode is requested, split without trimming
+    if [[ "$__parse_range_parse_mode_" == "raw" ]]; then
+        method='split'
+    fi
+
+    # Perform splitting
+    $method "$__parse_range_string_" "$delimiter" "limits"
+
+    # Parse result in output variables
+    __parse_range_min_="${limits[0]}"
+    __parse_range_max_="${limits[1]}"
 }

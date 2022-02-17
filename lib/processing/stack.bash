@@ -3,7 +3,7 @@
 # @file     stack.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 9:00:58 pm
-# @modified Saturday, 13th November 2021 2:42:36 am
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -80,7 +80,7 @@ function push_stack() {
     )
     
     # Parse options
-    parse_options
+    parse_options_s
 
     # Check number of arguments
     [[ ${#posargs[@]} == "0" ]] && return 1
@@ -145,7 +145,7 @@ function pop_stack() {
     )
     
     # Parse options
-    parse_options
+    parse_options_s
 
     # Check number of arguments
     [[ ${#posargs[@]} == "0" ]] && return 1
@@ -205,7 +205,7 @@ function reset_stack() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
     
     # -------------------------------------------------
 
@@ -254,7 +254,7 @@ function destroy_stack() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # -------------------------------------------------
 
@@ -299,7 +299,7 @@ function print_stack() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # -------------------------------------------------
 
@@ -344,7 +344,7 @@ function is_stack() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # -------------------------------------------------
 
@@ -386,7 +386,7 @@ function get_stack_size() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # -------------------------------------------------
 

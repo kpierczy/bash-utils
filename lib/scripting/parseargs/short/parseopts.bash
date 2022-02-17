@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     options.bash
+# @file     parseopts.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Sunday, 21st November 2021 2:59:23 pm
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -22,7 +22,7 @@
 #
 # @param defs
 #    name of the array holding definitions of the options 
-#    (@see parseopts)
+#    (@see parseopts_s)
 # @param names (out)
 #    output associative array holding pairs option_name/option_value
 # @param flags (out)
@@ -33,7 +33,7 @@
 #    <long,...> containing strings with comma-separated lists of 
 #    names of short and long options defined in @p defs
 # -------------------------------------------------------------------
-function parse_option_defs () {
+function parse_option_defs_s () {
 
     # Arguments
     local -n _pod_defs_="$1"
@@ -105,7 +105,7 @@ function parse_option_defs () {
 # @brief Check whether system uses GNU getopt (so called enhanced 
 #     getopt) version of the getopt utility
 # -------------------------------------------------------------------
-is_enhanced_getopt() {
+is_enhanced_getopt_s() {
 
     local rc_
 
@@ -124,17 +124,17 @@ is_enhanced_getopt() {
 # @param short
 #    string representing comma-separated list of short options
 #    to be parsed (it it created from @p def argument by the 
-#    @f parse_option_defs function)
+#    @f parse_option_defs_s function)
 # @param long
 #    string representing comma-separated list of long options
 #    to be parsed (it it created from @p def argument by the 
-#    @f parse_option_defs function)
+#    @f parse_option_defs_s function)
 #
 # @stdout
 #    prints an expression to be evaluetd by the calling context 
 #    depending on the result of the getopt command
 # -------------------------------------------------------------------
-function wrap_getopt () {
+function wrap_getopt_s () {
     
     # Arguments
     local -n _wg_args_="$1"
@@ -201,13 +201,13 @@ function wrap_getopt () {
 #    local -A options
 #    # @note Wor-spliiting needs to be enabled!
 #    enable_word_splitting
-#    parseopts "$*" defs options posargs
+#    parseopts_s "$*" defs options posargs
 #
 #    # Use 'options' and 'posargs' to examine parsed options
 #    print_hash_array options
 #    print_array posargs
 # -------------------------------------------------------------------
-function parseopts () {
+function parseopts_s () {
     
     # Arguments
     local -n _po_args_="${1:-}"
@@ -224,12 +224,12 @@ function parseopts () {
     _err_=0
 
     # Parse @p defs to the form taken by getopt utility
-    parse_option_defs _po_defs_ _po_names_ _po_flags_ _po_getopts_
+    parse_option_defs_s _po_defs_ _po_names_ _po_flags_ _po_getopts_
     
     # Call getopt
     local _po_result_
-    if is_enhanced_getopt; then
-         _po_result_=$(wrap_getopt _po_args_ "${_po_getopts_[short]}" "${_po_getopts_[long]}") || return 1
+    if is_enhanced_getopt_s; then
+         _po_result_=$(wrap_getopt_s _po_args_ "${_po_getopts_[short]}" "${_po_getopts_[long]}") || return 1
     fi
     
     # Set positional arguments
@@ -280,7 +280,7 @@ function parseopts () {
 #    @c 0 if @p string is a short option \n
 #    @c 1 otheriwse
 # -------------------------------------------------------------------
-function is_short_option() {
+function is_short_option_s() {
 
     # Arguments
     local string_="$1"
@@ -309,7 +309,7 @@ function is_short_option() {
 #    @c 0 if @p string is a long option \n
 #    @c 1 otheriwse
 # -------------------------------------------------------------------
-function is_long_option() {
+function is_long_option_s() {
 
     # Arguments
     local string_="$1"
@@ -336,23 +336,23 @@ function is_long_option() {
 #    @c 0 if @p string is an option \n
 #    @c 1 otheriwse
 #
-# @see is_short_option
-# @see is_long_option
+# @see is_short_option_s
+# @see is_long_option_s
 # -------------------------------------------------------------------
-function is_option() {
+function is_option_s() {
 
     # Arguments
     local string_="$1"
 
     # Check if an option
-    is_short_option string_ || is_long_option string_
+    is_short_option_s string_ || is_long_option_s string_
 
 }
 
 # -------------------------------------------------------------------
 # @brief Based on the list of arguments and options' definitions
 #    finds name of the option corresponding to the name of the
-#    key in the @p options hash table returned by the @fun parseopts
+#    key in the @p options hash table returned by the @fun parseopts_s
 #    function. Nameis written to the stdout
 #
 # @params args
@@ -371,7 +371,7 @@ function is_option() {
 # @note Function returns name of the the last occurrence of the 
 #    option in the @p args list
 # -------------------------------------------------------------------
-function get_option_name() {
+function get_option_name_s() {
 
     # Arguments
     local -n args_="$1"
@@ -480,7 +480,7 @@ function get_option_name() {
 #    Non-option arguments are gathered to the @var posargs array 
 #    that in turn is set as a new source of the positional arguments
 #    
-#    If @f parseopts returns an error alias will call 'return 1' in
+#    If @f parseopts_s returns an error alias will call 'return 1' in
 #    the calling context
 # 
 # @environment
@@ -495,7 +495,7 @@ function get_option_name() {
 #    options  hash array of parsed options
 #
 # -------------------------------------------------------------------
-alias parse_options='
+alias parse_options_s='
 # Parse arguments to a named array
 local -a args=( "$@" )
 
@@ -504,5 +504,5 @@ local -a posargs
 local -A options
 
 # Parse options
-parseopts args opt_definitions options posargs || return 1
+parseopts_s args opt_definitions options posargs || return 1
 '

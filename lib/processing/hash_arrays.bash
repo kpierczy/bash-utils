@@ -3,7 +3,7 @@
 # @file     hash_arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Monday, 14th February 2022 5:54:27 pm
+# @modified Thursday, 17th February 2022 5:08:16 pm
 # @project  bash-utils
 # @brief
 #    
@@ -38,7 +38,7 @@ function print_hash_array() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     arr_="${posargs[0]}"
@@ -82,6 +82,42 @@ function has_hash_array_field() {
     local -n harray_ref="$harray_"
     # Check if @p field is defined
     [ ${harray_ref[$field_]+x} ] || return 1
+
+    return 0
+}
+
+# -------------------------------------------------------------------
+# @brief Copies contenty of @p src hash array into the @p dst hash
+#    array
+#
+# @param src
+#    name of the source hash array
+# @param dst
+#    name of the destination hash array
+#
+# @returns
+#    @c 0 on success
+#    @c 1 if @p src or @dst is not a hash array
+# -------------------------------------------------------------------
+function copy_hash_array() {
+
+    # Parse arguments
+    local src_="$1"
+    local dst_="$2"
+
+    # Check if @p harray is a hash_array
+    is_hash_array $src_ && is_hash_array $dst_ || return 1
+
+    # Parse arguments
+    local -n src_ref_="$src_"
+    local -n dst_ref_="$dst_"
+
+    # Reset destination
+    dst_ref_=()
+    # Copy content
+    for key in "${!src_ref_[@]}"; do 
+        dst_ref_["$key"]="${src_ref_[$key]}"
+    done
 
     return 0
 }

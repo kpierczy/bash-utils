@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified Monday, 29th November 2021 10:36:10 am
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -90,7 +90,7 @@ function pip_install_list() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local -n _packages_="${posargs[0]}"
@@ -202,7 +202,7 @@ function pip_install() {
     )
 
     # Parse arguments
-    parse_options
+    parse_options_s
 
     # Parse packages to be installed into an array
     local -a packages_=( "${posargs[@]}" )

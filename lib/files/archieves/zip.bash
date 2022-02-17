@@ -3,7 +3,7 @@
 # @file     zip.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 11th November 2021 9:27:03 pm
-# @modified Friday, 12th November 2021 1:41:36 am
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -45,7 +45,7 @@ function need_zip_extract() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     archieve_="${posargs[0]}"
@@ -119,7 +119,7 @@ function extract_zip_archieve() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local archieve_="${posargs[0]}"

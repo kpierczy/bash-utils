@@ -3,7 +3,7 @@
 # @file     functional.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 6:14:24 pm
-# @modified Thursday, 11th November 2021 1:18:36 am
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -107,7 +107,7 @@ function reduce () {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
     
     # Parse arguments
     acc_="${posargs[0]}"

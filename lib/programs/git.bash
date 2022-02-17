@@ -2,7 +2,7 @@
 # @file     git.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 29th November 2021 2:07:06 pm
-# @modified Monday, 29th November 2021 2:59:01 pm
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  Winder
 # @brief
 #    
@@ -53,7 +53,7 @@ function git_clone_list() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Get source directory
     local -n list="${posargs[0]}"

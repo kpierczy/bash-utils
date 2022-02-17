@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Thursday, 11th November 2021 1:19:30 am
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -141,7 +141,7 @@ function remove_file_extension() {
     )
 
     # Parse options
-    parse_options
+    parse_options_s
 
     # Parse arguments
     _filename_="${posargs[0]}"

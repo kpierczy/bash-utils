@@ -2,7 +2,7 @@
 # @file     docker.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:31:34 pm
-# @modified Thursday, 11th November 2021 2:52:58 am
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -52,7 +52,7 @@ function drun() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
     
     # -------------------------------------------------
 
@@ -99,7 +99,7 @@ function drunv() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
     
     # -------------------------------------------------
 

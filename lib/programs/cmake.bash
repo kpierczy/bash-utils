@@ -2,7 +2,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 29th November 2021 11:46:21 am
-# @modified Monday, 29th November 2021 3:16:37 pm
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  Winder
 # @brief
 #    
@@ -53,7 +53,7 @@ function cmake_build_install() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Get source directory
     local src_dir=$(realpath -m ${options[src_dir]:-.})

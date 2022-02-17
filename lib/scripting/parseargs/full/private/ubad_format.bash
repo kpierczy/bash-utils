@@ -3,7 +3,7 @@
 # @file     ubad_format.sh
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 2:24:35 pm
-# @modified Monday, 14th February 2022 8:44:21 pm
+# @modified Thursday, 17th February 2022 7:04:12 pm
 # @project  bash-utils
 # @brief
 #    
@@ -96,6 +96,66 @@ function is_ubad_arg_type() {
 
 }
 
+# ---------------------------------------------------------------------------------------
+# @brief Checks whether given type refers to string argument
+# ---------------------------------------------------------------------------------------
+function is_ubad_arg_string() {
+
+    # Arguments
+    local string_="$1"
+
+    # Check if valid type given
+    case "${string_}" in
+        "string"  | "s" ) return 0 ;;
+        *               ) return 1 ;;
+    esac
+}
+
+# ---------------------------------------------------------------------------------------
+# @brief Checks whether given type refers to integer argument
+# ---------------------------------------------------------------------------------------
+function is_ubad_arg_integer() {
+
+    # Arguments
+    local string_="$1"
+
+    # Check if valid type given
+    case "${string_}" in
+        "integer"  | "i" ) return 0 ;;
+        *                ) return 1 ;;
+    esac
+}
+
+# ---------------------------------------------------------------------------------------
+# @brief Checks whether given type refers to flag argument
+# ---------------------------------------------------------------------------------------
+function is_ubad_arg_flag() {
+
+    # Arguments
+    local string_="$1"
+
+    # Check if valid type given
+    case "${string_}" in
+        "flag"  | "f" ) return 0 ;;
+        *             ) return 1 ;;
+    esac
+}
+
+# ---------------------------------------------------------------------------------------
+# @brief Checks whether given type refers to path argument
+# ---------------------------------------------------------------------------------------
+function is_ubad_arg_path() {
+
+    # Arguments
+    local string_="$1"
+
+    # Check if valid type given
+    case "${string_}" in
+        "path"  | "p" ) return 0 ;;
+        *             ) return 1 ;;
+    esac
+}
+
 
 # ---------------------------------------------------------------------------------------
 # @brief Checks whether @p string is a valid integer
@@ -117,6 +177,7 @@ function is_ubad_integer() {
     # Match pattern
     [[ $string_ =~ $pattern_ ]] || return 1
 }
+
 
 # -------------------------------------------------------------------
 # @brief Checks whether the @p string is a valid identifier, i.e.
@@ -154,4 +215,29 @@ function is_ubad_identifier() {
     # If no erronous character found, return success
     return 0
     
+}
+
+
+# ---------------------------------------------------------------------------------------
+# @brief Turns type of the UBAD argument into it's stringified representation used in 
+#    usage strings
+#
+# @param type
+#    string to be transformed
+# @outputs 
+#    stringified name
+# ---------------------------------------------------------------------------------------
+function ubad_arg_type_usage_string() {
+
+    # Arguments
+    local string_="$1"
+
+    # Check if valid type given
+    case "${string_}" in
+        "string"  | "s" ) echo "=STR"  ;;
+        "integer" | "i" ) echo "=INT"  ;;
+        "flag"    | "f" ) echo ""      ;;
+        "path"    | "p" ) echo "=PATH" ;;
+        *               ) echo ""      ;;
+    esac
 }

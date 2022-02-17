@@ -3,7 +3,7 @@
 # @file     tar.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 11th November 2021 11:45:54 pm
-# @modified Friday, 12th November 2021 1:11:28 am
+# @modified Thursday, 17th February 2022 11:59:25 am
 # @project  bash-utils
 # @brief
 #    
@@ -57,7 +57,7 @@ function extract_tar_archieve() {
     )
     
     # Parse arguments to a named array
-    parse_options
+    parse_options_s
 
     # Parse arguments
     local archieve_="${posargs[0]}"

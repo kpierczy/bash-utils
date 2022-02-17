@@ -3,7 +3,7 @@
 # @file     ubad_list.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 14th February 2022 5:23:15 pm
-# @modified Monday, 14th February 2022 8:47:45 pm
+# @modified Thursday, 17th February 2022 3:51:48 pm
 # @project  bash-utils
 # @brief
 #    
