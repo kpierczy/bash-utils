@@ -3,7 +3,7 @@
 # @file     strict_mode_test.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 1:58:55 am
-# @modified Thursday, 17th February 2022 7:15:43 pm
+# @modified Friday, 18th February 2022 8:05:11 pm
 # @project  Winder
 # @brief
 #    
@@ -92,18 +92,18 @@ describe generate_options_description
     it "Check if auto-generation of options' description works"
         
         # Options' definitions
-        declare -A opt_a_def=( [format]="-a|--opt-a"          [name]="a" [type]="f"                                 [help]="some description of a some description of a some description of a some description of a some description of a some description of a" )
-        declare -A opt_b_def=( [format]="-b|--opt-bbbbbbbbbb" [name]="b" [type]="f"                                 [help]="some description of b some description of b some description of b some description of b some description of b some description of b" )
-        declare -A opt_c_def=( [format]="-c|--opt-cc"         [name]="c" [type]="f"                                 [help]="some description of c some description of c some description of c some description of c some description of c some description of c" )
-        declare -A opt_d_def=( [format]="-d|--opt-dddd"       [name]="d" [type]="s" [variants]="var1 | var2 | var3" [help]="some description of d some description of d some description of d some description of d some description of d some description of d" )
-        declare -A opt_e_def=( [format]="-e|--opt-eeeee"      [name]="e" [type]="i" [range]="10:100"                [help]="some description of e some description of e some description of e some description of e some description of e some description of e" )
+        declare -A a_opt_def=( [format]="-a|--opt-a"          [name]="a" [type]="p"                                 [help]="some description of a some description of a some description of a some description of a some description of a some description of a" )
+        declare -A b_opt_def=( [format]="-b|--opt-bbbbbbbbbb" [name]="b" [type]="f"                                 [help]="some description of b some description of b some description of b some description of b some description of b some description of b" )
+        declare -A c_opt_def=( [format]="-c|--opt-cc"         [name]="c" [type]="f"                                 [help]="some description of c some description of c some description of c some description of c some description of c some description of c" )
+        declare -A d_opt_def=( [format]="-d|--opt-dddd"       [name]="d" [type]="s" [variants]="var1 | var2 | var3" [help]="some description of d some description of d some description of d some description of d some description of d some description of d" )
+        declare -A e_opt_def=( [format]="-e|--opt-eeeee|-f"   [name]="e" [type]="i" [range]="10:100"                [help]="some description of e some description of e some description of e some description of e some description of e some description of e" )
         # UBAD list for options
         declare -a opts_definitions=(
-            opt_a_def
-            opt_b_def
-            opt_c_def
-            opt_d_def
-            opt_e_def
+            a_opt_def
+            b_opt_def
+            c_opt_def
+            d_opt_def
+            e_opt_def
         )
         
         # Generate output

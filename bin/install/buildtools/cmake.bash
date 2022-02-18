@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Sunday, 21st November 2021 11:16:02 pm
+# @modified Thursday, 17th February 2022 9:12:53 pm
 # @project  bash-utils
 # @brief
 #    
@@ -20,7 +20,7 @@ source $BASH_UTILS_HOME/source_me.bash
 
 get_heredoc usage <<END
     Description: Installs CMake build tool
-    Usage: cmake.bash TYPE
+    Usage: cmake.bash TYPE VERSION
 
     Arguments
 
@@ -148,7 +148,7 @@ main() {
     )
 
     # Parsed options
-    parse_arguments
+    parse_arguments_s
 
     # Dependencies of the script
     local -a dependencies=( build-essential )

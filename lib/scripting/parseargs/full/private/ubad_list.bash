@@ -3,7 +3,7 @@
 # @file     ubad_list.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 14th February 2022 5:23:15 pm
-# @modified Thursday, 17th February 2022 3:51:48 pm
+# @modified Friday, 18th February 2022 6:39:55 pm
 # @project  bash-utils
 # @brief
 #    
@@ -48,12 +48,67 @@ function is_ubad_list() {
     local ubad_table_name_
 
     # Iterate over names of UBAD tables contained by the UBAD list
-    for ubad_table_name_ in ${array_[@]}; do
-
+    for ubad_table_name_ in "${array_[@]}"; do
+        
         # Check if name refers to a valid UBAd table
         is_ubad_table "$ubad_table_name_" "$argtype_" || return $?
 
     done
 
     return 0
+}
+
+
+# ---------------------------------------------------------------------------------------
+# @brief Checks whether an UBAD list has a UBAD table with the given name 
+#
+# @param list
+#    name of the UBAD list
+# @param name
+#    name to be found
+# @returns 
+#    @c 0 if requested table has been found
+#    @c 1 otherwise
+#    @c 2 if list is not an array
+# ---------------------------------------------------------------------------------------
+function has_ubad_list_table_with_name() {
+
+    # Get reference to the UBAD lsit
+    local list_="$1"
+    # Get type the table to be checked
+    local name_="$2"
+
+    # -------------------------- Validate arguments ---------------------------
+
+    # Check if @p list_ is an array
+    is_hash_array "$list_" || return 2
+
+    # ------------------------------ Parse envs -------------------------------
+
+    # Get reference to the UBAD list
+    local -n __list_ref_="$list_"
+
+    local table_
+
+    # Iterate over UBAD list
+    for table_ in "${__list_ref_[@]}"; do
+
+        # Get reference to the UBAD table of the given env
+        local -n table__ref_="$table_"
+
+        # Get name of the env
+        local __parseenvs_parse_envs_env_name_="${__parseenvs_parse_envs_env_def_ref_[name]}"
+
+        # If name matches, return success
+        if [[ "$__parseenvs_parse_envs_env_name_" == "$name_" ]]; then
+        
+            return 0
+        fi
+
+    done
+
+    # -------------------------------------------------------------------------
+
+    # By default return error 
+    return 1
 }

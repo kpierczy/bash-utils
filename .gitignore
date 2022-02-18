@@ -1,0 +1,26 @@
+*
+!readme.md
+!.gitignore
+!.gitmodules
+!source_me.bash
+
+# VSCode config
+!.vscode/
+!.vscode/**
+# Documentation
+!doc/
+!doc/**
+# Extern source files
+!dep/
+!dep/**
+# Source files
+!bin/
+!bin/**
+!lib/
+!lib/**
+# Script files
+!scripts/
+!scripts/**
+# Test files
+!tests/
+!tests/**

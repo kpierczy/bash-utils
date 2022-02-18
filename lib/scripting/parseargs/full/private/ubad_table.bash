@@ -3,7 +3,7 @@
 # @file     ubad_table.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 3:13:57 pm
-# @modified Thursday, 17th February 2022 5:57:33 pm
+# @modified Friday, 18th February 2022 7:28:50 pm
 # @project  bash-utils
 # @brief
 #    
@@ -237,6 +237,122 @@ function is_ubad_table() {
 }
 
 # ============================================================= Parsers ============================================================ #
+
+# ---------------------------------------------------------------------------------------
+# @brief Parses a specific @p field from UBAD tables given in the @p definitions 
+#    UBAD list and pairs them with argument's name
+#
+# @param definitions
+#    name of the UBAD list containing definitions
+# @param field
+#    field to be parsed
+# @param fields [out]
+#    name of the has array that the fields will be written into
+#
+# @returns 
+#    @c 0 on success \n
+#
+# @note Types of arguments are not being checke dby the function. They are assumed
+#    to be checked by the calling function
+# ---------------------------------------------------------------------------------------
+function parse_ubad_tables_field() {
+
+    # Parse arguments
+    local -n __parse_ubad_tables_field_field_definitions_="$1"
+    local    __parse_ubad_tables_field_field_field_="$2"
+    local -n __parse_ubad_tables_field_field_fields_="$3"
+
+    # ------------------------- Parse default values --------------------------
+
+    local ubad_table
+
+    # Get the field name
+    local field="${__parse_ubad_tables_field_field_field_}"
+
+    # Iterate over UBAD list
+    for ubad_table in "${__parse_ubad_tables_field_field_definitions_[@]}"; do
+        
+        # Get reference to the table
+        local -n ubad_table_ref="${ubad_table}"
+        
+        # If default value defined, write it down
+        if is_var_set ubad_table_ref["$field"]; then
+            
+            # Get name of the argument
+            local name="${ubad_table_ref[name]}"
+            # Get value of the argument
+            local value="${ubad_table_ref[$field]}"
+            # Write the value down
+            __parse_ubad_tables_field_field_fields_["$name"]="$value"
+
+        fi
+
+    done
+
+    # -------------------------------------------------------------------------
+
+    return 0   
+}
+
+# ---------------------------------------------------------------------------------------
+# @brief Parses a specific @p field from UBAD tables given in the @p definitions 
+#    UBAD list and pairs them with argument's name (skips flag-typed arguments)
+#
+# @param definitions
+#    name of the UBAD list containing definitions
+# @param field
+#    field to be parsed
+# @param fields [out]
+#    name of the has array that the default values of non-flag argument will be written
+#    into
+#
+# @returns 
+#    @c 0 on success \n
+#
+# @note Types of arguments are not being checke dby the function. They are assumed
+#    to be checked by the calling function
+# ---------------------------------------------------------------------------------------
+function parse_ubad_tables_field_no_flags() {
+
+    # Parse arguments
+    local -n __parse_ubad_tables_field_no_flags_field_definitions_="$1"
+    local    __parse_ubad_tables_field_no_flags_field_field_="$2"
+    local -n __parse_ubad_tables_field_no_flags_field_fields_="$3"
+
+    # ------------------------- Parse default values --------------------------
+
+    local ubad_table
+
+    # Get the field name
+    local field="${__parse_ubad_tables_field_no_flags_field_field_}"
+
+    # Iterate over UBAD list
+    for ubad_table in "${__parse_ubad_tables_field_no_flags_field_definitions_[@]}"; do
+        
+        # Get reference to the table
+        local -n ubad_table_ref="${ubad_table}"
+        
+        # If flag option met, continue
+        is_var_set ubad_table_ref[type] && is_ubad_arg_flag "${ubad_table_ref[type]}" &&
+            continue
+        # If default value defined, write it down
+        if is_var_set ubad_table_ref["$field"]; then
+            
+            # Get name of the argument
+            local name="${ubad_table_ref[name]}"
+            # Get value of the argument
+            local value="${ubad_table_ref[$field]}"
+            # Write the value down
+            __parse_ubad_tables_field_no_flags_field_fields_["$name"]="$value"
+
+        fi
+
+    done
+
+    # -------------------------------------------------------------------------
+
+    return 0   
+}
 
 # ---------------------------------------------------------------------------------------
 # @brief Parses list of variants associated with the argument

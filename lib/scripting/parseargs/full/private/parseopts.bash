@@ -1,22 +1,19 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     parseopts_early.bash
+# @file     parseopts.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 12:49:58 pm
-# @modified Thursday, 17th February 2022 8:18:38 pm
+# @modified Friday, 18th February 2022 8:04:34 pm
 # @project  bash-utils
 # @brief
 #    
-#    Simplified version of the @fun parseopts` function aimed to be used by the @fun parseopts itself
+#    Set of functions used to implement 'parseopts'
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
-
-# A string reporting a library bug
-declare __parseopts_bug_msg_=$(echo \
-        "A @fun parseopts failed to parse it's own options. This is a library bug. Please" \
-        "report it to the librarie's author."
-)
+    
+# UBAD table of the auto-generated 'help' option
+declare -A __help_parseopts_opt_def_=( [format]="-h|--help" [name]="help" [type]="f" [help]="Shows this usage text")
 
 # ============================================================= Helpers ============================================================ #
 
@@ -100,11 +97,9 @@ function is_option() {
 
 }
 
-# -------------------------------------------------------------------
-# @brief Based on the list of arguments and options' definitions
-#    finds name of the option corresponding to the name of the
-#    key in the @p options hash table returned by the @fun parseopts_s
-#    function. Nameis written to the stdout
+# ---------------------------------------------------------------------------------------
+# @brief Based on the list of arguments and options' definitions finds format of the
+#    option corresponding to it's name defined in the UBAD table
 #
 # @params args
 #    name of the list of arguments to be parsed
@@ -119,27 +114,26 @@ function is_option() {
 #       was not declared in the @p defs list or it does not
 #       appear on the @p args list
 #
-# @note Function returns format of the the last occurrence of the 
-#    option in the @p args list
-# -------------------------------------------------------------------
+# @note Function returns format of the the last occurrence of the option in the 
+#    @p args list
+# ---------------------------------------------------------------------------------------
 function get_option_format() {
 
     # Arguments
-    local -n __get_option_name_args_="$1"
-    local -n __get_option_name_defs_="$2"
-    local  __get_option_name_name_="$3"
+    local -n __get_option_format_args_="$1"
+    local -n __get_option_format_defs_="$2"
+    local  __get_option_format_name_="$3"
 
-    # Local iterator
     local opt_def=""
 
     # Search a list of definitions to find name(s) corresponding to the given key
-    for opt_def in "${__get_option_name_defs_[@]}"; do
+    for opt_def in "${__get_option_format_defs_[@]}"; do
 
         # Get reference to the UBAD table
         local -n opt_def_ref="$opt_def"
 
         # If requred table has been found, break
-        if [[ "${opt_def_ref[name]}" == "$__get_option_name_name_" ]]; then
+        if [[ "${opt_def_ref[name]}" == "$__get_option_format_name_" ]]; then
             break
         fi
 
@@ -148,7 +142,7 @@ function get_option_format() {
     # Get reference to the UBAD table
     local -n opt_def_ref="$opt_def"
     # If name was not found on the list of definitions, return error
-    if [[ "${opt_def_ref[name]}" != "$__get_option_name_name_" ]]; then
+    if [[ "${opt_def_ref[name]}" != "$__get_option_format_name_" ]]; then
         return 1
     fi
 
@@ -164,10 +158,10 @@ function get_option_format() {
     local -a format_list=( "$@" )
 
     # Iterate list of arguments backward to find the last occurence of the option
-    for ((i = ${#__get_option_name_args_[@]} - 1; i >= 0; i--)); do
+    for ((i = ${#__get_option_format_args_[@]} - 1; i >= 0; i--)); do
         
         # Get the argument
-        local single_arg="${__get_option_name_args_[$i]}"
+        local single_arg="${__get_option_format_args_[$i]}"
         
         # Check if argument is an option; if not, continue scanning
         starts_with "${single_arg}" "-" || continue
@@ -190,6 +184,30 @@ function get_option_format() {
 
     # If no option found, return error
     return 1
+}
+
+
+# ---------------------------------------------------------------------------------------
+# @brief Extends UBAD list describing option arguments with auto-generated descriptor
+#    of the 'help' option if one is not defined yet
+#
+# @param opt_defs
+#    name of the UBAd list containing definitions of options
+# ---------------------------------------------------------------------------------------
+function autogenerate_help_option() {
+
+    # Parse arguments
+    local __autogenerate_help_option_opt_defs_="$1"
+
+    # If descriptor is NOT already defined, add one
+    if ! has_ubad_list_table_with_name "$__autogenerate_help_option_opt_defs_" 'help'; then
+
+        # Get reference to the list
+        local -n __autogenerate_help_option_opt_defs_ref_="$__autogenerate_help_option_opt_defs_"
+        # Append auto-generated help
+        __autogenerate_help_option_opt_defs_ref_+=(__help_parseopts_opt_def_)
+        
+    fi
 }
 
 # ========================================================= Implementations ======================================================== #
@@ -220,8 +238,6 @@ function parse_ubad_options_list_core_info () {
 
     # ------------------------- Validate arguments ----------------------------
 
-    # Check if a valid UBAD list has been given (@define)
-    is_ubad_list "$__pode_opts_definitions_" 'opts' || return 2
     # Check if arguments of a valid type has been given
     is_hash_array "$__pode_names_" || return 1
     is_hash_array "$__pode_types_" || return 1
@@ -431,11 +447,7 @@ function wrap_getopt() {
 # @param args
 #    name of the list holding caller's arguments to be parsed
 # @param flag_def_type
-#    verbosity mode (either 'defined' or 'undefined')
-# @param opts_names [out]
-#    name of the array that the names of the valid options will be parsed into (these
-#    names are keys to the values in the @p opts_types and @p opts hash arrays that
-#    match given option with it's type/parsed value)
+#    parsed-flags definition mode (either 'defined' or 'undefined')
 # @param opts_types [out]
 #    name of the hash array holding pairs optname-opttype (every name has it's type
 #    defined here)
@@ -460,10 +472,9 @@ function parseopts_parse_options() {
     local    __parseopts_parse_options_opts_definitions_="$1"
     local    __parseopts_parse_options_args_="$2"
     local    __parseopts_parse_options_flag_def_type_="$3"
-    local -n __parseopts_parse_options_opts_names_="$4"
-    local -n __parseopts_parse_options_opts_types_="$5"
-    local -n __parseopts_parse_options_opts_="$6"
-    local -n __parseopts_parse_options_pargs_="$7"
+    local -n __parseopts_parse_options_opts_types_="$4"
+    local -n __parseopts_parse_options_opts_="$5"
+    local -n __parseopts_parse_options_pargs_="$6"
 
     # --------------- Parse names and types of valid options ------------------
     
@@ -573,11 +584,6 @@ function parseopts_parse_options() {
     
     # -------- Transform output helper (h)arrays into required form -----------
 
-    # Write all values of the `names_raw` array into `names` array (some names may be repeated as it may be tied to many formats)
-    __parseopts_parse_options_opts_names_=( "${__parseopts_parse_options_opts_names_raw_[@]}" )
-    # Remove duplicated names (use unordered set convention, as order of names is not importantant)
-    array_to_uset __parseopts_parse_options_opts_names_
-
     local format
 
     # Iterate over hash array of types
@@ -598,6 +604,10 @@ function parseopts_parse_options() {
     
     # If 'defined flags' mode requested
     if [[ "${__parseopts_parse_options_flag_def_type_}" == "defined" ]]; then
+        
+        # Write all values of the `names_raw` array into `names` array (some names may be repeated as it may be tied to many formats)
+        local __parseopts_parse_options_opts_names_=( "${__parseopts_parse_options_opts_names_raw_[@]}" )
+    
         local opt_name
 
         # Iterate over all options
@@ -613,165 +623,6 @@ function parseopts_parse_options() {
     fi
 
     # -------------------------------------------------------------------------
-
-    return 0
-}
-
-# ---------------------------------------------------------------------------------------
-# @brief Parses a specific @p field from UBAD tables given in the @p opts_definitions 
-#    UBAD list and pairs them with argument's name (skips flag-typed arguments)
-#
-# @param opts_definitions
-#    name of the UBAD list containing options' definitions
-# @param field
-#    field to be parsed
-# @param opts_fields [out]
-#    name of the has array that the default values of non-flag options will be written
-#    into
-#
-# @returns 
-#    @c 0 on success \n
-#
-# @note Types of arguments are not being checke dby the function. They are assumed
-#    to be checked by the calling function (i.e. `parseargs`)
-# ---------------------------------------------------------------------------------------
-function parseopts_parse_field() {
-
-    # Parse arguments
-    local -n __parseopts_parse_field_opts_definitions_="$1"
-    local    __parseopts_parse_field_field_="$2"
-    local -n __parseopts_parse_field_opts_fields_="$3"
-
-    # ------------------------- Parse default values --------------------------
-
-    local ubad_table
-
-    # Get the field name
-    local field="${__parseopts_parse_field_field_}"
-
-    # Iterate over UBAD list
-    for ubad_table in "${__parseopts_parse_field_opts_definitions_[@]}"; do
-    
-        # Get reference to the table
-        local -n ubad_table_ref="${ubad_table}"
-        
-        # If flag option met, continue
-        is_var_set ubad_table_ref[type] && is_ubad_arg_flag "${ubad_table_ref[type]}" &&
-            continue
-        # If default value defined, write it down
-        if is_var_set ubad_table_ref["$field"]; then
-            
-            # Get name of the argument
-            local name="${ubad_table_ref[name]}"
-            # Get value of the argument
-            local value="${ubad_table_ref[$field]}"
-            # Write the value down
-            __parseopts_parse_field_opts_fields_["$name"]="$value"
-
-        fi
-
-    done
-
-    # -------------------------------------------------------------------------
-
-    return 0   
-}
-
-# ---------------------------------------------------------------------------------------
-# @brief Automatically generates description of option arguments based on the UBAD list
-#
-# @param opt_defs
-#    name of the UBAD list containing option arguments' definitions
-# ---------------------------------------------------------------------------------------
-function generate_options_description() {   
-
-    # Parse arguments
-    local -n __generate_options_description_opt_defs_="$1"
-    
-    # Prepare outpt hash array for formats
-    local -A formats=()
-    # Prepare outpt hash array for helps
-    local -A helps=()
-    
-    local opt_def=""
-
-    # Iterate over defined UBDA tables to gather information about subequent options
-    for opt_def in "${__generate_options_description_opt_defs_[@]}"; do
-    
-        # Get reference to the UBAD table
-        local -n opt_def_ref="$opt_def"
-
-        # Get name of the option
-        local name="${opt_def_ref[name]}"
-        
-        # Get format of the option
-        local format="${opt_def_ref[format]}"
-        # Get help of the option
-        local help=""
-        is_var_set opt_def_ref[help] && help="${opt_def_ref[help]}"
-
-        # Get format's string
-        local type_string="$(ubad_arg_type_usage_string ${opt_def_ref[type]})"
-
-        # Transform and keep format string (add argument type's identifier and replace '|' delimiters with ', ')
-        formats["$name"]="${format//|/${type_string}, }${type_string}"
-        # Keep help string
-        helps["$name"]="$help"
-
-    done
-
-    # Maximal lenght of the optional argument's description
-    local OPTION_DESCRIPTION_LENGTH_MAX=85
-
-    local name=""
-    
-    # Prepare maximum length of the format string
-    local -i max_format_length=$(max_len formats)
-    # Print full descriptions
-    for name in "${!formats[@]}"; do
-        
-        # Create format string (left-aligned)
-        local description=$(printf "%-${max_format_length}s " "${formats[$name]}")
-        
-        # Enable word splitting (locally)
-        localize_word_splitting
-        enable_word_splitting
-
-        local word=""
-
-        # Number of characters written in the row
-        local chars_in_row
-        (( chars_in_row = $max_format_length + 2 ))
-
-        # Loop over words in the description and print them so that it fits in required width
-        for word in ${helps[$name]}; do
-        
-            if (( $chars_in_row + 1 + ${#word} <= $OPTION_DESCRIPTION_LENGTH_MAX )); then
-
-                # Add number of characters in row
-                (( chars_in_row = ${chars_in_row} + 1 + ${#word}))
-                # Print word
-                description+=" ${word}"
-
-            # Else, if word does NOT fit into description, go to the next line
-            else
-
-                # Set number of characters in row
-                (( chars_in_row = ${max_format_length} + 2 + ${#word}))
-                # Print word with intendation
-                description+=$(printf "\n%-${max_format_length}s  %s" " " "${word}") 
-
-            fi
-            
-        done
-
-        # Disable word splitting
-        disable_word_splitting
-
-        # Print description of the option
-        echo "${description}"
-
-    done
 
     return 0
 }
@@ -808,8 +659,7 @@ function parseopts_parseopts() {
     __parseopts_parseopts_own_options_=()
     __parseopts_parseopts_own_posargs_=()
 
-    # Helper variable used to store status code of commands
-    local ret_
+    # ----------------------- Parse core informations -------------------------
 
     # A hash array assosiating own options' formats with their names
     local -A __parseopts_own_options_names_
@@ -827,6 +677,8 @@ function parseopts_parseopts() {
         return 1
     }
 
+    # ------------------------ Compile getopt request -------------------------
+
     # String with `getopt`-compatibile definitions of own short options
     local __parseopts_own_getopt_shorts_
     # String with `getopt`-compatibile definitions of own long options
@@ -841,6 +693,10 @@ function parseopts_parseopts() {
         log_error "$__parseopts_bug_msg_"
         return 1
     }
+
+    local ret_
+
+    # ------------------------------ Run getopt -------------------------------
 
     # Parse own options with getopt
     local __parseopts_own_getopt_output_=$(
@@ -860,6 +716,8 @@ function parseopts_parseopts() {
     {
         return 2
     }
+
+    # ------------------------- Parse getopt results --------------------------
 
     # Set positional arguments to those parse by `getopt`
     eval "set -- $__parseopts_own_getopt_output_"
@@ -893,7 +751,119 @@ function parseopts_parseopts() {
     # Set positional arguments
     __parseopts_parseopts_own_posargs_=( "$@" )
 
+    # -------------------------------------------------------------------------
+
     return 0
+}
+
+# ========================================================== Helpe printer ========================================================= #
+
+# ---------------------------------------------------------------------------------------
+# @brief Automatically generates description of option arguments based on the UBAD list
+#
+# @param opt_defs
+#    name of the UBAD list containing option arguments' definitions
+# @param with_auto_help ( optional, default: '' )
+#    if given as 'with_auto_help', the automatically-generated [help] option will
+#    be added to definitions (is one is not already defined)
+# ---------------------------------------------------------------------------------------
+function generate_opts_description() {   
+
+    # Parse arguments
+    local __generate_opts_description_opt_defs_="$1"
+    local __generate_opts_description_with_auto_help_="${2:-}"
+
+    # Get reference to the UBAD list
+    local -n __generate_opts_description_opt_defs_ref_="$__generate_opts_description_opt_defs_"
+
+    # ---------------------- Add optional 'help' option -----------------------
+
+    # If option enabled, append table
+    if [[ "$__generate_opts_description_with_auto_help_" == "with_auto_help" ]]; then
+
+        # Check if list already contains 'help' option
+        if ! has_ubad_list_table_with_name "$__generate_opts_description_opt_defs_" 'help'; then
+
+            # Create local copy of the UBAD list that the additional table will appended into
+            local -a __generate_opts_description_opt_defs_copy_=( "${__generate_opts_description_opt_defs_ref_[@]}" )
+            # Append auto-generated help
+            __generate_opts_description_opt_defs_copy_+=(__help_parseopts_opt_def_)
+            # Change reference to the local copy
+            local -n __generate_opts_description_opt_defs_ref_=__generate_opts_description_opt_defs_copy_
+            
+        fi
+
+    fi
+
+    # ------------------------ Format the description -------------------------
+    
+    # Prepare outpt hash array for formats
+    local -A formats=()
+    # Prepare outpt hash array for helps
+    local -A helps=()
+    # Prepare outpt hash array for types
+    local -A types=()
+    
+    local opt_def=""
+
+    # Parse formats and helps
+    parse_description_info \
+        "$__generate_opts_description_opt_defs_" \
+        formats helps types
+
+    # Get reference to the UBAD list
+
+    local name
+    
+    # Iterate over formats and reformat them into prettier form
+    for name in "${!formats[@]}"; do
+    
+        # Get format of the option
+        local format="${formats[$name]}"
+        # Get format's string
+        local type_string="$(ubad_arg_type_usage_string ${types[$name]})"
+        
+        # Replace '|' delimiters with ', '
+        format="${format//|/, }"
+        # Add type strings to options
+        if ! is_ubad_arg_flag ${types[$name]}; then
+            
+            local short_pattern_middle='(.*)-([[:alpha:]]),(.*)'
+            local long_pattern_middle='(.*)--([-[:alpha:]]+),(.*)'
+
+            # Cover options in the middle of the string (delimited with comma) [long options]
+            while [[ "$format" =~ $long_pattern_middle ]]; do
+                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}=$type_string,${BASH_REMATCH[3]}"
+            done
+            # Cover options in the middle of the string (delimited with comma) [short options]
+            while [[ "$format" =~ $short_pattern_middle ]]; do
+                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]} $type_string,${BASH_REMATCH[3]}"
+            done
+
+            # Cover options on the end of the string
+            local short_pattern_end='(.*)-([[:alpha:]])$'
+            local long_pattern_end='(.*)--([-[:alpha:]]+)$'
+
+            # Cover options on the end of the string [long options]
+            while [[ "$format" =~ $long_pattern_end ]]; do
+                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}=$type_string"
+            done
+            # Cover options on the end of the string [short options]
+            while [[ "$format" =~ $short_pattern_end ]]; do
+                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]} $type_string"
+            done
+        
+        fi
+        
+        # Keep reformatted string
+        formats["$name"]="$format"
+
+    done
+
+    # Compile description text
+    compile_description_info formats helps
+
+    # -------------------------------------------------------------------------
 }
 
 # ================================================================================================================================== #

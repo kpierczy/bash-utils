@@ -3,7 +3,7 @@
 # @file     arguments_old.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 12:25:13 am
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Thursday, 17th February 2022 9:10:37 pm
 # @project  bash-utils
 # @brief
 #    
@@ -174,7 +174,7 @@ alias __echo_usage_if_verbose='
 #        posargs || return 1
 # 
 # -------------------------------------------------------------------
-function parseargs() {
+function parseargs_s() {
 
     # Arguments
     # local -n _pa_args_
@@ -689,7 +689,7 @@ is_var_set_non_empty opt_definitions[0] && parseargs_options+=( "--options-dst=o
 
 # Parse options
 local __ret_
-parseargs_s${parseargs_options[@]} -- args posargs && __ret_="$?" || __ret_="$?"
+parseargs_s ${parseargs_options[@]} -- args posargs && __ret_="$?" || __ret_="$?"
 # Return 0 if help requested
 [[ "$__ret_" == 2 ]] && return 0 ||
 # Return 1 if parsing error occurred

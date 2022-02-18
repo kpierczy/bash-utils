@@ -3,7 +3,7 @@
 # @file     ubad_format.sh
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 2:24:35 pm
-# @modified Thursday, 17th February 2022 7:04:12 pm
+# @modified Friday, 18th February 2022 7:40:21 pm
 # @project  bash-utils
 # @brief
 #    
@@ -234,10 +234,10 @@ function ubad_arg_type_usage_string() {
 
     # Check if valid type given
     case "${string_}" in
-        "string"  | "s" ) echo "=STR"  ;;
-        "integer" | "i" ) echo "=INT"  ;;
-        "flag"    | "f" ) echo ""      ;;
-        "path"    | "p" ) echo "=PATH" ;;
-        *               ) echo ""      ;;
+        "string"  | "s" ) echo "STR"  ;;
+        "integer" | "i" ) echo "INT"  ;;
+        "flag"    | "f" ) echo ""     ;;
+        "path"    | "p" ) echo "PATH" ;;
+        *               ) echo ""     ;;
     esac
 }

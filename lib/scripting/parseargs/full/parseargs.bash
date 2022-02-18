@@ -3,7 +3,7 @@
 # @file     parseargs.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 2:37:47 pm
-# @modified Thursday, 17th February 2022 5:40:56 pm
+# @modified Friday, 18th February 2022 6:57:38 pm
 # @project  bash-utils
 # @brief
 #    
@@ -87,26 +87,17 @@ declare __parseargs_bug_msg_=$(echo \
 #                                    after being parsed (edge whitespace characters 
 #                                    are removed). If this flag is setl this behaviour
 #                                    is suspended
-#  -s,             --strict-env-def  by default, if the environmental argument with
-#                                    the defined [format] is set but does not meet
-#                                    requirements descibed in the UBAD table, function
-#                                    will assume that the variable comes from the upper
-#                                    context and was not intended to be an argument
-#                                    of the function/script whose arguments are parsed
-#                                    by the `parseargs`. In such case, the argument will
-#                                    be considered not-parsed; if this switch is set,
-#                                    the environmental argument that is set, but does
-#                                    not meet requirements will be considered erronous
-#                                    and the 1 status code will be returned by the 
-#                                    `parseargs`
-#  -f,     --flag-default-undefined  by default, flag arguments are set to 1 when not 
-#                                    parsed (in bash '0' means true and '1' means false)
-#                                    and set to 0 when parsed. If this flag is set, 
-#                                    the non-parsed flag-typed arguments will stay
-#                                    undefined in 'opts' or 'envs' hash array 
-#                                    respecitvely
+#  -f,       --flag-default-defined  by default, flag arguments are unset when not 
+#                                    parsed and set to 0 when parsed (in bash '0' means 
+#                                    true and '1' means false). If this flag is set, 
+#                                    the non-parsed flag-typed arguments will be set
+#                                    to 1
 #  -c,   --without-int-verification  if set, no integer-typed arguments validation is
 #                                    performed
+#  -k,                 --ubad-check  if set, the @p opts_definitions definition will be
+#                                    verified to be a valid UBAD list describing the
+#                                    list of arguments; this procedure is computationally
+#                                    expensnsive and so it optional
 #
 # @environment
 #    
@@ -142,9 +133,9 @@ function parseargs() {
     local -A          __with_description_parseargs_opt_def_=( [format]="-d|--with-description"          [name]="with_description"          [type]="s" )
     local -A             __with_cmd_name_parseargs_opt_def_=( [format]="-z|--with-cmd-name"             [name]="with_cmd_name"             [type]="s" )
     local -A                       __raw_parseargs_opt_def_=( [format]="-r|--raw"                       [name]="raw"                       [type]="f" )
-    local -A            __strict_env_def_parseargs_opt_def_=( [format]="-s|--strict-env-def"            [name]="strict_env_def"            [type]="f" )
-    local -A    __flag_default_undefined_parseargs_opt_def_=( [format]="-f|--flag-default-undefined"    [name]="flag_default_undefined"    [type]="f" )
+    local -A      __flag_default_defined_parseargs_opt_def_=( [format]="-f|--flag-default-defined"      [name]="flag_default_defined"      [type]="f" )
     local -A  __without_int_verification_parseargs_opt_def_=( [format]="-c|--without-int-verification"  [name]="without_int_verification"  [type]="f" )
+    local -A                __ubad_check_parseargs_opt_def_=( [format]="-k|--ubad-check"                [name]="ubad_check"                [type]="f" )
 
     # UBAD list for options
     local -a __parseargs_opts_definitions_=(
@@ -165,10 +156,10 @@ function parseargs() {
         __with_description_parseargs_opt_def_
         __with_cmd_name_parseargs_opt_def_
         __raw_parseargs_opt_def_
-        __stric_env_def_parseargs_opt_def_
-        __flag_default_undefined_parseargs_opt_def_
+        __flag_default_defined_parseargs_opt_def_
         __without_int_verification_parseargs_opt_def_
         __without_path_verification_parseargs_opt_def_
+        __ubad_check_parseargs_opt_def_
     )
 
     # -------------------------- Parse own options ----------------------------
@@ -219,7 +210,6 @@ function parseargs() {
     # ======================================================================= #
 
     local help_requested="false"
-    local parseopts_output=""
 
     # Check if options' definitions has been given
     if is_var_set __parseargs_own_opts_[opts_definitions]; then
@@ -236,17 +226,16 @@ function parseargs() {
         is_var_set __parseargs_own_opts_[verbose]                  && __parseargs_parseopts_opts_+=" -v"
         is_var_set __parseargs_own_opts_[with_help]                && __parseargs_parseopts_opts_+=" -h"
         is_var_set __parseargs_own_opts_[raw]                      && __parseargs_parseopts_opts_+=" -r"
-        is_var_set __parseargs_own_opts_[flag_default_undefined]   && __parseargs_parseopts_opts_+=" -f"
+        is_var_set __parseargs_own_opts_[flag_default_defined]     && __parseargs_parseopts_opts_+=" -f"
         is_var_set __parseargs_own_opts_[without_int_verification] && __parseargs_parseopts_opts_+=" -c"
+        is_var_set __parseargs_own_opts_[ubad_check]               && __parseargs_parseopts_opts_+=" -k"
 
         # Parse caller's options
-        parseopts_output="$(
-            parseopts "$__parseargs_parseopts_opts_" --    \
-                __parseargs_args_                          \
-                ${__parseargs_own_opts_[opts_definitions]} \
-                __parseargs_opts_                          \
-                ${__parseargs_pargs_}
-        )" ||
+        parseopts "$__parseargs_parseopts_opts_" --      \
+            __parseargs_args_                            \
+            "${__parseargs_own_opts_[opts_definitions]}" \
+            __parseargs_opts_                            \
+            "${__parseargs_pargs_}"                      ||
         {
             log_error "Failed to parse options"
             restore_log_config_from_default_stack
@@ -264,7 +253,7 @@ function parseargs() {
             # Get reference to the array
             local __parseargs_opts_ref_="${__parseargs_own_opts_[opts]}"
             # Write down the array
-            copy_hash_array __parseargs_opts_ref_ __parseargs_opts_
+            copy_hash_array __parseargs_opts_ __parseargs_opts_ref_
             
         fi
 
@@ -277,6 +266,95 @@ function parseargs() {
         # Set positional arguments to all given argumnts
         __parseargs_pargs_ref_=( "${@}" )
 
+    fi
+
+    # ======================================================================= #
+    # -------------------------- Print help message ------------------------- # 
+    # ======================================================================= #
+
+    # Check if help needs to be printed
+    if [[ "$help_requested" == "true" ]] && is_var_set __parseargs_own_opts_[verbose]; then
+        
+        # If custom usage string given, print it
+        if is_var_set __parseargs_own_opts_[with_usage]; then
+
+            # Get reference to the string
+            local -n usage_ref="$__parseargs_own_opts_[with_usage]"
+            # Print usage
+            echo "$usage_ref"
+
+        else
+
+            local description=""
+            local prog_name="$0"
+
+            # Prepare command's description
+            is_var_set __parseargs_own_opts_[with_description] && description="${__parseargs_own_opts_[with_description]}"
+            # Prepare command's name
+            is_var_set __parseargs_own_opts_[with_cmd_name]    && prog_name="${__parseargs_own_opts_[with_cmd_name]}"
+
+            # Prepare usage string
+            local __parseargs_usage_string_="Usage: $prog_name"
+            # If options are present, add their's representation
+            is_var_set __parseargs_own_opts_[opts_definitions] && __parseargs_usage_string_+=" [OPTIONS]"
+            # If required positional arguments are present, add their's representation
+            is_var_set __parseargs_own_opts_[args_definitions] && \
+                __parseargs_usage_string_+=" $(parsepargs_generate_required_arguments ${__parseargs_own_opts_[args_definitions]})"
+            # If non-required positional arguments are present, add their's representation as '...'
+            parsepargs_has_non_required_arguments ${__parseargs_own_opts_[args_definitions]} && __parseargs_usage_string_+=" ..."
+            
+            # Print description
+            (( "${#description}" > 0 )) && echo "Description: $description"
+            # Print usage string
+            echo -e "$__parseargs_usage_string_"
+            echo 
+
+            # Print positional arguments' description
+            is_var_set __parseargs_own_opts_[args_definitions] && {
+
+                # Prepare description
+                local args_description="$(generate_pargs_description ${__parseargs_own_opts_[args_definitions]})"
+
+                # Output argument's description
+                echo "Arguments:"
+                echo 
+                echo -e "$args_description"
+                echo 
+
+            }
+            # Print optional arguments' description
+            is_var_set __parseargs_own_opts_[opts_definitions] && {
+                
+                local opts_description
+                
+                # Prepare description
+                if is_var_set __parseargs_own_opts_[with_help]; then
+                    opts_description="$(generate_opts_description ${__parseargs_own_opts_[opts_definitions]}) with_auto_help"
+                else
+                    opts_description="$(generate_opts_description ${__parseargs_own_opts_[opts_definitions]})"
+                fi
+
+                # Output argument's description
+                echo "Options:"
+                echo 
+                echo -e "$opts_description"
+                echo 
+
+            }
+            # Print environmental arguments' description
+            is_var_set __parseargs_own_opts_[envs_definitions] && {
+                
+                # Prepare description
+                local envs_description="$(generate_envs_description ${__parseargs_own_opts_[envs_definitions]})"
+
+                # Output argument's description
+                echo "Environment:"
+                echo 
+                echo -e "$envs_description"
+            }
+
+        fi
+        
     fi
 
     # ======================================================================= #
@@ -329,63 +407,45 @@ function parseargs() {
 
     # --------------------- Parse positional arguments ------------------------
 
-    local parsepargs_output=""
-    local parsepargs_output_required_arguments=""
-
     # ======================================================================= #
     # --------------------- Parse environmental arguments ------------------- # 
     # ======================================================================= #
 
-    local parsenvs_output=""
-
-    # ======================================================================= #
-    # -------------------------- Print help message ------------------------- # 
-    # ======================================================================= #
-
-    # Check if help needs to be printed
-    if [[ "$help_requested" == "true" ]] && is_var_set __parseargs_own_opts_[verbose]; then
+    # Check if envs' definitions has been given
+    if is_var_set __parseargs_own_opts_[envs_definitions]; then
         
-        # If custom usage string given, print it
-        if is_var_set __parseargs_own_opts_[with_usage]; then
+        # -------------------------- Parse caller's envs --------------------------
 
-            # Get reference to the string
-            local -n usage_ref="$__parseargs_own_opts_[with_usage]"
-            # Print usage
-            echo "$usage_ref"
+        # Create array holding caller's envs parsed
+        local -A __parseargs_envs_
 
-        else
+        # Compile options passed to `parseargs`
+        local __parseargs_parseenvs_opts_=""
+        is_var_set __parseargs_own_opts_[verbose]                  && __parseargs_parseenvs_opts_+=" -v"
+        is_var_set __parseargs_own_opts_[raw]                      && __parseargs_parseenvs_opts_+=" -r"
+        is_var_set __parseargs_own_opts_[flag_default_defined]     && __parseargs_parseenvs_opts_+=" -f"
+        is_var_set __parseargs_own_opts_[without_int_verification] && __parseargs_parseenvs_opts_+=" -c"
 
-            local description=""
-            local prog_name="$0"
+        # Parse caller's envs
+        parseenvs "$__parseargs_parseenvs_opts_" --      \
+            "${__parseargs_own_opts_[envs_definitions]}" \
+            __parseargs_envs_                            ||
+        {
+            log_error "Failed to parse envs"
+            restore_log_config_from_default_stack
+            return 1
+        }
 
-            # Prepare command's description
-            is_var_set __parseargs_own_opts_[with_description] && description="${__parseargs_own_opts_[with_description]}"
-            # Prepare command's name
-            is_var_set __parseargs_own_opts_[with_cmd_name]    && prog_name="${__parseargs_own_opts_[with_cmd_name]}"
+        # Write parsed envs to the target hash array, if given
+        if is_var_set __parseargs_own_opts_[envs]; then
 
-            # Print description
-            (( "${#description}" > 0 )) && echo "Description: $description"
-            # Print usage string
-            echo -e "Usage: $prog_name [OPTIONS] $parsepargs_output_required_arguments ..."
-            echo 
-
-            # Print positional arguments' description
-            echo "Arguments:"
-            echo 
-            echo -e "$parsepargs_output"
-            echo 
-            # Print optional arguments' description
-            echo "Options:"
-            echo 
-            echo -e "$parseopts_output"
-            echo 
-            # Print environmental arguments' description
-            echo "Environment:"
-            echo 
-            echo -e "$parsenvs_output"
-
+            # Get reference to the array
+            local __parseargs_envs_ref_="${__parseargs_own_opts_[envs]}"
+            # Write down the array
+            copy_hash_array __parseargs_envs_ __parseargs_envs_ref_
+            
         fi
-        
+
     fi
 
     # ======================================================================= #
