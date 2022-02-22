@@ -3,7 +3,7 @@
 # @file     openocd.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 4:36:43 pm
-# @modified Sunday, 21st November 2021 8:36:26 pm
+# @modified Wednesday, 23rd February 2022 12:06:33 am
 # @project  bash-utils
 # @brief
 #    
@@ -18,27 +18,26 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
-# Script's usage
-get_heredoc usage <<END
-    Description: Installs OpenOCD progremmer/debugger software from the binrary package
-    Usage: openocd.bash VERSION
+# Description of the script
+declare cmd_description="Installs OpenOCD programmer/debugger software from the binary package"
 
-    Arguments
+# Arguments' descriptions
+declare -A pargs_description=(
+    [version]="version of hte OpenOCD to be downloaded (@see Source)"
+)
 
-        VERSION  version of hte OpenOCD to be downloaded (@see Source)
+# Options' descriptions
+declare -A opts_description=(
+    [prefix]="installation prefix"
+    [dirname]="name that the package's directory should be renamed to after being extracted (realative to --prefix)"
+    [cleanup]="if set, the downloaded archieve will be removed after being downloaded"
+)
 
-    Options:
-      
-        --help        if no command given, displays this usage message
-        --prefix=DIR  installation prefix
-        --dirname     name that the toolchain's dirctory should be changed to after
-                      being extracted (realative to --prefix)
-        --cleanup     if set, the downloaded archieve will be removed after being downloaded
-        
+# Additional info
+get_heredoc source_description <<END
     Source:
     
         https://github.com/xpack-dev-tools/openocd-xpack/releases
-
 END
 
 # ========================================================== Configuration ========================================================= #
@@ -51,11 +50,11 @@ declare TARGET_SCHEME='xpack-openocd-$VERSION'
 # ============================================================ Constants =========================================================== #
 
 # Logging context of the script
-LOG_CONTEXT="openocd"
+declare LOG_CONTEXT="openocd"
 
 # ============================================================ Commands ============================================================ #
 
-install() {
+function install() {
 
     # Get system's architecture
     case $(get_system_arch) in
@@ -65,60 +64,61 @@ install() {
         *               ) log_error "Architecture's not supported ($(get_system_arch))"
                             exit 1;;
     esac
-    # Evaluate the target URL
-    local URL=$(eval "echo $URL_SCHEME")
 
-    local PREFIX="${options[prefix]:-.}"
+    # Convert prefix to absolute path
+    opts[prefix]=$(realpath ${opts[prefix]})
+    # Evaluate the target URL
+    local url=$( VERSION=${pargs[version]} eval "echo $URL_SCHEME" )
+    # Evaluate target name
+    local target=$( VERSION=${pargs[version]} eval "echo $TARGET_SCHEME" )
 
     # Download and extract the toolchain
-    download_and_extract $URL  \
-        --arch-dir=/tmp        \
-        --extract-dir=$PREFIX  \
-        --show-progress        \
-        --verbose              \
+    download_and_extract $url         \
+        --arch-dir=/tmp               \
+        --extract-dir=${opts[prefix]} \
+        --show-progress               \
+        --verbose                     \
         --log-target="OpenOCD"
-    [[ $? == 0 ]] || exit 1
-
-    local TARGET=$(eval "echo $TARGET_SCHEME")
 
     # Rename toolchain's folder
-    is_var_set_non_empty options[dirname] &&
-        mv $PREFIX/$TARGET $PREFIX/${options[dirname]}
+    is_var_set_non_empty opts[dirname] &&
+        mv ${opts[prefix]}/$target ${opts[prefix]}/${opts[dirname]}
 
     # If option given, remove archieve
-    is_var_set_non_empty options[cleanup] &&
-        rm /tmp/${TARGET}*.tar.gz
-
-    exit $?
+    is_var_set_non_empty opts[cleanup] &&
+        rm /tmp/${target}*.tar.gz
+    
 }
 
 # ============================================================== Main ============================================================== #
 
-main() {
+function main() {
 
-    # Link USAGE message
-    local -n USAGE=usage
-
-    # Commands imlemented by the script
-    local ARG_NUM=1
-    local -a arguments=(
-        VERSION
-    )
+    # Arguments
+    local -A version_parg_def=( [format]="VERSION" [name]="version" [type]="s" )
 
     # Options
-    local -a opt_definitions=(
-        '--help',help,f
-        '--prefix',prefix
-        '--dirname',dirname
-        '--cleanup',cleanup,f
-    )
+    local -A  a_prefix_opt_def=( [format]="--prefix"  [name]="prefix"  [type]="p" [default]="." )
+    local -A b_dirname_opt_def=( [format]="--dirname" [name]="dirname" [type]="p"               )
+    local -A c_cleanup_opt_def=( [format]="--cleanup" [name]="cleanup" [type]="f"               )
 
-    # Make options' parsing verbose
-    local VERBOSE_PARSEARGS=1
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help                                  )
+    PARSEARGS_OPTS+=( --verbose                                    )
+    PARSEARGS_OPTS+=( --with-append-description=source_description )
 
     # Parse arguments
     parse_arguments
-
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
+    fi
+    
     # Run installation script
     install
 

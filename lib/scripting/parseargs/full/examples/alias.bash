@@ -3,7 +3,7 @@
 # @file     alias.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 22nd February 2022 1:33:01 am
-# @modified Tuesday, 22nd February 2022 2:55:47 am
+# @modified Tuesday, 22nd February 2022 3:00:39 am
 # @project  bash-utils
 # @brief
 #    

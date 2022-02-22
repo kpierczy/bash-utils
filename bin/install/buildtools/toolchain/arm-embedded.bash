@@ -3,7 +3,7 @@
 # @file     arm-embedded.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 1:51:48 pm
-# @modified Sunday, 21st November 2021 4:20:56 pm
+# @modified Wednesday, 23rd February 2022 12:32:36 am
 # @project  bash-utils
 # @brief
 #    
@@ -17,125 +17,122 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
+# Description of the script
+declare cmd_description=$(echo \
+    "Installs requested version of the ARM-Embedded-Toolchain binaries for the " \
+    "current platform (x86_64 or aarch64 supported)"
+)
+
+# Arguments' descriptions
+declare -A pargs_description=(
+    [version]="target version of the toolchain"
+)
+
+# Options' descriptions
+declare -A opts_description=(
+    [url]="custom URL to be used to download the toolchain (by default toolchain is downloaded from the ARM's website deduced based on the toolchain's version)"
+    [prefix]="installation prefix"
+    [dirname]="name that the toolchain's dirctory should be changed to after being extracted (realative to --prefix)"
+    [cleanup]="if set, the downloaded archieve will be removed after being downloaded"
+)
+
 # Helper URL
 declare HELPER_SITE="https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads"
+# Additional info
+get_heredoc source_description <<END
+    Note: 
+    
+        You can acquire VERSION of the toolchain to be downloaded by visiting <Source> and inspecting part 
+        of the name of the toolchain between 'gcc-arm-none-eabi-' and '-<ARCHITECTURE>.<ARCHIEVE_EXTENSION>'
 
-# Script's usage
-get_heredoc usage <<END
-    Description: Installs requested version of the ARM-Embedded-Toolchain binaries for the current 
-        platform (x86_64 or aarch64 supported)
-    Usage: arm-embedded.bash VERSION
+    Source
 
-    Arguments:
-
-        VERSION target version of the toolchain 
-
-    Options:
-      
-        --help     if no command given, displays this usage message
-        -u, --url  custom URL to be used to download the toolchain (by default 
-                   toolchain is downloaded from the ARM's website deduced
-                   based on the toolchain's version)
-        --prefix   installation prefix (default: .)
-        --dirname  name that the toolchain's dirctory should be changed to after
-                   being extracted (realative to --prefix)
-        --cleanup  if set, the downloaded archieve will be removed after being downloaded
-
-    Note: You can acquire VERSIOn of the toolchain to be downloaded by visiting $HELPER_SITE and inspecting part 
-          of the name of the toolchain between 'gcc-arm-none-eabi-' and '-<ARCHITECTURE>.<ARCHIEVE_EXTENSION>'
-
+        [SOURCE] $HELPER_SITE
 END
 
 # ========================================================== Configuration ========================================================= #
 
+# Logging context of the script
+declare LOG_CONTEXT="arm-toochain"
+
 # Scheme used to deduce default URL of the toolchain to be downloaded
 declare DEFAULT_URL_SCHEME='https://developer.arm.com/-/media/Files/downloads/gnu-rm/$VERSION/gcc-arm-none-eabi-$VERSION-$ARCH-linux.tar.bz2'
-
-# ============================================================ Constants =========================================================== #
-
-# Logging context of the script
-LOG_CONTEXT="arm-toochain"
+# Download directory
+declare DOWNLOAD_DIR='/tmp'
 
 # ============================================================ Commands ============================================================ #
 
-install_toolchain() {
+function install_toolchain() {
 
-    # Arguments
-    local VERSION="${1:-}"
-
-    # Get the target URL
-    if is_var_set_non_empty options[url]; then
-        local URL=${options[url]}
-    elif is_var_set_non_empty VERSION; then
+    # If no custom URL given, compose default one
+    if ! is_var_set_non_empty opts[url]; then
 
         # Get system's architecture
         case $(get_system_arch) in
-            x86_64  ) local ARCH=$(get_system_arch);;
-            aarch64 ) local ARCH=$(get_system_arch);;
-            *       ) log_error "Architecture's not supported ($(get_system_arch))"
-                      exit 1;;
+            x86_64  ) local arch=$(get_system_arch);;
+            aarch64 ) local arch=$(get_system_arch);;
+            *       ) log_error "Architecture's not supported ($(get_system_arch))"; exit 1;;
         esac
-        # Evaluate the target URL
-        local URL=$(eval "echo $DEFAULT_URL_SCHEME")
-        
-    else
-        log_error "Invalid usage"
-        echo $USAGE
+
+        # Evaluate default URL
+        opts[url]=$(VERSION=${pargs[version]} ARCH=$arch eval "echo $DEFAULT_URL_SCHEME")
+
     fi
 
-    local PREFIX="${options[prefix]:-.}"
-
     # Download and extract the toolchain
-    download_and_extract $URL               \
-        --arch-dir=/tmp                     \
-        --extract-dir=$PREFIX               \
+    download_and_extract ${opts[url]}       \
+        --arch-dir=$DOWNLOAD_DIR            \
+        --extract-dir=${opts[prefix]}       \
         --show-progress                     \
         --verbose                           \
         --log-target="ARM Embedded Toolchain"
-    [[ $? == 0 ]] || exit 1
 
     # Rename toolchain's folder
-    is_var_set_non_empty options[dirname] &&
-        mv $PREFIX/gcc-arm-none-eabi-$VERSION $PREFIX/${options[dirname]}
+    is_var_set_non_empty opts[dirname] &&
+        mv ${opts[prefix]}/gcc-arm-none-eabi-${pargs[version]} ${opts[prefix]}/${opts[dirname]}
 
     # If option given, remove archieve
-    is_var_set_non_empty options[cleanup] &&
-        rm /tmp/gcc-arm-none-eabi-${VERSION}*.tar.bz2
+    is_var_set_non_empty opts[cleanup] &&
+        rm $DOWNLOAD_DIR/gcc-arm-none-eabi-${pargs[version]}*.tar.bz2
 
     exit $?
 }
 
 # ============================================================== Main ============================================================== #
 
-main() {
+function main() {
 
-    # Link USAGE message
-    local -n USAGE=usage
-
-    # Commands imlemented by the script
-    local ARG_NUM=1
-    local -a arguments=(
-        version
-    )
+    # Arguments
+    local -A version_parg_def=( [format]="VERSION" [name]="version" [type]="s" )
 
     # Options
-    local -a opt_definitions=(
-        '--help',help,f
-        '-u|--url',url
-        '--prefix',prefix
-        '--dirname',dirname
-        '--cleanup',cleanup,f
-    )
+    local -A     a_url_opt_def=( [format]="-u|--url"     [name]="url"     [type]="s"               )
+    local -A  b_prefix_opt_def=( [format]="--prefix"     [name]="prefix"  [type]="p" [default]="." )
+    local -A c_dirname_opt_def=( [format]="--dirname"    [name]="dirname" [type]="p"               )
+    local -A d_cleanup_opt_def=( [format]="-c|--cleanup" [name]="cleanup" [type]="f"               )
 
-    # Make options' parsing verbose
-    local VERBOSE_PARSEARGS=1
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help                                  )
+    PARSEARGS_OPTS+=( --verbose                                    )
+    PARSEARGS_OPTS+=( --with-append-description=source_description )
 
     # Parse arguments
     parse_arguments
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
+    fi
+    
+    # Convert prefix to abspath
+    opts[prefix]=$(realpath ${opts[prefix]})
 
-    # ----------------------------- Run installation script -----------------------------
-
-    install_toolchain ${version:-}
+    # Install toolchain
+    install_toolchain
 
 }
 

@@ -3,7 +3,7 @@
 # @file     parsepargs.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 7:33:06 pm
-# @modified Tuesday, 22nd February 2022 2:46:44 am
+# @modified Tuesday, 22nd February 2022 7:26:37 pm
 # @project  bash-utils
 # @brief
 #    
@@ -277,7 +277,7 @@ function parsepargs() {
         __parsepargs_pargs_types_            \
         "get_parg_format"                    \
         "$__parsepargs_raw_"                 \
-        __parsepargs_pargs_                  ||
+        "$__parsepargs_pargs_"               ||
     {
         local ret_=$?
         restore_log_config_from_default_stack

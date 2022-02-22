@@ -3,7 +3,7 @@
 # @file     cli_v2.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 8:34:01 pm
-# @modified Monday, 29th November 2021 1:27:13 pm
+# @modified Wednesday, 23rd February 2022 12:10:04 am
 # @project  bash-utils
 # @brief
 #    
@@ -17,28 +17,26 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
-# Script's usage
-get_heredoc usage <<END
-    Description: Installs Mbed CLI utility (version 2)
-    Usage: cli_v2.bash
+# Description of the script
+declare cmd_description="Installs Mbed CLI utility (version 2)"
 
-    Options:
-      
-                    -help  if no command given, displays this usage message
-             --print-path  if given, prints path to the directory that needs to be in PATH to use CLI
-                           to the file descriptor No. 3
-          --with-mbed=DIR  if given also installs python packages required by the Mbed
-END
+# Options' descriptions
+declare -A opts_description=(
+    [print_path]="if given, prints path to the directory that needs to be in PATH to use CLI to the file descriptor No. 3"
+    [mbed_root]="if given also installs python packages required by the Mbed"
+)
 
 # ============================================================ Constants =========================================================== #
 
 # Logging context of the script
-LOG_CONTEXT="mbed"
+declare LOG_CONTEXT="mbed"
 
 # ============================================================ Commands ============================================================ #
 
-install() {
+function install() {
 
+    # ---------------------------- Installing dependencies ------------------------------
+    
     # Dependencies of the Mbed CLI
     local -a dependencies=( ninja-build )
     # Install dependencies
@@ -47,11 +45,13 @@ install() {
         exit 1
     }
 
+    # -------------------------------- Installing CLI -----------------------------------
+    
     # If Mbed root given, install Python dependencies
-    if is_var_set_non_empty options[mbed_root]; then
+    if is_var_set_non_empty opts[mbed_root]; then
 
         # If valid Mbed root has been given, install dependencies
-        if [[ -f ${options[mbed_root]}/requirements.txt ]]; then
+        if [[ -f ${opts[mbed_root]}/requirements.txt ]]; then
 
             # @note Here the list of installed Python packages is acquired directly from the `pip list`
             #    and no @fun is_pip_package_installed() function is used. As a call to `pip list` is
@@ -74,17 +74,17 @@ install() {
 
                         # If ANY package's not installed, install requirements
                         log_info "Updating Mbed python dependencies..."
-                        PIP_FLAGS='-r' pip_install -v ${options[mbed_root]}/requirements.txt
+                        PIP_FLAGS='-r' pip_install -v ${opts[mbed_root]}/requirements.txt
                         break
                         
                     fi
                 fi
 
-            done < ${options[mbed_root]}/requirements.txt
+            done < ${opts[mbed_root]}/requirements.txt
 
         # Otherwise, exit with error
         else
-            log_error "Invalid  Mbed root given (${options[mbed_root]})"
+            log_error "Invalid  Mbed root given (${opts[mbed_root]})"
             exit 1
         fi
 
@@ -97,7 +97,7 @@ install() {
     }
 
     # Write path to the CLI's binaries, if requested
-    if is_var_set_non_empty options[print_path]; then
+    if is_var_set_non_empty opts[print_path]; then
         echo "~/.local/bin" >&3
     fi
 
@@ -105,23 +105,27 @@ install() {
 
 # ============================================================== Main ============================================================== #
 
-main() {
-
-    # Link USAGE message
-    local -n USAGE=usage
+function main() {
 
     # Options
-    local -a opt_definitions=(
-        '--help',help,f
-        '--print-path',print_path,f
-        '--with-mbed',mbed_root
-    )
+    local -A a_print_path_opt_def=( [format]="--print-path" [name]="print_path" [type]="f" )
+    local -A  b_with_mbed_opt_def=( [format]="--with-mbed"  [name]="mbed_root"  [type]="p" )
 
-    # Make options' parsing verbose
-    local VERBOSE_PARSEARGS=1
-
-    # Parse arguments
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help )
+    PARSEARGS_OPTS+=( --verbose   )
+    
+    # Parsed options
     parse_arguments
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
+    fi
 
     # Run installation script
     install

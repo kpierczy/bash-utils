@@ -3,7 +3,7 @@
 # @file     colcon.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 14th February 2022 3:08:56 pm
-# @modified Monday, 14th February 2022 4:00:35 pm
+# @modified Wednesday, 23rd February 2022 12:06:12 am
 # @project  bash-utils
 # @brief
 #    
@@ -18,20 +18,13 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
-get_heredoc usage <<END
-    Description: Installs colcon build system
-    Usage: colcon.bash
-
-    Options:
-
-        --help     displays this usage message
-
-END
+# Description of the script
+declare cmd_description="Installs colcon build system"
 
 # ============================================================ Constants =========================================================== #
 
 # Logging context of the script
-LOG_CONTEXT="colcon"
+declare LOG_CONTEXT="colcon"
 
 # ========================================================== Configruation ========================================================= #
 
@@ -40,7 +33,7 @@ declare APT_KEY_URL='https://raw.githubusercontent.com/ros/rosdistro/master/ros.
 
 # ============================================================== Main ============================================================== #
 
-install() {
+function install() {
 
     # Check if package is already installed
     if ! is_pkg_installed python3-colcon-common-extensions; then
@@ -61,17 +54,23 @@ install() {
 
 # ============================================================== Main ============================================================== #
 
-main() {
+function main() {
 
-    local -n USAGE=usage
-
-    # Options
-    local opt_definitions=(
-        '--help',help,f
-    )
-
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help )
+    PARSEARGS_OPTS+=( --verbose   )
+    
     # Parsed options
     parse_arguments
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
+    fi
 
     # Run installation script
     install

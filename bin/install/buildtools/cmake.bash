@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Thursday, 17th February 2022 9:12:53 pm
+# @modified Wednesday, 23rd February 2022 12:06:09 am
 # @project  bash-utils
 # @brief
 #    
@@ -18,34 +18,37 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
-get_heredoc usage <<END
-    Description: Installs CMake build tool
-    Usage: cmake.bash TYPE VERSION
+# Description of the script
+declare cmd_description="Installs CMake build tools"
 
-    Arguments
+# Arguments' descriptions
+declare -A pargs_description=(
+    [type]="installation type; either installation from sources, from binary package"
+    [version]="version of the CMake to be installed"
+)
 
-           TYPE  installation type (either 'src' for installation from sources, or 'bin'
-                 for binary package installation)
-        VERSION  version of the CMake to be installed
+# Options' descriptions
+declare -A opts_description=(
+    [prefix]="Installation directory of the cmake (default /opt/cmake)"
+    [cleanup]="if set, the downloaded archieve will be removed after being downloaded"
+)
 
-    Options:
-
-        --help     displays this usage message
-        --prefix   Installation directory of the cmake (default /opt/cmake)
-        --url      custom URL to be used for downloading (default: official CMake github)
-        --cleanup  if set, the downloaded archieve will be removed after being downloaded
-
+# Additional info
+get_heredoc source_description <<END
+    Source:
+    
+        https://github.com/Kitware/CMake/releases
 END
 
 # ============================================================ Constants =========================================================== #
 
 # Logging context of the script
-LOG_CONTEXT="cmake"
+declare LOG_CONTEXT="cmake"
 
 # ========================================================== Configruation ========================================================= #
 
-# Installation directory for the CMake
-declare DEFAULT_PREFIX='/opt/cmake'
+# Download directory for the CMake
+declare DOWNLOAD_DIR='/tmp'
 # Scheme of the URL of the CMake source code
 declare SRC_URL_SCHEME='https://github.com/Kitware/CMake/releases/download/v$VERSION/cmake-$VERSION.tar.gz'
 # Scheme of the URL of the CMake binary variant
@@ -53,105 +56,81 @@ declare BIN_URL_SCHEME='https://github.com/Kitware/CMake/releases/download/v$VER
 
 # ============================================================== Main ============================================================== #
 
-install_src() {
+function install_src() {
 
     # Evaluate the target URL
-    local URL=$(eval "echo $SRC_URL_SCHEME")
+    local url=$(VERSION=${pargs[version]} eval "echo $SRC_URL_SCHEME")
 
-
-    # Name of the directory extracted from the archieve
-    local TARGET=${URL##*/}
-          TARGET=${TARGET%.tar.gz}
+    # Compute name of the directory extracted from the archieve
+    local extracted_name=$url
+    extracted_name=${extracted_name##*/}
+    extracted_name=${extracted_name%.tar.gz}
 
     # Name fo the configruation script
     local CONFIG_TOOL='bootstrap'
     # Configruation flags
-    local CONFIG_FLAGS="--prefix=${options[prefix]:-$DEFAULT_PREFIX}"
+    local -a CONFIG_FLAGS=()
+    CONFIG_FLAGS+=( "--prefix=${opts[prefix]}" )
 
     # Download and isntall CMake
-    download_build_and_install $URL     \
-        --verbose                      \
-        --arch-dir=/tmp                \
-        --extract-dir=/tmp             \
-        --show-progress                \
-        --src-dir=$TARGET              \
-        --build-dir=/tmp/$TARGET/build \
-        --log-target="CMake"           \
+    download_build_and_install $url                     \
+        --verbose                                       \
+        --arch-dir=$DOWNLOAD_DIR                        \
+        --extract-dir=$DOWNLOAD_DIR                     \
+        --show-progress                                 \
+        --src-dir=$extracted_name                       \
+        --build-dir=$DOWNLOAD_DIR/$extracted_name/build \
+        --log-target="CMake"                            \
         --force
 
     # If option given, remove archieve
-    is_var_set_non_empty options[cleanup] &&
-        rm /tmp/${TARGET}*.tar.gz
+    is_var_set_non_empty opts[cleanup] &&
+        rm $DOWNLOAD_DIR/${extracted_name}*.tar.gz
         
 }
 
-install_bin() {
+function install_bin() {
 
     # Get system's architecture
     case $(get_system_arch) in
-        x86_64          ) local ARCH='x86_64';;
-        arm64 | aarch64 ) local ARCH='aarch64';;
-        *               ) log_error "Architecture's not supported ($(get_system_arch))"
-                          exit 1;;
+        x86_64          ) local arch='x86_64';;
+        arm64 | aarch64 ) local arch='aarch64';;
+        *               ) log_error "Architecture's not supported ($(get_system_arch))"; exit 1;;
     esac
+    
     # Evaluate the target URL
-    local URL=$(eval "echo $BIN_URL_SCHEME")
-
-    local PREFIX="${options[prefix]:-$DEFAULT_PREFIX}"
+    local url=$(VERSION=${pargs[version]} ARCH=$arch eval "echo $BIN_URL_SCHEME")
+    # Compute path to the extraction directory
+    local extract_path=$(basename ${opts[prefix]})
+    # Compute name of the directory extracted from the archieve
+    local extracted_name=$url
+    extracted_name=${extracted_name##*/}
+    extracted_name=${extracted_name%.tar.gz}
 
     # Download and extract the toolchain
-    download_and_extract $URL            \
-        --arch-dir=/tmp                  \
-        --extract-dir=$(dirname $PREFIX) \
-        --show-progress                  \
-        --verbose                        \
+    download_and_extract $url       \
+        --verbose                   \
+        --arch-dir=$DOWNLOAD_DIR    \
+        --extract-dir=$extract_path \
+        --show-progress             \
         --log-target="CMake"
-    [[ $? == 0 ]] || exit 1
-
-    # Name of the directory extracted from the archieve
-    local TARGET=${URL##*/}
-          TARGET=${TARGET%.tar.gz}
 
     # Rename toolchain's folder
-    mv $(dirname $PREFIX)/$TARGET $PREFIX
+    mv $extract_path/$extracted_name ${opts[prefix]}
 
     # If option given, remove archieve
-    is_var_set_non_empty options[cleanup] &&
-        rm /tmp/${TARGET}*.tar.gz
+    is_var_set_non_empty opts[cleanup] &&
+        rm $DOWNLOAD_DIR/${extracted_name}*.tar.gz
 
 }
 
-# ============================================================== Main ============================================================== #
 
-main() {
-
-    local -n USAGE=usage
-
-    # Arguments
-    local -a arguments=(
-        installation_type
-        VERSION
-    )
-
-    # Variants of the first arguments
-    local -a ARG1_VARIANTS=(
-        src
-        bin
-    )
-
-    # Options
-    local opt_definitions=(
-        '--help',help,f
-        '--prefix',prefix
-        '--url',url
-        '--cleanup',cleanup,f
-    )
-
-    # Parsed options
-    parse_arguments_s
-
+function install_cmake() {
+    
     # Dependencies of the script
-    local -a dependencies=( build-essential )
+    local -a dependencies=( 
+        build-essential
+    )
 
     # Install dependencies
     install_pkg_list --allow-local-app --su -y -v -U dependencies || {
@@ -160,11 +139,48 @@ main() {
     }
 
     # Run installation script
-    case $installation_type in
-        src ) install_src;;
-        bin ) install_bin;;
+    case ${pargs[type]} in
+        'src' ) install_src ;;
+        'bin' ) install_bin ;;
     esac
 
+}
+
+# ============================================================== Main ============================================================== #
+
+function main() {
+
+    # Arguments
+    local -A    a_type_parg_def=( [format]="TYPE"    [name]="type"    [type]="s" [variants]="src | bin" )
+    local -A b_version_parg_def=( [format]="VERSION" [name]="version" [type]="s"                        )
+
+    # Options
+    local -A  a_prefix_opt_def=( [format]="--prefix"  [name]="prefix"      [type]="s" [default]="/opt/cmake" )
+    local -A b_cleanup_opt_def=( [format]="--cleanup" [name]="cleanup"     [type]="f"                        )
+
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help                                  )
+    PARSEARGS_OPTS+=( --verbose                                    )
+    PARSEARGS_OPTS+=( --with-append-description=source_description )
+    
+    # Parsed options
+    parse_arguments
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
+    fi
+
+    # Convert prefix to abspath
+    opts[prefix]=$(realpath ${opts[prefix]})
+    
+    # Install CMake
+    install_cmake
+    
 }
 
 # ============================================================= Script ============================================================= #

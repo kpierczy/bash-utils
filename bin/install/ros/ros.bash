@@ -3,10 +3,10 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Monday, 14th February 2022 3:17:58 pm
+# @modified Wednesday, 23rd February 2022 12:06:24 am
 # @project  bash-utils
-# @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Binary.html
-# @source   https://docs.ros.org/en/$ROS2_DISTRO/Installation/Ubuntu-Install-Debians.html
+# @source   https://docs.ros.org/en/$distro/Installation/Ubuntu-Install-Binary.html
+# @source   https://docs.ros.org/en/$distro/Installation/Ubuntu-Install-Debians.html
 # @brief
 #    
 #    Installation/Uninstallation script for ROS2 
@@ -21,61 +21,44 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
-get_heredoc usage <<END
-    Description: Installs/uninstalls ROS2 foxy edition using apt packages manager
-    Usage: foxy_pkg.bash ACTION SRC
+# Description of the script
+declare cmd_description="Installs/uninstalls ROS2 foxy edition using apt packages manager"
 
-    Arguments:
+# Arguments' descriptions
+declare -A pargs_description=(
+    [action]="action to be performed by the script"
+    [src]="installation type: either binary-package based installation or apt-based installation"
+)
 
-        ACTION  action to be performed by the script (either 'install' or 'uninstall')
-           SRC  installation source (either 'bin' for binary-package based installation
-                or 'pkg' for apt-based installation)
-
-    Options:
-      
-        --help  displays this usage message
-
-    Environment:
-
-        ROS2_INSTALLATION_PATH  installation path of the ROS when 'bin' installation/uninstallation
-                                is performed (default: /opt/ros/galactic)
-                   ROS2_DISTRO  distribution to be installed. Currently supported are:
-                                    - foxy
-                                    - galactic (default)
-END
+# Opts' descriptions
+declare -A opts_description=(
+    [install_path]="installation path of the ROS when 'bin' installation/uninstallation is performed"
+    [distro]="distribution to be installed"
+    [cleanup]="if set downloaded sources will be removed after installation"
+)
 
 # ============================================================ Constants =========================================================== #
 
-# List of supported distributions
-declare -a ROS2_SUPPORTED_DISTROS=(
-    foxy
-    galactic
-)
-
 # Script's log context
-LOG_CONTEXT="ros2"
+declare LOG_CONTEXT="ros2"
 
-# ========================================================== Configruation ========================================================= #
-
-# Distributon to be installed
-var_set_default ROS2_DISTRO 'galactic'
 # Default destination of the ROS2
-ROS2_DEFAULT_INSTALLATION_PATH="/opt/ros/$ROS2_DISTRO"
-# Destination of the ROS2
-var_set_default ROS2_INSTALLATION_PATH "$ROS2_DEFAULT_INSTALLATION_PATH"
+declare ROS2_DEFAULT_INSTALLATION_PATH_SCHEME="/opt/ros/\$distro"
+# Path to the default configuration of the rosdep
+declare ROS2_ROSDEP_DEFAULT_CONFIG_PATH=/etc/ros/rosdep/sources.list.d/20-default.list
+
+# URL of the ROS2 GPG key
+declare ROS2_GPG_URL="https://raw.githubusercontent.com/ros/rosdistro/master/ros.key"
+# Destination of the PGP key
+declare ROS2_GPG_PATH="/usr/share/keyrings/ros-archive-keyring.gpg"
+# URL of the ROS2 Ubuntu repository
+declare ROS2_REPO_URL="http://packages.ros.org/ros2/ubuntu"
+# Path to the source file of the ROS2 Ubuntu repository
+declare ROS2_APT_SOURCE_PATH="/etc/apt/sources.list.d/ros2.list"
 
 # ============================================================ Functions =========================================================== #
 
-add_ros_repo() {
-
-    # URL of the ROS2 GPG key
-    local ROS2_GPG_URL="https://raw.githubusercontent.com/ros/rosdistro/master/ros.key"
-    # Destination of the PGP key
-    local ROS2_GPG_PATH="/usr/share/keyrings/ros-archive-keyring.gpg"
-    # URL of the ROS2 Ubuntu repository
-    local ROS2_REPO_URL="http://packages.ros.org/ros2/ubuntu"
-    # Path to the source file of the ROS2 Ubuntu repository
-    local ROS2_APT_SOURCE_PATH="/etc/apt/sources.list.d/ros2.list"
+function add_ros_repo() {
 
     # Authorise ROS2 GPG key
     if [[ ! -f "$ROS2_GPG_PATH" ]]; then
@@ -95,17 +78,15 @@ add_ros_repo() {
 }
 
 
-install_ros_pkg() {
-    install_pkg ros-$ROS2_DISTRO-desktop
+function install_ros_pkg() {
+    install_pkg ros-${opts[distro]}-desktop
 }
 
 
-install_ros_bin() {
+function install_ros_bin() {
     
     # Download folder for binaries
-    local ROS2_DOWNLOAD_DIR="/tmp"
-    # Download folder for binaries
-    local ROS2_BIN_DOWNLOAD_PATH="$ROS2_DOWNLOAD_DIR/ros2_$ROS2_DISTRO.tar.bz2"
+    local download_path="/tmp/ros2_${opts[distro]}.tar.bz2"
 
     # --------------------------- Dependencies ---------------------------
 
@@ -116,57 +97,47 @@ install_ros_bin() {
         python3-catkin-pkg # ROS2 requires v0.4.24 while Ubuntu Foxy provides v0.4.16 by default
     )
 
-    # Python dependencies
-    local ros_python_dependencies=(
-        argcomplete # ROS autocompletion tool
-    )
-
     # Install additional dependencies
     install_pkg_list -yv --su -U dependencies_
-    
-    # Install python dependencies
-    log_info "Installing additional ROS2 python dependencies"
-    echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | PIP_FLAGS='-U' map pip_install
 
     # --------------------------- Installation ---------------------------
 
     # Get directory and basename of the destination folder
-    local ROS2_INSTALLATION_PATH_DIR=$(dirname $ROS2_INSTALLATION_PATH)
-    local ROS2_INSTALLATION_PATH_BASE=$(basename $ROS2_INSTALLATION_PATH)
+    local installation_dir=$(dirname ${opts[install_path]})
     # Prepary output directory
-    mkdir -p "$ROS2_INSTALLATION_PATH_DIR"
+    mkdir -p "$installation_dir"
 
     # Download and extract ROS2-Foxy binaries
-    LOG_CONTEXT=$LOG_CONTEXT LOG_TARGET="ROS2 binaries" download_and_extract -v \
-        $(get_ros_bin_url) $(dirname $ROS2_BIN_DOWNLOAD_PATH) $ROS2_INSTALLATION_PATH_DIR || return 1
+    download_and_extract                \
+        --verbose                       \
+        --log-target="ROS2 binaries"    \
+        --arch-path=$download_path      \
+        --extract-dir=$installation_dir \
+        $(get_ros_bin_url)
 
     # Rename destination directory
-    mv $ROS2_INSTALLATION_PATH_DIR/ros2-linux $ROS2_INSTALLATION_PATH
+    mv $installation_dir/ros2-linux ${opts[install_path]}
 
     # Remove sources
-    if [[ $BASH_UTILS_RM_DOWNLOADED -eq "1" ]]; then
+    if is_var_set opts[cleanup]; then
         log_info "Deleting downloaded sources..."
-        rm -rf $ROS2_BIN_DOWNLOAD_PATH
+        rm -rf $download_path
         log_info "Sources deleted"
     fi
     
 }
 
 
-install_ros() {
+function install_ros() {
 
-    # If 'pkg' installation, force default isntallation path
-    [[ $src == "pkg" ]] && ROS2_INSTALLATION_PATH="$ROS2_DEFAULT_INSTALLATION_PATH"
-
-    # -------------------------- Configuration ---------------------------
-
-    # Path to the default configuration of the rosdep
-    local ROS2_ROSDEP_DEFAULT_CONFIG_PATH=/etc/ros/rosdep/sources.list.d/20-default.list
+    # If 'pkg' installation, force default installation path
+    [[ ${pargs[src]} == "pkg" ]] && 
+        opts[install_path]=$(distro=${opts[distro]} eval "echo $ROS2_DEFAULT_INSTALLATION_PATH_SCHEME")
 
     # --------------------------- Dependencies ---------------------------
 
     # List of dependencies packages
-    local dependencies=(
+    local -a dependencies=(
         locales                          # Locales utilities
         curl                             # Utility to download files from online servers
         gnupg2                           # Implementation of the OpenPGP standard (encryption)
@@ -176,13 +147,13 @@ install_ros() {
     )
 
     # Python dependencies
-    local ros_python_dependencies=(
+    local -a ros_python_dependencies=(
         argcomplete # ROS autocompletion tool
         vcstool     # Repository-management
     )
 
     # ROS dependencies to be skipped
-    local rosdep_skip_dependencies=(
+    local -a rosdep_skip_dependencies=(
         cyclonedds 
         fastcdr 
         fastrtps 
@@ -193,7 +164,7 @@ install_ros() {
     # ---------------------------------- Pre-check ----------------------------------
 
     # Check if ROS is already installed
-    [[ -f $ROS2_INSTALLATION_PATH/setup.bash ]] && return
+    [[ -f ${opts[install_path]}/setup.bash ]] && return
     
     # Check whether current locale supports UTF-8
     locale |
@@ -224,7 +195,7 @@ install_ros() {
     # ------------------------------ Preconfigruation -------------------------------
 
     # Source distros-specific routines
-    source $(get_script_dir)/$ROS2_DISTRO.bash
+    source $(get_script_dir)/${opts[distro]}.bash
 
     # Run distro-specific preparation routine
     is_function_defined prepare_ros_installation && 
@@ -236,18 +207,24 @@ install_ros() {
     # Install dependencies
     sudo apt update && install_pkg_list -yv --su dependencies
 
+    log_info "Installing ROS2 python dependencies..."
+    
     # Install python dependencies
-    log_info "Installing ROS2 python dependencies"
-    echo "${ros_python_dependencies[@]}" | tr ' ' '\n' | PIP_FLAGS='-U' map pip_install
+    PIP_FLAGS='-U' pip_install_list ros_python_dependencies
+
+    log_info "Dependencies installed"
+    
     
     # -------------------------------- Installation ---------------------------------
 
-    log_info "Installing ROS2 to $ROS2_DEFAULT_INSTALLATION_PATH..."
+    log_info "Installing ROS2 to ${opts[install_path]}..."
     
     # Install ROS2 package (desktop-version)
-    [[ $src == "pkg" ]] && install_ros_pkg ||
-    [[ $src == "bin" ]] && install_ros_bin
-
+    case ${pargs[src]} in
+        'pkg' ) install_ros_pkg ;;
+        'bin' ) install_ros_bin ;;
+    esac
+    
     log_info "ROS2 installed"
 
     # --------------------------- `rosdep` configuration ----------------------------
@@ -262,56 +239,63 @@ install_ros() {
     # Install rosdep dependencies
     log_info "Installing ROS2-rosdep dependencies."
     rosdep install                                   \
-        --rosdistro=$ROS2_DISTRO                     \
-        --from-paths $ROS2_INSTALLATION_PATH/share   \
+        --rosdistro=${opts[distro]}                  \
+        --from-paths ${opts[install_path]}/share     \
         --ignore-src -y                              \
         --skip-keys="${rosdep_skip_dependencies[0]}"
 
 }
 
 
-uninstall_ros() {
+function uninstall_ros() {
 
     # For binary installation, remove ROS folder
-    [[ $src == "bin" ]] && rm -rf $ROS2_INSTALLATION_PATH
+    [[ ${pargs[src]} == "bin" ]] && rm -rf ${opts[install_path]}
 
     # Uninstall ROS-related apt packages
-    sudo apt remove ~nros-$ROS2_DISTRO-* && sudo apt autoremove
+    sudo apt remove ~nros-${opts[distro]}-* && sudo apt autoremove
 }
 
 # ============================================================== Main ============================================================== #
 
-main() {
+function main() {
 
     # Arguments
-    local -a arguments=(
-        action
-        src
-    )
+    local -A a_action_parg_def=( [format]="ACTION" [name]="action" [type]="s" [variants]="install | uninstall" )
+    local -A    b_src_parg_def=( [format]="SRC"    [name]="src"    [type]="s" [variants]="bin | pkg"           )
 
-    # Options
-    local opt_definitions=(
-        '--help',help,f
-    )
+    # Opts
+    local -A    a_path_opt_def=( [format]="--installation-path" [name]="install_path" [type]="p" [default]=$ROS2_DEFAULT_INSTALLATION_PATH_SCHEME  )
+    local -A  b_distro_opt_def=( [format]="-d|--distro"         [name]="distro"       [type]="s" [default]="galactic" [variants]="foxy | galactic" )
+    local -A c_cleanup_opt_def=( [format]="-c|--cleanup"        [name]="cleanup"      [type]="f"                                                   )
 
-    # Parsed options
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help )
+    PARSEARGS_OPTS+=( --verbose   )
+
+    # Parse arguments
     parse_arguments
-
-    # Verify distro
-    is_array_element ROS2_SUPPORTED_DISTROS  "$ROS2_DISTRO" || {
-        log_error "Unsupported distro given ($(print_var ROS2_DISTRO))"
-        return 1
-    }
-
-    # Change lgo context
-    LOG_CONTEXT="$LOG_CONTEXT-$ROS2_DISTRO"
-
-    # Check usage
-    if [[ $action == 'install' ]]; then
-        install_ros
-    elif [[ $action == 'uninstall' ]]; then
-        uninstall_ros
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
     fi
+
+    # Evaluate installation path
+    opts[install_path]=$(distro=${opts[distro]} eval "echo ${opts[install_path]}")
+    opts[install_path]=$(to_abs_path ${opts[install_path]})
+    # Change log context
+    LOG_CONTEXT="$LOG_CONTEXT-${opts[distro]}"
+
+    # Run command
+    case ${pargs[action]} in
+        install   ) install_ros   ;;
+        uninstall ) uninstall_ros ;;
+    esac
     
 }
 

@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Monday, 21st February 2022 6:58:11 pm
+# @modified Tuesday, 22nd February 2022 8:54:52 pm
 # @project  bash-utils
 # @brief
 #    
@@ -326,8 +326,6 @@ function perform_build_action() {
         build     ) action_tool_="${BUILD_TOOL:-make}";;
         install   ) action_tool_="${INSTALL_TOOL:-make install}";;
     esac
-
-
 
     # Get action flags
     local action_flags_=''
@@ -1016,7 +1014,7 @@ function build_and_install() {
 #                      contains not directly source files, but the 
 #                      directory gathering all files. This option can
 #                      be passed to point to this directory (relative
-#                      to the extraction directory
+#                      to the extraction directory)
 #  -b|--build-dir=DIR  directory where the build process should be
 #                      performed. Directory will be created if not
 #                      exists (default: .)
@@ -1061,7 +1059,7 @@ function download_build_and_install() {
     # Arguments
     local url_
 
-    # ---------------- Parse arguments ----------------
+    # ---------------------------- Parse arguments ----------------------------
 
     # Function's options
     local -a opt_definitions=(
@@ -1090,108 +1088,66 @@ function download_build_and_install() {
     local all_skipped_=1
     # Return status
     local ret_
+    
+    # ---------------------- Prepare common environment -----------------------
 
-    # ---------- Prepare common environment -----------
-
+    # Prepare flags
+    local -a common_flags=()
     # Establish whether verbose logs should be displayed
-    local verbose_flag_=''
-    is_var_set options[verbose] &&
-        verbose_flag_="--verbose"
-
+    is_var_set options[verbose] && common_flags+=( "--verbose" )
     # Establish whether all steps should be forced
-    local force_flag_=''
-    is_var_set options[force] &&
-        force_flag_="--force"
-
+    is_var_set options[force] && common_flags+=( "--force" )
     # Establish whether a specific log target should be used
-    local log_target_=''
-    is_var_set options[log_target] &&
-        log_target_="--log-target=${options[log_target]}"
+    is_var_set options[log_target] && common_flags+=( "--log-target=${options[log_target]}"  )
 
-    # --- Prepare download & extraction environment ---
+    # --------------- Prepare download & extraction environment ---------------
 
+    # Prepare flags
+    local -a download_extract_flags=()
     # Establish whether progress bar should be displayed
-    local download_extract_progess_flag_=''
-    is_var_set options[verbose] &&
-        download_extract_progess_flag_="--show-progress"
-
+    is_var_set options[verbose] && download_extract_flags+=( "--show-progress" )
     # Establish download directory
-    local download_extract_destination_opt_=''
-    is_var_set options[arch_dir] &&
-        download_extract_destination_opt_="--arch-dir=${options[arch_dir]}"
-    is_var_set options[arch_path] &&
-        download_extract_destination_opt_="--arch-path=${options[arch_path]}"
-
+    is_var_set options[arch_dir]  && download_extract_flags+=( "--arch-dir=${options[arch_dir]}"   )
+    is_var_set options[arch_path] && download_extract_flags+=( "--arch-path=${options[arch_path]}" )
     # Establish extraction directory
-    local download_extract_extract_dir_=''
-    is_var_set options[extract_dir] &&
-        download_extract_extract_dir_="--extract-dir=${options[extract_dir]}"
+    is_var_set options[extract_dir] && download_extract_flags+=( "--extract-dir=${options[extract_dir]}" )
 
-    # Compile dowload/extract flags
-    local download_extract_all_flags_=$(echo   \
-        "${verbose_flag_}"                     \
-        "${force_flag_}"                       \
-        "${log_target_}"                       \
-        "${download_extract_progess_flag_}"    \
-        "${download_extract_destination_opt_}" \
-        "${download_extract_extract_dir_}"
-    )
+    # ------------------------ Prepare build environment ---------------------- 
 
-    # ------------ Prepare build environment ---------- 
-
+    # Prepare flags
+    local -a build_flags=()
     # Establish whether verbose tools' logs should be displayed
-    local build_verbose_tools_flag_=''
-    is_var_set options[verbose_tools] &&
-        build_verbose_tools_flag_="--verbose-tools"
+    is_var_set options[verbose_tools] && build_flags+=( "--verbose-tools" )
 
     # Establish source directory
-    local build_source_dir_="--src-dir=${options[extract_dir]:-.}"
-    is_var_set options[src_dir] &&
-        build_source_dir_="--src-dir=${options[extract_dir]:-.}/${options[src_dir]}"    
+    is_var_set options[src_dir] \
+        && build_flags+=( "--src-dir=${options[extract_dir]:-.}/${options[src_dir]}" ) \
+        || build_flags+=( "--src-dir=${options[extract_dir]:-.}"                     )
 
     # Establish build directory
-    local build_build_dir_="."
-    is_var_set options[build_dir] &&
-        build_build_dir_="--build-dir=${options[build_dir]}"    
+    is_var_set options[build_dir] \
+        && build_flags+=( "--build-dir=${options[build_dir]}" ) \
+        || build_flags+=( "--build-dir=."                     )
 
     # Establish build target
-    local build_target_=""
-    is_var_set options[target] &&
-        build_target_="--target=${options[target]}"    
+    is_var_set options[target] && build_flags+=( "--target=${options[target]}" )
 
     # Establish whether build steps should be marked
-    local build_mark_flag_="."
-    is_var_set options[mark] &&
-        build_mark_flag_="--mark"
+    is_var_set options[mark] && build_flags+=( "--mark" )
 
     # Establish whether steps performed by the function are limited
-    local up_to_flag=''
-    is_var_set_non_empty options[up_to] && 
-        up_to_flag="${options[up_to]}"
+    is_var_set options[up_to] && build_flags+=( "--up-to=${options[up_to]}" )
 
-    # Compile build flags
-    local build_all_flags_=$(echo      \
-        "${verbose_flag_}"             \
-        "${build_verbose_tools_flag_}" \
-        "${force_flag_}"               \
-        "${log_target_}"               \
-        "${build_source_dir_}"         \
-        "${build_build_dir_}"          \
-        "${build_target_}"             \
-        "${build_mark_flag_}"          \
-        "${up_to_flag}"
-    )
-
-    # ------------ Enable word splitting -------------- 
+    # ------------------------ Enable word splitting -------------------------- 
 
     # Enable word-splitting (localy) to properly parse options
     localize_word_splitting
     enable_word_splitting
 
-    # --------- Download and extract sources ---------- 
+    # --------------------- Download and extract sources ---------------------- 
     
     # Try to download and extract sources
-    download_and_extract ${download_extract_all_flags_[@]} $url_ && ret_=$? || ret_=$?
+    download_and_extract ${common_flags[@]} ${download_extract_flags[@]} $url_ && ret_=$? || ret_=$?
 
     # If error occurred, return error
     [[ $ret_ == "1" ]] && return 1
@@ -1204,10 +1160,10 @@ function download_build_and_install() {
         [[ "${options[up_to]}" == "download" ]] && return 0
     fi
 
-    # ---------------- Build sources ------------------ 
+    # ---------------------------- Build sources ------------------------------ 
 
     # Try to build and install sources
-    build_and_install $build_all_flags_ && ret_=$? || ret_=$?
+    build_and_install ${common_flags[@]} ${build_flags[@]} && ret_=$? || ret_=$?
     
     # If error occurred, return error
     [[ $ret_ == "1" ]] && return 1

@@ -3,7 +3,7 @@
 # @file     boost.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 1:13:17 pm
-# @modified Sunday, 21st November 2021 10:18:09 pm
+# @modified Wednesday, 23rd February 2022 12:06:17 am
 # @project  bash-utils
 # @brief
 #    
@@ -18,53 +18,57 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
-get_heredoc usage <<END
-    Description: Installs Boost library
-    Usage: boost.bash TYPE [VERSION] [TARGET]
+# Description of the script
+declare cmd_description="Installs Boost library"
 
-    Arguments:
+# Arguments' descriptions
+declare -A pargs_description=(
+    [type]="type of the installation to be performed; either from apt-package or source"
+    [version]="version of the boost to be installed in the 'src' variant"
+    [target]="target to be installed in source variant"
+)
 
-          TYPE  type of the installation to be performed
+# Options' descriptions
+declare -A opts_description=(
+    [prefix]="installation prefix when the 'src' variant is installed (default: .)"
+    [cleanup]="if set downloaded sources will be removed after installation"
+)
 
-                  pkg  installas Boost from apt package
-                  src  installas Boost from source
+# Envs' descriptions
+declare -A envs_description=(
+    [config_flags]="array containing configruation flags to be passed to the boost's bootstrap step"
+    [compile_flags]="array containing configruation flags to be passed to the boost's compilation step"
+)
 
-        VERSION version of the boost to be installed in the 'src' variant
-
-        TARGET  target to be installed in source variant
-          
-                 headers  installs only header files
-                   stage  installs only comiples library files
-                    full  installs full version of the boost
-
-    Options:
-      
-
-                         --help  displays this usage message
-                   --prefix=DIR  installation prefix when the 'src' variant is installed (default: .)
-        --with-config-flags=STR  string containing configruation flags to be passed to the 
-                                 boost's bootstrap step
-       --with-compile-flags=STR  string containing configruation flags to be passed to the 
-                                 boost's compilation step
+# Additional info
+get_heredoc source_description <<END
+    Source:
+    
+        https://sourceforge.net/projects/boost/files/boost
 END
 
 # ============================================================ Constants =========================================================== #
 
 # Logging context of the script
-LOG_CONTEXT="boost"
+declare LOG_CONTEXT="boost"
+
+# Boost package to be installed
+declare BOOST_PKG="libboost-all-dev"
+# Scheme of the URL of the boost to download sources 
+declare URL_SCHEME='https://sourceforge.net/projects/boost/files/boost/$version/boost_${version//./_}.tar.bz2/download'
+# Boost download directory
+declare DOWNLOAD_DIR="/tmp"
 
 # ============================================================ Functions =========================================================== #
 
-install_pkg() {
-
-    # Boost package to be installed
-    local BOOST_PKG="libboost-all-dev"
+function install_pkg() {
 
     # Check if package already isntalled
     ! is_pkg_installed $BOOST_PKG || return
 
-    # Install package
     log_info "Installing boost package ..."
+
+    # Install package
     sudo apt update && sudo apt install -y $BOOST_PKG || {
         log_error "Failed o install $BOOST_PKG" package
         return 1
@@ -74,118 +78,119 @@ install_pkg() {
     
 }
 
-install_source() {
+function install_source() {
     
-    # Scheme of the URL of the boost to download sources 
-    local URL_SCHEME='https://sourceforge.net/projects/boost/files/boost/$version/boost_${version//./_}.tar.bz2/download'
-    # Boost download directory
-    local DOWNLOAD_DIR="/tmp"
-    # Supported targets
-    local -a TARGETS=(
-        headers
-        stage
-        full
-    )
-    
-    # Verify target argument
-    is_var_set_non_empty target && is_array_element TARGETS $target || {
-        log_error "Invalid target given ($target)"
-        echo $usage
-        return 1
-    }
-
     # Verify if boost version given
-    is_var_set_non_empty version || {
+    is_var_set_non_empty pargs[version] || {
         log_error "No boost version given"
         return 1
     }
 
     # Evaluate the target URL
-    local URL=$(eval "echo $URL_SCHEME")
+    local url=$(version=${pargs[version]} eval "echo $URL_SCHEME")
 
-    # Name of the directory extracted from the archieve
-    local TARGET=${URL##*/}
-          TARGET=${TARGET%.tar.bz2*}
-
-    # Get installation prefix
-    local PREFIX=${options[prefix]:-.}
+    # Compute name of the archieve
+    local archieve_name=$url
+    archieve_name=${archieve_name%/*}
+    archieve_name=${archieve_name##*/}
+    # Compute name of the directory extracted from the archieve
+    local extracted_name=${archieve_name%.tar.bz2*}
 
     # Name of the configruation script
-    local CONFIG_TOOL='bootstrap'
+    local CONFIG_TOOL='bootstrap.sh'
     # Prepare configuration flags
-    local CONFIG_FLAGS=''
-    CONFIG_FLAGS+="--with-python=python3 "
-    CONFIG_FLAGS+="--prefix=$PREFIX "
-    CONFIG_FLAGS+="${options[config_flags]:-.} "
+    local -a CONFIG_FLAGS=()
+    CONFIG_FLAGS+=( "--with-python=python3 "    )
+    CONFIG_FLAGS+=( "--prefix=${opts[prefix]} " )
+    # Add custom flags
+    is_var_set envs[config_flags] && {
+        local -n custom_config_flags=${envs[config_flags]}
+        CONFIG_FLAGS+=( ${custom_config_flags[@]} )
+    }
+
     # Name of the compilation script
     local BUILD_TOOL='./b2'
-    # Prepare compilation target and 
-    case $target in
-        headers ) local target="headers"; local BUILD_FLAGS="--prefix=$PREFIX";;
-        stage   ) local target="stage";   local BUILD_FLAGS="--stagedir=$PREFIX/lib";;
-        full    ) local target="install"; local BUILD_FLAGS="--prefix=$PREFIX";;
-    esac
-    BUILD_FLAGS+=" ${options[compile_flags]:-}"
 
+    # Prepare compilation target
+    local -a BUILD_FLAGS=()
+    case ${pargs[target]} in
+        headers ) pargs[target]='headers' ;BUILD_FLAGS+=( "--prefix=${opts[prefix]}"       ) ;;
+        stage   ) pargs[target]='stage'   ;BUILD_FLAGS+=( "--stagedir=${opts[prefix]}/lib" ) ;;
+        full    ) pargs[target]='install' ;BUILD_FLAGS+=( "--prefix=${opts[prefix]}"       ) ;;
+    esac
+    # Add custom compilation flags
+    is_var_set envs[compile_flags] && {
+        local -n custom_compile_flags=${envs[compile_flags]}
+        BUILD_FLAGS+=( "$custom_compile_flags" )
+    }
+    
     # Download and isntall CMake
-    WGET_FLAGS='--no-clobber'          \
-    download_build_and_install $URL    \
-        --verbose                      \
-        --arch-path=/tmp/$TARGET       \
-        --extract-dir=/tmp             \
-        --show-progress                \
-        --src-dir=$TARGET              \
-        --target=$target               \
-        --build-dir=/tmp/$TARGET/build \
-        --log-target="Boost"           \
-        --up-to=build                  \
+    WGET_FLAGS='--no-clobber'                     \
+    download_build_and_install $url               \
+        --verbose                                 \
+        --arch-path=$DOWNLOAD_DIR/$archieve_name  \
+        --extract-dir=$DOWNLOAD_DIR               \
+        --show-progress                           \
+        --src-dir=$extracted_name                 \
+        --target=${pargs[target]}                 \
+        --build-dir=$DOWNLOAD_DIR/$extracted_name \
+        --log-target="Boost"                      \
+        --up-to=build                             \
         --force
 
+    # If only headers have been generated, move them manually to the prefix directory
+    if [[ ${pargs[target]} == "headers" ]]; then
+        mkdir -p ${opts[prefix]}/include
+        cp -r $DOWNLOAD_DIR/$extracted_name/boost ${opts[prefix]}/include/
+    fi
+
     # If option given, remove archieve
-    is_var_set_non_empty options[cleanup] &&
-        rm /tmp/${TARGET}*.tar.bz2
+    is_var_set_non_empty opts[cleanup] &&
+        rm $DOWNLOAD_DIR/$extracted_name*.tar.bz2
 
 }
 
 # ============================================================== Main ============================================================== #
 
-main() {
+function main() {
     
-    # Link USAGE message
-    local -n USAGE=usage
-
-    # Requirewd number of arguments
-    local ARG_NUM_MIN=1
-    local -a arguments=(
-        itype
-        version
-        target
-    )
-    # Valid variants of the `itype` argument
-    local ARG1_VARIANTS=(
-        pkg
-        src
-    )
+    # Arguments
+    local -A    a_type_parg_def=( [format]="TYPE"    [name]="type"    [type]="s" [variants]="pkg |src"                                )
+    local -A b_version_parg_def=( [format]="VERSION" [name]="version" [type]="s"                                     [default]=""     )
+    local -A  c_target_parg_def=( [format]="TARGET"  [name]="target"  [type]="s" [variants]="headers | stage | full" [default]="full" )
 
     # Options
-    local opt_definitions=(
-        '--help',help,f
-        '--prefix',prefix
-        '--with-config-flags',config_flags
-        '--with-compile-flags',compile_flags
-        '--cleanup',cleanup,f
-    )
+    local -A  a_prefix_opt_def=( [format]="--prefix"     [name]="prefix"  [type]="p" [default]="." )
+    local -A b_cleanup_opt_def=( [format]="-c|--cleanup" [name]="cleanup" [type]="f"               )
 
-    # Make options' parsing verbose
-    local VERBOSE_PARSEARGS=1
+    # Envs
+    local -A  a_config_flags_env_def=( [format]="BOOST_CONFIG_FLAGS"  [name]="config_flags"  [type]="s" )
+    local -A b_compile_flags_env_def=( [format]="BOOST_COMPILE_FLAGS" [name]="compile_flags" [type]="s" )
+
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help                                  )
+    PARSEARGS_OPTS+=( --verbose                                    )
+    PARSEARGS_OPTS+=( --with-append-description=source_description )
     
     # Parsed options
     parse_arguments
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
+    fi
     
+    # Convert prefix to abspath
+    opts[prefix]=$(realpath ${opts[prefix]})
+
     # Perform corresponding routine
-    case $itype in
-        pkg ) install_pkg;;
-        src ) install_source;;
+    case ${pargs[type]} in
+        'pkg' ) install_pkg    ;;
+        'src' ) install_source ;;
     esac
     
 }

@@ -3,7 +3,7 @@
 # @file     cli_v1_autocompletion.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 5:01:29 pm
-# @modified Sunday, 21st November 2021 8:35:27 pm
+# @modified Wednesday, 23rd February 2022 12:15:37 am
 # @project  bash-utils
 # @brief
 #    
@@ -18,36 +18,34 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
-# Script's usage
-get_heredoc usage <<END
-    Description: Installs autocompletion script for Mbed CLI v1
-    Usage: cli_v1_autocompletion.bash
+# Description of the script
+declare cmd_description="Installs autocompletion script for Mbed CLI v1"
 
-    Options:
-      
-        --help              if no command given, displays this usage message
-        --destination=FILE  script's installation (default ./mbed_cli_autocomplete)
-
-END
+# Options' descriptions
+declare -A opts_description=(
+    [destination]="script's installation"
+)
 
 # ========================================================== Configuration ========================================================= #
 
+# Logging context of the script
+declare LOG_CONTEXT="mbed"
+
 # URL to be downloaded
 declare GIT_URL='https://github.com/ARMmbed/mbed-cli'
-
-# ============================================================ Constants =========================================================== #
-
-# Logging context of the script
-LOG_CONTEXT="mbed"
+# Location of the script (relative to the repositorie's root)
+declare SCRIPT_LOCATION=tools/bash_completion/mbed
+# Download directory
+declare DOWNLOAD_DIR='/tmp'
 
 # ============================================================ Commands ============================================================ #
 
-install() {
+function install() {
 
     log_info "Downloading Mbed CLI autocompletion script..."
 
     # Download the homebrew
-    if ! git clone $GIT_URL /tmp; then
+    if ! git clone $GIT_URL $DOWNLOAD_DIR; then
         [[ $? != 128 ]] || {
             log_error "Failed to download Mbed CLI autocompletion script"
             exit 1
@@ -56,39 +54,37 @@ install() {
 
     log_info "Script downloaded"
 
-    # Location of the script relative to the repositorie's root
-    local SCRIPT_LOCATION=tools/bash_completion/mbed
-    # Destination for the script
-    local DESTINATION=${options[destination]:-./mbed_cli_autocomplete}
-
     # Copy script from the repository to the destination
-    cp /tmp/$SCRIPT_LOCATION $DESTINATION
+    cp $DOWNLOAD_DIR/$SCRIPT_LOCATION ${opts[destination]}
     # Remove downloaded repository
-    rm -rf /tmp/${GIT_URL##*/}
+    rm -rf $DOWNLOAD_DIR/${GIT_URL##*/}
 
 }
 
 # ============================================================== Main ============================================================== #
 
-main() {
-
-    # Link USAGE message
-    local -n USAGE=usage
+function main() {
 
     # Options
-    local -a opt_definitions=(
-        '--help',help,f
-        '--destination',destination
-    )
+    local -A destination_opt_def=( [format]="--destination" [name]="destination" [type]="p" [default]="./mbed_cli_autocomplete" )
 
-    # Make options' parsing verbose
-    local VERBOSE_PARSEARGS=1
-
-    # Parse arguments
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help )
+    PARSEARGS_OPTS+=( --verbose   )
+    
+    # Parsed options
     parse_arguments
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
+    fi
 
-    # ----------------------------- Run installation script -----------------------------
-
+    # Install CLI
     install
 
 }

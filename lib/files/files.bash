@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Monday, 21st February 2022 6:58:11 pm
+# @modified Tuesday, 22nd February 2022 4:07:10 pm
 # @project  bash-utils
 # @brief
 #    
@@ -158,4 +158,35 @@ function remove_file_extension() {
     # Print @p filename with extension suffix removed
     echo "${_filename_%."$_extension_"}"
 
+}
+
+# -------------------------------------------------------------------
+# @brief Converts file's path into the absolute path
+#
+# @param path
+#    path to be converted (may not exist)
+#
+# @outputs
+#    absolute path to the file 
+# -------------------------------------------------------------------
+function to_abs_path() {
+
+    # Arguments
+    local path="$1"
+
+    # If absolute path given, return it
+    if starts_with "$path" '/'; then
+        echo "$path"
+        return
+    fi
+
+    # Otherwise, get pwd
+    local cwd="$(pwd)"
+    # If path starts with a single dot, remove this prefix
+    if starts_with "$path" './'; then
+        path="${path:2}"
+    fi
+
+    # Print concatenated result
+    echo "$cwd/$path"
 }

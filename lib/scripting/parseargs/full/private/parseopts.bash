@@ -3,7 +3,7 @@
 # @file     parseopts.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 12:49:58 pm
-# @modified Tuesday, 22nd February 2022 2:26:44 am
+# @modified Tuesday, 22nd February 2022 9:23:59 pm
 # @project  bash-utils
 # @brief
 #    
@@ -13,7 +13,7 @@
 # ====================================================================================================================================
     
 # UBAD table of the auto-generated 'help' option
-declare -A __help_parseopts_opt_def_=( [format]="-h|--help" [name]="help" [type]="f" [help]="Shows this usage text")
+declare -A __help_parseopts_opt_def_=( [format]="-h|--help" [name]="help" [type]="f" [help]="shows this usage text")
 
 # ============================================================= Helpers ============================================================ #
 
@@ -157,6 +157,8 @@ function get_option_format() {
     # Get list of format from positional arguments
     local -a format_list=( "$@" )
 
+    local i
+    
     # Iterate list of arguments backward to find the last occurence of the option
     for ((i = ${#__get_option_format_args_[@]} - 1; i >= 0; i--)); do
         
@@ -812,11 +814,9 @@ function generate_opts_description() {
 
     # Parse formats and helps
     parse_description_info                         \
-        "$__generate_opts_description_opt_defs_"   \
+        __generate_opts_description_opt_defs_ref_  \
         "$__generate_opts_description_parse_mode_" \
         formats helps types
-
-    # Get reference to the UBAD list
 
     local name
     
@@ -838,11 +838,11 @@ function generate_opts_description() {
 
             # Cover options in the middle of the string (delimited with comma) [long options]
             while [[ "$format" =~ $long_pattern_middle ]]; do
-                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}=$type_string,${BASH_REMATCH[3]}"
+                format="${BASH_REMATCH[1]}--${BASH_REMATCH[2]}=<$type_string>,${BASH_REMATCH[3]}"
             done
             # Cover options in the middle of the string (delimited with comma) [short options]
             while [[ "$format" =~ $short_pattern_middle ]]; do
-                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]} $type_string,${BASH_REMATCH[3]}"
+                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]} <$type_string>,${BASH_REMATCH[3]}"
             done
 
             # Cover options on the end of the string
@@ -851,11 +851,11 @@ function generate_opts_description() {
 
             # Cover options on the end of the string [long options]
             while [[ "$format" =~ $long_pattern_end ]]; do
-                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}=$type_string"
+                format="${BASH_REMATCH[1]}--${BASH_REMATCH[2]}=<$type_string>"
             done
             # Cover options on the end of the string [short options]
             while [[ "$format" =~ $short_pattern_end ]]; do
-                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]} $type_string"
+                format="${BASH_REMATCH[1]}-${BASH_REMATCH[2]} <$type_string>"
             done
         
         fi

@@ -3,7 +3,7 @@
 # @file     variables.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 2:36:03 am
-# @modified Monday, 21st February 2022 6:58:11 pm
+# @modified Tuesday, 22nd February 2022 6:35:53 pm
 # @project  bash-utils
 # @brief
 #    

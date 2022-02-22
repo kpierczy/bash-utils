@@ -3,7 +3,7 @@
 # @file     common.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 12:49:58 pm
-# @modified Tuesday, 22nd February 2022 2:58:05 am
+# @modified Tuesday, 22nd February 2022 7:26:53 pm
 # @project  bash-utils
 # @brief
 #    
@@ -18,7 +18,7 @@ declare __lib_bug_msg_=$(echo \
 )
 
 # Interdation argument's description
-declare ARGUMENTS_DESCRIPTION_INTEND="${ARGUMENTS_DESCRIPTION_INTEND:-5}"
+declare ARGUMENTS_DESCRIPTION_INTEND="${ARGUMENTS_DESCRIPTION_INTEND:-4}"
 # Maximal lenght of the argument's description
 declare ARGUMENTS_DESCRIPTION_LENGTH_MAX="${ARGUMENTS_DESCRIPTION_LENGTH_MAX:-85}"
 
@@ -254,6 +254,8 @@ function compile_description_info() {
 
     done
 
+    local i
+    
     # Print result in the reverse order
     for ((i = ${#__compile_description_info_result_[@]} - 1; i >= 0 ; i--)); do
         echo "${__compile_description_info_result_[$i]}"
@@ -409,7 +411,7 @@ function verify_variants_and_ranges() {
         __verify_variants_and_ranges_ranges_
 
     # --------------- Verify if variants/ranges are respected -----------------
-    
+
     # Iterate through parsed arguments
     for name in "${!__verify_variants_and_ranges_parsed_[@]}"; do
 

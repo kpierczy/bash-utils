@@ -3,7 +3,7 @@
 # @file     serialplot.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 5:09:51 pm
-# @modified Sunday, 21st November 2021 11:40:52 pm
+# @modified Wednesday, 23rd February 2022 12:06:40 am
 # @project  bash-utils
 # @brief
 #    
@@ -18,17 +18,13 @@ source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
 
-# Script's usage
-get_heredoc usage <<END
-    Description: Installs autocompletion script for Mbed CLI v1
-    Usage: homebrew.bash
+# Script's description
+declare cmd_description="Installs serialplot utility"
 
-    Options:
-      
-        --help              if no command given, displays this usage message
-        --destination=FILE  script's installation (default ./serialplot)
-
-END
+# Option's descriptions
+declare -A opts_description=(
+    [path]="installation path"
+)
 
 # ========================================================== Configuration ========================================================= #
 
@@ -38,21 +34,18 @@ declare URL='https://serialplot.ozderya.net/downloads/serialplot-0.12.0-x86_64.A
 # ============================================================ Constants =========================================================== #
 
 # Logging context of the script
-LOG_CONTEXT="serialplot"
+declare LOG_CONTEXT="serialplot"
 
 # ============================================================ Commands ============================================================ #
 
-install() {
-
-    # Destination for the seriaplot 
-    local DESTINATION=${options[destination]:-./seriaplot}
+function install() {
 
     log_info "Downloading seriaplot..."
 
     # Download the homebrew
-    wget $URL                          \
-        --quiet                        \
-        --output-document=$DESTINATION \
+    wget $URL                                          \
+        --quiet                                        \
+        --output-document=$(to_abs_path ${opts[path]}) \
         --show-progress || 
     {
         log_error "Failed to download seriaplot"
@@ -62,31 +55,35 @@ install() {
     log_info "Script downloaded"
 
     # Add execution right to the seriaplot
-    chmod +x $DESTINATION
+    chmod +x ${opts[path]}
 
 }
 
 # ============================================================== Main ============================================================== #
 
-main() {
-
-    # Link USAGE message
-    local -n USAGE=usage
+function main() {
 
     # Options
-    local -a opt_definitions=(
-        '--help',help,f
-        '--destination',destination
-    )
+    local -A path_opt_def=( [format]="--path" [name]="path" [type]="p" [default]="./serialplot" )
 
-    # Make options' parsing verbose
-    local VERBOSE_PARSEARGS=1
+    # Parsing options
+    declare -a PARSEARGS_OPTS
+    PARSEARGS_OPTS+=( --with-help )
+    PARSEARGS_OPTS+=( --verbose   )
 
+    # Set help generator's configuration
+    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
     # Parse arguments
     parse_arguments
 
-    # ----------------------------- Run installation script -----------------------------
-
+    # If help requested, return
+    if [[ $ret == '5' ]]; then
+        return
+    elif [[ $ret != '0' ]]; then
+        return $ret
+    fi
+    
+    # Install utility
     install
 
 }

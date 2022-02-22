@@ -3,7 +3,7 @@
 # @file     net.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 9:59:21 pm
-# @modified Monday, 21st February 2022 6:58:11 pm
+# @modified Tuesday, 22nd February 2022 8:59:07 pm
 # @project  bash-utils
 # @brief
 #    
@@ -71,7 +71,7 @@ function wget_and_localize() {
             ret_=0
         # Else, check whether file was already downloaded
         else
-
+            
             # In case file was already downloaded, reproduce logfile with --verbose flag
             wget "$@" --output-file="$logfile_" --verbose &> /dev/null
             # Read content of the logfile

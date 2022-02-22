@@ -3,7 +3,7 @@
 # @file     parsepargs.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 21st February 2022 6:20:31 pm
-# @modified Tuesday, 22nd February 2022 2:55:27 am
+# @modified Tuesday, 22nd February 2022 7:35:24 pm
 # @project  bash-utils
 # @brief
 #    
@@ -33,7 +33,7 @@ function get_parg_format() {
     local -n __get_parg_format_defs_="$1"
     local  __get_parg_format_name_="$2"
 
-    local parg_def=""
+    local parg_def_idx
 
     # Search a list of definitions to find name(s) corresponding to the given key
     for parg_def_idx in "${!__get_parg_format_defs_[@]}"; do
@@ -42,11 +42,11 @@ function get_parg_format() {
         local -n parg_def_ref="${__get_parg_format_defs_[$parg_def_idx]}"
 
         # If requred table has been found, break
-        if [[ "${opt_def_ref[name]}" == "$__get_parg_format_name_" ]]; then
+        if [[ "${parg_def_ref[name]}" == "$__get_parg_format_name_" ]]; then
 
             # If format is defined for the argument, return it
-            if is_var_set opt_def_ref[format]; then
-                echo "${opt_def_ref[format]}"
+            if is_var_set parg_def_ref[format]; then
+                echo "${parg_def_ref[format]}"
                 return 0
             # Else, auto-generate format of the argument based on the index
             else
@@ -160,11 +160,16 @@ function parsepargs_parse_pargs() {
 
     local __parsepargs_parse_pargs_parg_def_idx_
 
-    # Iterate over indeces of the UBAD list
-    for __parsepargs_parse_pargs_parg_def_idx_ in "${!__parsepargs_parse_pargs_pargs_defs_ref_[@]}"; do
+    local i
 
-        # Get reference to the UBAD table of the given parg
-        local -n __parsepargs_parse_pargs_parg_def_ref_="${__parsepargs_parse_pargs_pargs_defs_ref_[$__parsepargs_parse_pargs_parg_def_idx_]}"
+    # Get number of arguments to be parsed
+    local defs_num="${#__parsepargs_parse_pargs_pargs_defs_ref_[@]}"
+
+    # Iterate over UBAD list
+    for ((i = 0; i < $defs_num; i++)); do
+
+        # Get reference to the UBAD table
+        local -n __parsepargs_parse_pargs_parg_def_ref_="${__parsepargs_parse_pargs_pargs_defs_ref_[$i]}"
         
         # Get name of the parg
         local name="${__parsepargs_parse_pargs_parg_def_ref_[name]}"
@@ -238,11 +243,13 @@ function parsepargs_parse_pargs() {
             # Get number of arguments in the pack (remov '[' and ']' from both sides)
             local pack_size="${arity:1:-1}"
             
+            local j
+            
             # Iterate over pack and parse corresponding arguments
-            for ((i = 0; i < $pack_size; i++)); do
+            for ((j = 0; j < $pack_size; j++)); do
 
                 # Compose name of the argument
-                local pack_elem_name="$name$(($i + 1))"
+                local pack_elem_name="$name$(($j + 1))"
                 
                 # Keep it's type
                 __parsepargs_parse_pargs_pargs_types_["$pack_elem_name"]="$type"
@@ -267,7 +274,7 @@ function parsepargs_parse_pargs() {
                     if is_var_set __parsepargs_parse_pargs_parg_def_ref_[format]; then
                         format="${__parsepargs_parse_pargs_parg_def_ref_[format]}" # Get format
                         format="${format%$arity}"                                  # Remove arity form the format's end
-                        format="${format}$(($i + 1))"                              # Add idnex of the argument in the pack
+                        format="${format}$(($j + 1))"                              # Add idnex of the argument in the pack
                     fi
                     
                     log_error "Required argument '$format' has not been given"
@@ -320,11 +327,13 @@ function parsepargs_parse_pargs() {
             # If some arguments left, parse them
             else
 
+                local k
+
                 # Iterate over variadic arguments
-                for ((i = 0; i < $args_left_num; i++)); do
+                for ((k = 0; k < $args_left_num; k++)); do
 
                     # Compose name of the argument
-                    local vpack_elem_name="$name$(($i + 1))"
+                    local vpack_elem_name="$name$(($k + 1))"
 
                     # Keep it's type
                     __parsepargs_parse_pargs_pargs_types_["$vpack_elem_name"]="$type"
@@ -396,19 +405,23 @@ function parsepargs_generate_required_arguments() {
     # Initialize arguments' index counter
     local __parsepargs_generate_required_arguments_index_count_=1
 
-    local __parsepargs_generate_required_arguments_def_
+    local i
+
+    # Get number of arguments to be parsed
+    local defs_num="${#__parsepargs_generate_required_arguments_defs_ref_[@]}"
 
     # Iterate over UBAD list
-    for __parsepargs_generate_required_arguments_def_ in "${__parsepargs_generate_required_arguments_defs_ref_[@]}"; do
+    for ((i = 0; i < $defs_num; i++)); do
 
         # Get reference to the UBAD table
-        local -n __parsepargs_generate_required_arguments_def_ref_="$__parsepargs_generate_required_arguments_def_"
+        local -n __parsepargs_generate_required_arguments_def_ref_="${__parsepargs_generate_required_arguments_defs_ref_[$i]}"
 
         # If table describes variadic argument, append string based on the format
         if is_var_set __parsepargs_generate_required_arguments_def_ref_[format]; then
             
             # Get the format
             local format="${__parsepargs_generate_required_arguments_def_ref_[format]}"
+            
             # Get the arity
             local arity="$(get_parg_arity $format)"
             # Append string based on the format
