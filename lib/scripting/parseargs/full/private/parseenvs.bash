@@ -3,7 +3,7 @@
 # @file     parseenvs.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 12:49:58 pm
-# @modified Friday, 18th February 2022 8:18:35 pm
+# @modified Tuesday, 22nd February 2022 2:26:44 am
 # @project  bash-utils
 # @brief
 #    
@@ -70,10 +70,10 @@ function get_env_format() {
 #    names have no defined value inside this array has not been parsed)
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if function sufferred from the bug \n
-#    @c 2 if invalid option has been passed \n
-#    @c 4 if invalid UBAD list has been given
+#    @retval @c 0 on success 
+#    @retval @c 1 if function sufferred from the bug 
+#    @retval @c 2 if invalid option has been passed 
+#    @retval @c 4 if invalid UBAD list has been given
 #
 # @note Types of arguments are not being checke dby the function. They are assumed
 #    to be checked by the calling function (i.e. `parseargs`)
@@ -127,6 +127,9 @@ function parseenvs_parse_envs() {
                 # Parse flag only if it is set to '1'
                 if [[ "$__parseenvs_parse_envs_env_ref_" == "1" ]]; then
                     __parseenvs_parse_envs_envs_["$__parseenvs_parse_envs_env_name_"]="0"
+                # Else, if 'unpresent flags define' option is set, define option as unparsed
+                elif [[ "${__parseenvs_parse_envs_flag_def_type_}" == "defined" ]]; then
+                    __parseenvs_parse_envs_envs_["$__parseenvs_parse_envs_env_name_"]="1"
                 fi
 
             # For other types, just parse value of the env
@@ -149,18 +152,22 @@ function parseenvs_parse_envs() {
     return 0
 }
 
-# ========================================================== Helpe printer ========================================================= #
+# ========================================================= Help formatter ========================================================= #
 
 # ---------------------------------------------------------------------------------------
 # @brief Automatically generates description of envs arguments based on the UBAD list
 #
 # @param envs_defs
 #    name of the UBAD list containing envs arguments' definitions
+# @param parse_mode ( optional, default: 'default' )
+#    parse mode (either 'default' - list element's will be trimmed - or 'raw' - list 
+#    element's will NOT be trimmed)
 # ---------------------------------------------------------------------------------------
 function generate_envs_description() {   
 
     # Parse arguments
     local __generate_envs_description_opt_envs_="$1"
+    local __generate_envs_description_parse_mode_="${2:-default}"
 
     # ------------------------ Format the description -------------------------
     
@@ -174,8 +181,9 @@ function generate_envs_description() {
     local opt_def=""
 
     # Parse formats and helps
-    parse_description_info                       \
-        "$__generate_envs_description_opt_envs_" \
+    parse_description_info                         \
+        "$__generate_envs_description_opt_envs_"   \
+        "$__generate_envs_description_parse_mode_" \
         formats helps types
     
     # Compile description text

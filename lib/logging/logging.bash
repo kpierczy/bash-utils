@@ -3,7 +3,7 @@
 # @file     logging.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:08:34 am
-# @modified Saturday, 13th November 2021 1:24:40 am
+# @modified Monday, 21st February 2022 10:42:56 pm
 # @project  bash-utils
 # @brief
 #    
@@ -92,7 +92,7 @@ function disable_stdout_logs() {
 
 # -------------------------------------------------------------------
 # @brief Prints @c 1 to stdout if logging to stdout is enabled or
-#    @c 0 otherwise
+#    @retval @c 0 otherwise
 # -------------------------------------------------------------------
 function get_stdout_logs_status() {
     [[ $LOG_ENABLE_STDOUT == "0" ]] && echo "0" || echo "1"

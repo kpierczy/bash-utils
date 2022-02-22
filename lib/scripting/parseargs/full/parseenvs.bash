@@ -3,7 +3,7 @@
 # @file     parseenvs.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 7:33:06 pm
-# @modified Friday, 18th February 2022 5:35:23 pm
+# @modified Tuesday, 22nd February 2022 1:54:06 am
 # @project  bash-utils
 # @brief
 #    
@@ -32,9 +32,11 @@ declare __parseenvs_bug_msg_=$(echo \
 #    name of the hash array where the parsed options will be written into
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on bug
-#    @c 2 on parsing error
+#    @retval @c 0 on success
+#    @retval @c 1 on bug
+#    @retval @c 2 on parsing error
+#    @retval @c 3 if argument(s) of the wrong type has been given
+#    @retval @c 4 if invalid UBAD list has been given
 #
 # @options (script-oriented)
 # 
@@ -55,6 +57,10 @@ declare __parseenvs_bug_msg_=$(echo \
 #                                    to 1
 #  -c,   --without-int-verification  if set, no integer-typed arguments validation is
 #                                    performed
+#  -k,                 --ubad-check  if set, the @p envs_definitions definition will be
+#                                    verified to be a valid UBAD list describing the
+#                                    list of arguments; this procedure is computationally
+#                                    expensnsive and so it optional
 #
 # @environment
 #    
@@ -130,7 +136,7 @@ function parseenvs() {
     
     # Check if arguments of a valid type has been given
     is_hash_array "$__parseenvs_envs_"  || {
-        log_error "Argument of 'parseenvs' invalid type has been given"
+        log_error "Argument of 'parseenvs' (envs) has no a valid type (hash array)"
         restore_log_config_from_default_stack
         return 3
     }
@@ -143,10 +149,10 @@ function parseenvs() {
     # ------------------------- Check helper options --------------------------
 
     # Check if 'default flag defined' option is passed
-    local __parseenvs_flag_def_type_=$( is_var_set __parseopts_own_opts_[flag_default_defined] \
+    local __parseenvs_flag_def_type_=$( is_var_set __parseenvs_own_opts_[flag_default_defined] \
         && echo "defined" || echo "undefined" )
     # Check if 'raw' option is passed
-    local __parseenvs_raw_=$( is_var_set __parseopts_own_opts_[raw] \
+    local __parseenvs_raw_=$( is_var_set __parseenvs_own_opts_[raw] \
         && echo "raw" || echo "default" ) 
 
     # ======================================================================= #
@@ -157,11 +163,11 @@ function parseenvs() {
     local -A __parseenvs_envs_types_
 
     # Parse options of the caller
-    parseenvs_parse_envs                \
-        __parseenvs_envs_definitions_   \
-        "${__parseenvs_flag_def_type_}" \
-        __parseenvs_envs_types_         \
-        __parseenvs_envs_               ||
+    parseenvs_parse_envs                 \
+        "$__parseenvs_envs_definitions_" \
+        "$__parseenvs_flag_def_type_"    \
+        __parseenvs_envs_types_          \
+        __parseenvs_envs_                ||
     {
         local ret_=$?
         restore_log_config_from_default_stack

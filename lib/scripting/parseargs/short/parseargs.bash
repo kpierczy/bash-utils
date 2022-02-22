@@ -3,7 +3,7 @@
 # @file     arguments_old.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 12:25:13 am
-# @modified Thursday, 17th February 2022 9:10:37 pm
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -51,9 +51,9 @@ alias __echo_usage_if_verbose='
 #    into
 #
 # @returns 
-#    @c 0 if no error occurred \n
-#    @c 1 if arguments parsing/verification failed \n
-#    @c 2 if usage message was requested with '-h, --help' 
+#    @retval @c 0 if no error occurred 
+#    @retval @c 1 if arguments parsing/verification failed 
+#    @retval @c 2 if usage message was requested with '-h, --help' 
 #         option
 #
 # @options

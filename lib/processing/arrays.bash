@@ -3,7 +3,7 @@
 # @file     arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Thursday, 17th February 2022 8:11:58 pm
+# @modified Monday, 21st February 2022 11:45:45 pm
 # @project  bash-utils
 # @brief
 #    
@@ -52,8 +52,8 @@
 #    element to be checked
 #
 # @returns 
-#    @c 0 if @p array contains an @p element \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p array contains an @p element 
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_array_element() {
 
@@ -172,7 +172,7 @@ function print_array() {
     
     # Parse arguments to a named array
     parse_options_s
-
+    
     # Parse arguments
     local -n arr_="${posargs[0]}"
 
@@ -232,8 +232,8 @@ function print_array() {
 #    name fo the destination array
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error
+#    @retval @c 0 on success 
+#    @retval @c 1 on error
 # -------------------------------------------------------------------
 function files_lines_to_array() {
 

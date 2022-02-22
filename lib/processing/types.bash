@@ -3,7 +3,7 @@
 # @file     types.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 1:12:37 pm
-# @modified Monday, 14th February 2022 8:23:06 pm
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -22,8 +22,8 @@
 #    name of the entity to be inspected
 #
 # @returns
-#    @c 0 on succes \n
-#    @c 1 if entity does not exist
+#    @retval @c 0 on succes 
+#    @retval @c 1 if entity does not exist
 #
 # @brief The space of variables is searched BEFORE the space of functions
 # ---------------------------------------------------------------------------------------
@@ -60,9 +60,9 @@ function get_entity_type() {
 #    name of the entity to be inspected
 #
 # @returns
-#    @c 0 on succes \n
-#    @c 1 if entity does not exist \n
-#    @c 2 if entity is not a string
+#    @retval @c 0 on succes 
+#    @retval @c 1 if entity does not exist 
+#    @retval @c 2 if entity is not a string
 # ---------------------------------------------------------------------------------------
 function is_string() {
 
@@ -94,9 +94,9 @@ function is_string() {
 #    name of the entity to be inspected
 #
 # @returns
-#    @c 0 on succes \n
-#    @c 1 if entity does not exist \n
-#    @c 2 if entity is not an integer
+#    @retval @c 0 on succes 
+#    @retval @c 1 if entity does not exist 
+#    @retval @c 2 if entity is not an integer
 # ---------------------------------------------------------------------------------------
 function is_integer() {
 
@@ -125,9 +125,9 @@ function is_integer() {
 #    name of the entity to be inspected
 #
 # @returns
-#    @c 0 on succes \n
-#    @c 1 if entity does not exist \n
-#    @c 2 if entity is not an array
+#    @retval @c 0 on succes 
+#    @retval @c 1 if entity does not exist 
+#    @retval @c 2 if entity is not an array
 # ---------------------------------------------------------------------------------------
 function is_array() {
 
@@ -152,9 +152,9 @@ function is_array() {
 #    name of the entity to be inspected
 #
 # @returns
-#    @c 0 on succes \n
-#    @c 1 if entity does not exist \n
-#    @c 2 if entity is not an hash array
+#    @retval @c 0 on succes 
+#    @retval @c 1 if entity does not exist 
+#    @retval @c 2 if entity is not an hash array
 # ---------------------------------------------------------------------------------------
 function is_hash_array() {
 
@@ -179,9 +179,9 @@ function is_hash_array() {
 #    name of the entity to be inspected
 #
 # @returns
-#    @c 0 on succes \n
-#    @c 1 if entity does not exist \n
-#    @c 2 if entity is not a function
+#    @retval @c 0 on succes 
+#    @retval @c 1 if entity does not exist 
+#    @retval @c 2 if entity is not a function
 # ---------------------------------------------------------------------------------------
 function is_function() {
 

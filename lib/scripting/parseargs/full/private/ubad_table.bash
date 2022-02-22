@@ -3,7 +3,7 @@
 # @file     ubad_table.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 3:13:57 pm
-# @modified Friday, 18th February 2022 7:28:50 pm
+# @modified Tuesday, 22nd February 2022 12:26:48 am
 # @project  bash-utils
 # @brief
 #    
@@ -21,9 +21,9 @@
 # @param entity
 #    name of the entity to be inspected
 # @returns 
-#    @c 0 if entity named @p entity is a valid UBAD table \n
-#    @c 1 otherwise
-#    @c 2 if invalid @p entity is given
+#    @retval @c 0 if entity named @p entity is a valid UBAD table 
+#    @retval @c 1 otherwise
+#    @retval @c 2 if invalid @p entity is given
 # ---------------------------------------------------------------------------------------
 function are_optional_fields_of_ubad_table_valid() {
 
@@ -97,9 +97,9 @@ function are_optional_fields_of_ubad_table_valid() {
 # @param entity
 #    name of the entity to be inspected
 # @returns 
-#    @c 0 if entity named @p entity is a valid UBAD table \n
-#    @c 1 otherwise
-#    @c 2 if invalid @p entity is given
+#    @retval @c 0 if entity named @p entity is a valid UBAD table 
+#    @retval @c 1 otherwise
+#    @retval @c 2 if invalid @p entity is given
 # ---------------------------------------------------------------------------------------
 function is_positional_arg_ubad_table() {
 
@@ -133,9 +133,9 @@ function is_positional_arg_ubad_table() {
 # @param entity
 #    name of the entity to be inspected
 # @returns 
-#    @c 0 if entity named @p entity is a valid UBAD table \n
-#    @c 1 otherwise
-#    @c 2 if invalid @p entity is given
+#    @retval @c 0 if entity named @p entity is a valid UBAD table 
+#    @retval @c 1 otherwise
+#    @retval @c 2 if invalid @p entity is given
 # ---------------------------------------------------------------------------------------
 function is_optional_arg_ubad_table() {
 
@@ -169,9 +169,9 @@ function is_optional_arg_ubad_table() {
 # @param entity
 #    name of the entity to be inspected
 # @returns 
-#    @c 0 if entity named @p entity is a valid UBAD table \n
-#    @c 1 otherwise
-#    @c 2 if invalid @p entity is given
+#    @retval @c 0 if entity named @p entity is a valid UBAD table 
+#    @retval @c 1 otherwise
+#    @retval @c 2 if invalid @p entity is given
 # ---------------------------------------------------------------------------------------
 function is_environmental_argubad_table() {
 
@@ -208,9 +208,9 @@ function is_environmental_argubad_table() {
 #    type of the arguments described by the inspected UBAD list (one of [pargs, opts,
 #    envs])
 # @returns 
-#    @c 0 if entity named @p entity is a valid UBAD table \n
-#    @c 1 otherwise
-#    @c 2 if invalid @p entity or @p argtype is given
+#    @retval @c 0 if entity named @p entity is a valid UBAD table 
+#    @retval @c 1 otherwise
+#    @retval @c 2 if invalid @p entity or @p argtype is given
 # ---------------------------------------------------------------------------------------
 function is_ubad_table() {
 
@@ -250,7 +250,7 @@ function is_ubad_table() {
 #    name of the has array that the fields will be written into
 #
 # @returns 
-#    @c 0 on success \n
+#    @retval @c 0 on success 
 #
 # @note Types of arguments are not being checke dby the function. They are assumed
 #    to be checked by the calling function
@@ -264,10 +264,10 @@ function parse_ubad_tables_field() {
 
     # ------------------------- Parse default values --------------------------
 
-    local ubad_table
-
     # Get the field name
     local field="${__parse_ubad_tables_field_field_field_}"
+
+    local ubad_table
 
     # Iterate over UBAD list
     for ubad_table in "${__parse_ubad_tables_field_field_definitions_[@]}"; do
@@ -307,7 +307,7 @@ function parse_ubad_tables_field() {
 #    into
 #
 # @returns 
-#    @c 0 on success \n
+#    @retval @c 0 on success 
 #
 # @note Types of arguments are not being checke dby the function. They are assumed
 #    to be checked by the calling function

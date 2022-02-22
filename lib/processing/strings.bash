@@ -3,7 +3,7 @@
 # @file     strings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 4:50:15 pm
-# @modified Thursday, 17th February 2022 5:57:24 pm
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -24,8 +24,8 @@
 #    prefix to be matched
 #
 # @returns 
-#    @c 0 if true \n
-#    @c 0 if false
+#    @retval @c 0 if true 
+#    @retval @c 0 if false
 # -------------------------------------------------------------------
 function starts_with() {
 
@@ -50,8 +50,8 @@ function starts_with() {
 #    suffix to be matched
 #
 # @returns 
-#    @c 0 if true \n
-#    @c 0 if false
+#    @retval @c 0 if true 
+#    @retval @c 0 if false
 # -------------------------------------------------------------------
 function ends_with() {
 
@@ -76,8 +76,8 @@ function ends_with() {
 #    substring to be matched
 #
 # @returns 
-#    @c 0 if true \n
-#    @c 0 if false
+#    @retval @c 0 if true 
+#    @retval @c 0 if false
 # -------------------------------------------------------------------
 function is_substring() {
 
@@ -99,8 +99,8 @@ function is_substring() {
 #    string to be conjugated
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if a non-numerical @p value given
+#    @retval @c 0 on success 
+#    @retval @c 1 if a non-numerical @p value given
 # -------------------------------------------------------------------
 function inflect_numeral() {
 
@@ -148,8 +148,8 @@ function strlen() {
 #    string to be evaluated
 #
 # @returns 
-#    @c 0 if @p string is a valid identifier \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p string is a valid identifier 
+#    @retval @c 1 otherwise
 #
 # @options
 #
@@ -361,8 +361,8 @@ function represents_integer() {
 #    list of strings to be compared against
 #
 # @returns 
-#    @c 0 if @p string is equal to any of @p ...
-#    @c 1 otherwise
+#    @retval @c 0 if @p string is equal to any of @p ...
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_any_of() {
 

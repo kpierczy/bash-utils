@@ -3,7 +3,7 @@
 # @file     parseopts.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -277,8 +277,8 @@ function parseopts_s () {
 #    string to be inspected
 #
 # @returns 
-#    @c 0 if @p string is a short option \n
-#    @c 1 otheriwse
+#    @retval @c 0 if @p string is a short option 
+#    @retval @c 1 otheriwse
 # -------------------------------------------------------------------
 function is_short_option_s() {
 
@@ -306,8 +306,8 @@ function is_short_option_s() {
 #    string to be inspected
 #
 # @returns 
-#    @c 0 if @p string is a long option \n
-#    @c 1 otheriwse
+#    @retval @c 0 if @p string is a long option 
+#    @retval @c 1 otheriwse
 # -------------------------------------------------------------------
 function is_long_option_s() {
 
@@ -333,8 +333,8 @@ function is_long_option_s() {
 #    string to be inspected
 #
 # @returns 
-#    @c 0 if @p string is an option \n
-#    @c 1 otheriwse
+#    @retval @c 0 if @p string is an option 
+#    @retval @c 1 otheriwse
 #
 # @see is_short_option_s
 # @see is_long_option_s
@@ -363,8 +363,8 @@ function is_option_s() {
 #    name of the key to be matched
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 either if the option corresponding to the @p key
+#    @retval @c 0 on success 
+#    @retval @c 1 either if the option corresponding to the @p key
 #       was not declared in the @p defs list or it does not
 #       appear on the @p args list
 #

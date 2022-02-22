@@ -3,7 +3,7 @@
 # @file     net.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 9:59:21 pm
-# @modified Sunday, 21st November 2021 3:37:11 pm
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -22,9 +22,9 @@
 #    arguments to be passed to wget
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error \n
-#    @c 2 if file was already downloaded and was not downloaded 
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
+#    @retval @c 2 if file was already downloaded and was not downloaded 
 #         again (--no-clobber option was passed)
 # 
 # @note Output of the `wget` command is forced to be redirected

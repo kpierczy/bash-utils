@@ -3,7 +3,7 @@
 # @file     zip.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 11th November 2021 9:27:03 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -94,8 +94,8 @@ function need_zip_extract() {
 #    name of the archieve to be extracted
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error \n
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
 #
 # @options
 #

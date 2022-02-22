@@ -3,7 +3,7 @@
 # @file     ubad_list.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 14th February 2022 5:23:15 pm
-# @modified Friday, 18th February 2022 6:39:55 pm
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -24,9 +24,9 @@
 #    type of the arguments described by the inspected UBAD list (one of [pargs, opts,
 #    envs])
 # @returns 
-#    @c 0 if entity named @p entity is a valid UBAD list \n
-#    @c 1 otherwise
-#    @c 2 if invalid @p argtype is given
+#    @retval @c 0 if entity named @p entity is a valid UBAD list 
+#    @retval @c 1 otherwise
+#    @retval @c 2 if invalid @p argtype is given
 # ---------------------------------------------------------------------------------------
 function is_ubad_list() {
 
@@ -67,9 +67,9 @@ function is_ubad_list() {
 # @param name
 #    name to be found
 # @returns 
-#    @c 0 if requested table has been found
-#    @c 1 otherwise
-#    @c 2 if list is not an array
+#    @retval @c 0 if requested table has been found
+#    @retval @c 1 otherwise
+#    @retval @c 2 if list is not an array
 # ---------------------------------------------------------------------------------------
 function has_ubad_list_table_with_name() {
 

@@ -3,7 +3,7 @@
 # @file     variables.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 2:36:03 am
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -17,8 +17,8 @@
 #    name of the variable to be inspected
 #
 # @returns 
-#    @c 0 if @p var is defined in the calling context \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p var is defined in the calling context 
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_var_set() {
     local var=$1
@@ -31,8 +31,8 @@ function is_var_set() {
 #    name of the variable to be inspected
 #
 # @returns 
-#    @c 0 if @p var is defined to a non-zero string \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p var is defined to a non-zero string 
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_var_set_non_empty() {
     local var=$1

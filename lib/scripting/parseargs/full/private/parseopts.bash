@@ -3,7 +3,7 @@
 # @file     parseopts.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 12:49:58 pm
-# @modified Friday, 18th February 2022 8:04:34 pm
+# @modified Tuesday, 22nd February 2022 2:26:44 am
 # @project  bash-utils
 # @brief
 #    
@@ -26,8 +26,8 @@ declare -A __help_parseopts_opt_def_=( [format]="-h|--help" [name]="help" [type]
 #    string to be inspected
 #
 # @returns 
-#    @c 0 if @p string is a short option \n
-#    @c 1 otheriwse
+#    @retval @c 0 if @p string is a short option 
+#    @retval @c 1 otheriwse
 # -------------------------------------------------------------------
 function is_short_option() {
 
@@ -55,8 +55,8 @@ function is_short_option() {
 #    string to be inspected
 #
 # @returns 
-#    @c 0 if @p string is a long option \n
-#    @c 1 otheriwse
+#    @retval @c 0 if @p string is a long option 
+#    @retval @c 1 otheriwse
 # -------------------------------------------------------------------
 function is_long_option() {
 
@@ -81,8 +81,8 @@ function is_long_option() {
 #    string to be inspected
 #
 # @returns 
-#    @c 0 if @p string is an option \n
-#    @c 1 otheriwse
+#    @retval @c 0 if @p string is an option 
+#    @retval @c 1 otheriwse
 #
 # @see is_short_option
 # @see is_long_option
@@ -109,8 +109,8 @@ function is_option() {
 #    name of the option to be matched
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 either if the option corresponding to the @p key
+#    @retval @c 0 on success 
+#    @retval @c 1 either if the option corresponding to the @p key
 #       was not declared in the @p defs list or it does not
 #       appear on the @p args list
 #
@@ -225,9 +225,9 @@ function autogenerate_help_option() {
 #    output hash array asosiating option's format with it's type
 #
 # @returns
-#    @c 0 on success \n
-#    @c 1 if arguments of invalid type given \n
-#    @c 2 if @p opts_definitions is not a valid UBAD options' list
+#    @retval @c 0 on success 
+#    @retval @c 1 if arguments of invalid type given 
+#    @retval @c 2 if @p opts_definitions is not a valid UBAD options' list
 # ---------------------------------------------------------------------------------------
 function parse_ubad_options_list_core_info () {
 
@@ -268,7 +268,7 @@ function parse_ubad_options_list_core_info () {
 
         # Get reference to the UBAD table
         local -n __pode_opt_ubad_table_="$__pode_opt_def_"
-
+        
         # Iterate over all options definitions
         for __pode_opt_formats_ in "${__pode_opt_ubad_table_[format]}"; do
 
@@ -317,9 +317,9 @@ function parse_ubad_options_list_core_info () {
 #    written into
 #
 # @returns
-#    @c 0 on success \n
-#    @c 1 if arguments of invalid type given \n
-#    @c 2 if @p types hash array is of invalid format
+#    @retval @c 0 on success 
+#    @retval @c 1 if arguments of invalid type given 
+#    @retval @c 2 if @p types hash array is of invalid format
 # ---------------------------------------------------------------------------------------
 function compile_getopt_definitions() {
 
@@ -400,9 +400,9 @@ function compile_getopt_definitions() {
 #    name of the string representing comma-separated list of long options to be parsed
 #
 # @returns
-#    @c 0 on success \n
-#    @c 1 if invalid arguments were passed \n
-#    @c 2 on parsing error
+#    @retval @c 0 on success 
+#    @retval @c 1 if invalid arguments were passed 
+#    @retval @c 2 on parsing error
 # ---------------------------------------------------------------------------------------
 function wrap_getopt() {
 
@@ -458,10 +458,10 @@ function wrap_getopt() {
 #    name of the array holding values of actually parsed positional arguments
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if function sufferred from the bug \n
-#    @c 2 if invalid option has been passed \n
-#    @c 4 if invalid UBAD list has been given
+#    @retval @c 0 on success 
+#    @retval @c 1 if function sufferred from the bug 
+#    @retval @c 2 if invalid option has been passed 
+#    @retval @c 4 if invalid UBAD list has been given
 #
 # @note Types of arguments are not being checke dby the function. They are assumed
 #    to be checked by the calling function (i.e. `parseargs`)
@@ -644,9 +644,9 @@ function parseopts_parse_options() {
 #    be parsed into
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if function sufferred from the bug \n
-#    @c 2 if invalid option has been passed \n
+#    @retval @c 0 on success 
+#    @retval @c 1 if function sufferred from the bug 
+#    @retval @c 2 if invalid option has been passed 
 # ---------------------------------------------------------------------------------------
 function parseopts_parseopts() {
 
@@ -756,13 +756,16 @@ function parseopts_parseopts() {
     return 0
 }
 
-# ========================================================== Helpe printer ========================================================= #
+# ========================================================= Help formatter ========================================================= #
 
 # ---------------------------------------------------------------------------------------
 # @brief Automatically generates description of option arguments based on the UBAD list
 #
 # @param opt_defs
 #    name of the UBAD list containing option arguments' definitions
+# @param parse_mode ( optional, default: 'default' )
+#    parse mode (either 'default' - list element's will be trimmed - or 'raw' - list 
+#    element's will NOT be trimmed)
 # @param with_auto_help ( optional, default: '' )
 #    if given as 'with_auto_help', the automatically-generated [help] option will
 #    be added to definitions (is one is not already defined)
@@ -771,7 +774,8 @@ function generate_opts_description() {
 
     # Parse arguments
     local __generate_opts_description_opt_defs_="$1"
-    local __generate_opts_description_with_auto_help_="${2:-}"
+    local __generate_opts_description_parse_mode_="${2:-default}"
+    local __generate_opts_description_with_auto_help_="${3:-}"
 
     # Get reference to the UBAD list
     local -n __generate_opts_description_opt_defs_ref_="$__generate_opts_description_opt_defs_"
@@ -807,8 +811,9 @@ function generate_opts_description() {
     local opt_def=""
 
     # Parse formats and helps
-    parse_description_info \
-        "$__generate_opts_description_opt_defs_" \
+    parse_description_info                         \
+        "$__generate_opts_description_opt_defs_"   \
+        "$__generate_opts_description_parse_mode_" \
         formats helps types
 
     # Get reference to the UBAD list

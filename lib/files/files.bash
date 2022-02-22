@@ -3,7 +3,7 @@
 # @file     modifying.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:04:36 am
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -91,8 +91,8 @@ function print_lines() {
 # @param filename
 #    name of the file to be processed
 # @returns
-#    @c 0 on success \n
-#    @c 1 if @p filename without extension was given
+#    @retval @c 0 on success 
+#    @retval @c 1 if @p filename without extension was given
 # -------------------------------------------------------------------
 function get_file_extension() {
     
@@ -121,8 +121,8 @@ function get_file_extension() {
 #    name of the file to be processed
 #
 # @returns
-#    @c 0 on success \n
-#    @c 1 if @p filename without extension was given
+#    @retval @c 0 on success 
+#    @retval @c 1 if @p filename without extension was given
 #
 # @options
 #

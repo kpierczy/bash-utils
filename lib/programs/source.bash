@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -144,8 +144,8 @@ function is_directory_marked() {
 #    action to be inspected 
 #
 # @returns 
-#    @c 0 if action is one of [configure, build, install] \n
-#    @c 1 otherwise
+#    @retval @c 0 if action is one of [configure, build, install] 
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_build_action() {
 
@@ -168,9 +168,9 @@ function is_build_action() {
 #    action to be inspected (one of [configure, build, install])
 #
 # @returns 
-#    @c 0 if action can be performed on the target \n
-#    @c 1 if action cannot be performed on the target \n
-#    @c 2 if invalid action given
+#    @retval @c 0 if action can be performed on the target 
+#    @retval @c 1 if action cannot be performed on the target 
+#    @retval @c 2 if invalid action given
 #
 # -------------------------------------------------------------------
 function is_targeted_action() {
@@ -197,9 +197,9 @@ function is_targeted_action() {
 #    build action to be performed (one of [configure, build, install])
 # 
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error \n
-#    @c 2 if action was skipped
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
+#    @retval @c 2 if action was skipped
 #
 # @options
 #
@@ -438,9 +438,9 @@ function perform_build_action() {
 #    build directory
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error \n
-#    @c 2 if action was skipped
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
+#    @retval @c 2 if action was skipped
 #
 # @options
 #
@@ -554,9 +554,9 @@ function configure_source() {
 # @brief Builds source files configured in the build directory
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error \n
-#    @c 2 if action was skipped
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
+#    @retval @c 2 if action was skipped
 #
 # @options
 #
@@ -669,9 +669,9 @@ function build_source() {
 # @brief Installs targets built in the build directory
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error \n
-#    @c 2 if action was skipped
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
+#    @retval @c 2 if action was skipped
 #
 # @options
 #
@@ -787,9 +787,9 @@ function install_source() {
 #    @p build_dir directory
 # 
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error \n
-#    @c 2 if action was skipped
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
+#    @retval @c 2 if action was skipped
 #
 # @options
 #
@@ -983,9 +983,9 @@ function build_and_install() {
 #    URL to the  archieve to be downloaded
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if all steps were skipped \n
-#    @c 2 on error
+#    @retval @c 0 on success 
+#    @retval @c 1 if all steps were skipped 
+#    @retval @c 2 on error
 #
 # @options
 #     

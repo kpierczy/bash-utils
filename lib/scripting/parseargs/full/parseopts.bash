@@ -3,7 +3,7 @@
 # @file     parseopts.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 7:33:06 pm
-# @modified Friday, 18th February 2022 6:20:26 pm
+# @modified Tuesday, 22nd February 2022 2:06:32 am
 # @project  bash-utils
 # @brief
 #    
@@ -37,12 +37,12 @@ declare __parseopts_bug_msg_=$(echo \
 #    name of the array where the parsed positional arguments will be written into
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if function sufferred from the bug \n
-#    @c 2 if invalid option has been passed \n
-#    @c 3 if argument(s) of the wrong type has been given \n
-#    @c 4 if invalid UBAD list has been given
-#    @c 5 if '-h|--help' option has been parsed \n
+#    @retval @c 0 on success
+#    @retval @c 1 if function sufferred from the bug
+#    @retval @c 2 if invalid option has been passed
+#    @retval @c 3 if argument(s) of the wrong type has been given
+#    @retval @c 4 if invalid UBAD list has been given
+#    @retval @c 5 if '-h|--help' option has been parsed
 #
 # @options (script-oriented)
 # 
@@ -120,7 +120,7 @@ function parseopts() {
     {
         return $?
     }
-
+    
     # Get positional arguments
     local __parseopts_args_="${__parseopts_own_pargs_[0]:-}"
     local __parseopts_opts_definitions_="${__parseopts_own_pargs_[1]:-}"
@@ -148,10 +148,18 @@ function parseopts() {
     }
     
     # Check if arguments of a valid type has been given
-    is_array      "$__parseopts_args_"  &&
-    is_hash_array "$__parseopts_opts_"  &&
-    is_array      "$__parseopts_pargs_" || {
-        log_error "Argument of invalid type has been given"
+    is_array "$__parseopts_args_"  || {
+        log_error "Argument of 'parseopts' (args) has no a valid type (array)"
+        restore_log_config_from_default_stack
+        return 3
+    }
+    is_hash_array "$__parseopts_opts_"  || {
+        log_error "Argument of 'parseopts' (opts) has no a valid type (hash array)"
+        restore_log_config_from_default_stack
+        return 3
+    }
+    is_array "$__parseopts_pargs_" || {
+        log_error "Argument of 'parseopts' (pargs) has no a valid type (array)"
         restore_log_config_from_default_stack
         return 3
     }
@@ -177,7 +185,7 @@ function parseopts() {
     # ======================================================================= #
 
     # Make local copy of the UBAD list that may be modified in the body of the function
-    local -a __parseopts_opts_definitions_copy_=( "${__parseopts_opts_definitions_[@]}" )
+    local -a __parseopts_opts_definitions_copy_=( ${__parseopts_opts_definitions_[@]} )
 
     # ------------------------ Add 'help' UBAD table --------------------------
 
@@ -193,7 +201,7 @@ function parseopts() {
 
     # Hash array holding list of types corresponding to options' names
     local -A __parseopts_opts_types_
-
+    
     # Parse options of the caller
     parseopts_parse_options                \
         __parseopts_opts_definitions_copy_ \

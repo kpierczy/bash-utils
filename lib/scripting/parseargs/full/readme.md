@@ -108,15 +108,13 @@ categories:
     passed to the function/script as the third type of arguments. Be carefull though, 'environmental arguments' are NOT
     the same as the Linux environmental variables!
     
-@fun `parseopts` function uses three types of UBAD lists - 'args-definitions', 'opts-definitions' and 'envs-definitions' - to 
-acquire arguments' descriptions. Order of the UBAD tables in the 'args-definitions' list determines order of described 
+@fun `parseopts` function uses three types of UBAD lists - 'pargs-definitions', 'opts-definitions' and 'envs-definitions' - to 
+acquire arguments' descriptions. Order of the UBAD tables in the 'pargs-definitions' list determines order of described 
 positional arguments. Results of the parsing routine are written into three hash arrays and two array:
 
     1) pargs - array of all parsed positional arguments
-    2) nargs - hash array of parsed named positional arguments
-    2) uargs - array of parsed unnamed positional arguments
     2) opts  - hash array of parsed optional arguments
-    2) envs  - hash array of parsed environmental arguments
+    3) envs  - hash array of parsed environmental arguments
 
 ## UBAD Table
 
@@ -124,85 +122,91 @@ Having described types of argument distinguished by the module we can move to th
 table. Underlying section tends to describe subsequent fields in a way that is exhaustive for the topic and hopefully not for
 the user :)
 
-[format] (optional/required)
+    [format] (optional/required)
 
-    This field wears two hats. First of all, it describes WHAT should be parsed. Meaning of 'what should be parsed' differs
-    from argument's type to type and so are requirements for this format, hence their descriptions are divided into threee
-    categories.
+This field wears two hats. First of all, it describes WHAT should be parsed. Meaning of 'what should be parsed' differs
+from argument's type to type and so are requirements for this format, hence their descriptions are divided into threee
+categories.
 
-    --> Positional arguments (optional)
-            
-            For positional arguments this field - if given - takes one of three forms: 'NAME', 'NAME[n]' or 'NAME...',
-            where 'NAME' is any (preferably human-readable) string consisting of alphanumerical characters and unerscores
-            (may be an empty string). The first forms describes, that the UBAD table refers to a single positional argument. 
-            The second form describes n subsequent positional arguments. The last form refers to a variadic list of arguments
-            (note: UBAD table using 'NAME...' format - if used - should be the last element of the UBAD list descibing 
-            positional argument. Further entries will be ommitted by the `parseargs` function)
+* Positional arguments (optional): 
+    
+    For positional arguments this field - if given - takes one of three forms: 'NAME', 'NAME[n]' or 
+    'NAME...', where 'NAME' is any (preferably human-readable) string consisting of alphanumerical characters and unerscores
+    (may be an empty string). The first forms describes, that the UBAD table refers to a single positional argument. 
+    The second form describes n subsequent positional arguments. The last form refers to a variadic list of arguments
+    (note: UBAD table using 'NAME...' format - if used - should be the last element of the UBAD list descibing 
+    positional argument. Further entries will be ommitted by the `parseargs` function)
 
-            If this field is not given, a single positional argument is assumed.
+    If this field is not given, a single positional argument is assumed.
 
-    --> Optional arguments (required)
+* Optional arguments (required): 
 
-            For optional arguments this field holds a string representing a '|'-separated list of standard GNU options'
-            identifiers. For more informations refer to `getopt`
+    For optional arguments this field holds a string representing a '|'-separated list of standard GNU options'
+    identifiers. For more informations refer to `getopt`
 
-    --> Environmental arguments (required)
+* Environmental arguments (required): 
 
-            For environmental arguments this field contains a name of the variable to be parsed
+    For environmental arguments this field contains a name of the variable to be parsed
 
-    The secod function of the [format] field is to provide a human-readable name of the argument for auto-generated 'usage'
-    message. For positional arguments - for which this field is optional - if no field is given or when NAME is an empty
-    string the default name 'ARGx' is used, where 'x' is an index of the UBAD table in the UBAD list of positional argument
-    (indexed from 1)
+The secod function of the [format] field is to provide a human-readable name of the argument for auto-generated 'usage'
+message. For positional arguments - for which this field is optional - if no field is given or when NAME is an empty
+string the default name 'ARGx' is used, where 'x' is an index of the UBAD table in the UBAD list of positional argument
+(indexed from 1)
 
-[name] (optional/required)
+    [name] (required)
 
-    Name of the key under which the argument should be parsed into the destination hash array (nargs/opts/envs)
+Name of the key under which the argument should be parsed into the destination hash array (nargs/opts/envs). Should consist
+of letters and underscores
 
-        --> Positional arguments (optional)
+* Positional arguments
 
-            For positional arguments, if this field is not defined, the parsed argument will be written into
-            the 'uargs' array and not into the 'nargs' hash array. If defined, it will correspond to the key in the
-            'nargs' hash array which the parsed option will be stored under.
+    For positional arguments this field defines a name under which the parsed argument(s) will be written into
+    the 'pargs' array. If the [format] field describes multiple arguments ('NAME[n]' or 'NAME...' format) names
+    of keys in the 'nargs' hash array will be produces by appending index of the argument (inside the group)
+    to the value of the [name] field
 
-            If [name] field is given, and the [format] field describes multiple arguments ('NAME[n]' or 'NAME...' format)
-            names of keys in the 'nargs' hash array will be produces by appending index of the argument (inside the group)
-            to the value of the [name] field
+* Optional arguments & Environmental arguments
 
-        --> Optional arguments & Environmental arguments (required)
+    For optionals and environmental arguments this field is required and defines name of the key in the 
+    'opts' and 'envs' hash tables respectively that the parsed argument will be stored into.
 
-            For optionals and environmental arguments this field is required and defines name of the key in the 
-            'opts' and 'envs' hash tables respectively that the parsed argument will be stored into.
+    [type] (optional)
 
-[type] (optional)
+Type of the argument. This may be one of:
 
-    Type of the argument. This may be one of:
+* s|string) argument holding a string
+* i|integer) argument holding an integer
+* p|path) argument holding a path
+* f|flag) argument holding a flag (not applicable for positional arguments)
 
-        s|string) argument holding a string
-        i|integer) argument holding an integer
-        p|path) argument holding a path
-        f|flag) argument holding a flag (not applicable for positional arguments)
+The default type is 'string'. Type of the argument may be used for automatic verification (only for integers and paths).
+Note that the flag to be considered 'True' by the parser must be either given at all (for optional arguments) or set to 
+**1** (for positional and environmental arguments). Every other values will be considered as non-parsed flag. However, 
+such a flags will be represented in parsed hash arrays (nargs, opts, envs) with value **0** that is considered to be *True* 
+in bash. *False* flags will have their fields either undefined (by default) or set to **1** (if requested; bash considers 
+**1** as *False*). Although **flag** type makes not much sens for positional arguments, if defined as so, they will be parsed
+due to described rules.
 
-    The default type is 'string'. Type of the argument may be used for automatic verification (only for integers and paths).
+    [defaut] (optional, meaningless for flag arguments when it comes to optional and environmental arguments)
 
-[defaut] (optional, meaningless for flag arguments)
+The default value of the argument if it is not parsed. Note: if variadic positional arguments defining a default value are not
+parsed, the default is written into `pargs[name]` when `name` is name given in the UBAD table. If at least one variadic argument
+is parsed, the values are written in `pargs[name#idx]` where `#idx` is index of the variadic arg
 
-    The default value of the argument if it is not parsed. 
+    [variants] (optional, meaningless for flag arguments)
 
-[variants] (optional, meaningless for flag arguments)
+'|'-separated list of valid values that the argument may take. By default every element of the list if trimmed (edge 
+whitespace characters are removed) to enable user declare variants like this - 'var1 | var2 | var3' - instead of like this
+'var1|var2|var3'. This behaviour may be changed by setting corresponding switch of the `parseargs` function
 
-    '|'-separated list of valid values that the argument may take. By default every element of the list if trimmed (edge 
-    whitespace characters are removed) to enable user declare variants like this - 'var1 | var2 | var3' - instead of like this
-    'var1|var2|var3'. This behaviour may be changed by setting corresponding switch of the `parseargs` function
+Variants may contain regex expressions (supported by the =~ operator) taken into '[...]'. '[]' characters can be escaped 
+with a leading backslash (note: this functionality is a goal, but it is not implemented yet)
 
-    Variants may contain regex expressions (supported by the =~ operator) taken into '[...]'. '[]' characters can be escaped 
-    with a leading backslash (note: this functionality is a goal, but it is not implemented yet)
+    [range] (optional, meaningless for flag arguments)
 
-[range] (optional, meaningless for flag arguments)
+Colon-separated pair of values defining 'MIN:MAX' range for the argument. For string-typed and path-typed arguments the
+lexicalographical comparison is used. This field is overwritten by the [variants] field, if given
 
-    Colon-separated pair of values defining 'MIN:MAX' range for the argument. For string-typed and path-typed arguments the
-    lexicalographical comparison is used. This field is overwritten by the [variants] field, if given
+    [help] (optional)
 
-[help] (optional)
-
-    Human-readable description of the argument used for automatic generation of the 'usage' message
+Human-readable description of the argument used for automatic generation of the 'usage' message

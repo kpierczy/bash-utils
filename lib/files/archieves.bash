@@ -3,7 +3,7 @@
 # @file     archieves.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 7:11:57 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -38,8 +38,8 @@ declare -a BASH_UTILS_SUPPORTED_ARCHIEVES=(
 #    archieve format to be verified
 #
 # @returns 
-#    @c 0 if @p format is a supported archieve format \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p format is a supported archieve format 
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_compatibile_archieve_format() {
 
@@ -58,8 +58,8 @@ function is_compatibile_archieve_format() {
 #    path to the archieve
 #
 # @returns
-#    @c 0 on succes \n
-#    @c 1 if @p filename is not a path to a archieve file of the
+#    @retval @c 0 on succes 
+#    @retval @c 1 if @p filename is not a path to a archieve file of the
 #       known file
 #
 # @note List of supported archieves formats is hold in 
@@ -116,8 +116,8 @@ function get_archieve_format() {
 #    files to be added to the archieve
 #
 # @returns
-#    @c 0 on success \n
-#    @c 1 on error or if the unsupported archieve format was given
+#    @retval @c 0 on success 
+#    @retval @c 1 on error or if the unsupported archieve format was given
 #
 # @options
 #
@@ -271,9 +271,9 @@ function need_extract() {
 #    name of the archieve to be extracted
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error \n
-#    @c 2 if archieve was already extracted
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
+#    @retval @c 2 if archieve was already extracted
 #
 # @options
 #
@@ -354,9 +354,9 @@ function extract_archieve() {
 #    URL to be downloaded
 #
 # @returns
-#    @c 0 on success \n
-#    @c 1 on error \n
-#    @c 2 if both download and extraction steps were skipped
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
+#    @retval @c 2 if both download and extraction steps were skipped
 #
 # @options
 #

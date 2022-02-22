@@ -3,7 +3,7 @@
 # @file     hash_arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Thursday, 17th February 2022 5:08:16 pm
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -65,9 +65,9 @@ function print_hash_array() {
 #    field of the @p harray to be checked
 #
 # @returns
-#    @c 0 if @p harray has a field names @p field
-#    @c 1 otherwise
-#    @c 2 if @p harray is not a hash array
+#    @retval @c 0 if @p harray has a field names @p field
+#    @retval @c 1 otherwise
+#    @retval @c 2 if @p harray is not a hash array
 # -------------------------------------------------------------------
 function has_hash_array_field() {
 
@@ -96,8 +96,8 @@ function has_hash_array_field() {
 #    name of the destination hash array
 #
 # @returns
-#    @c 0 on success
-#    @c 1 if @p src or @dst is not a hash array
+#    @retval @c 0 on success
+#    @retval @c 1 if @p src or @dst is not a hash array
 # -------------------------------------------------------------------
 function copy_hash_array() {
 

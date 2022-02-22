@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Thursday, 17th February 2022 1:46:21 pm
+# @modified Monday, 21st February 2022 10:16:44 pm
 # @project  bash-utils
 # @brief
 #    

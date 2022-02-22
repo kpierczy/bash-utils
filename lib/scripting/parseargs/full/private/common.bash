@@ -3,7 +3,7 @@
 # @file     common.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 12:49:58 pm
-# @modified Friday, 18th February 2022 8:28:36 pm
+# @modified Tuesday, 22nd February 2022 2:58:05 am
 # @project  bash-utils
 # @brief
 #    
@@ -13,9 +13,8 @@
 # ====================================================================================================================================
 
 # A string reporting a library bug
-declare __parsargs_bug_msg_=$(echo \
-        "A @fun parseargs failed to parse it's own options. This is a library bug. Please" \
-        "report it to the librarie's author."
+declare __lib_bug_msg_=$(echo \
+    "An internal error occurred in the \`parseargs\` library Please report it to the librarie's author."
 )
 
 # Interdation argument's description
@@ -30,6 +29,9 @@ declare ARGUMENTS_DESCRIPTION_LENGTH_MAX="${ARGUMENTS_DESCRIPTION_LENGTH_MAX:-85
 # 
 # @param defs
 #   name of the UBAD list describing arguments
+# @param parse_mode ( optional, default: 'default' )
+#    parse mode (either 'default' - list element's will be trimmed - or 'raw' - list 
+#    element's will NOT be trimmed)
 # @param formats [out]
 #   name of the hash array that the [format] fields will be parsed into
 # @param helps [out]
@@ -41,9 +43,10 @@ function parse_description_info() {
 
     # Parse arguments
     local __parse_description_info_defs_="$1"
-    local __parse_description_info_formats_="$2"
-    local __parse_description_info_helps_="$3"
-    local __parse_description_info_types_="$4"
+    local __parse_description_info_parse_mode_="${2:-default}"
+    local __parse_description_info_formats_="$3"
+    local __parse_description_info_helps_="$4"
+    local __parse_description_info_types_="$5"
 
     # Parse formats
     parse_ubad_tables_field               \
@@ -66,6 +69,7 @@ function parse_description_info() {
     # Get reference to both harrays
     local -n __parse_description_info_formats_ref_="$__parse_description_info_formats_"
     local -n __parse_description_info_helps_ref_="$__parse_description_info_helps_"
+    local -n __parse_description_info_types_ref_="$__parse_description_info_types_"
 
     local name
     
@@ -81,6 +85,87 @@ function parse_description_info() {
         # If [type] was not given, add an default one
         is_var_set __parse_description_info_types_ref_["$name"] || \
             __parse_description_info_types_ref_["$name"]="string"
+            
+    done
+
+    # Get reference to the definitions
+    local -n __parse_description_info_defs_ref_="$__parse_description_info_defs_"
+
+    local descriptor
+
+    # Iterate over arguments' definitions and append information about default values and valid ranges/variants
+    for descriptor in "${__parse_description_info_defs_ref_[@]}"; do
+
+        # Get reference to the given argument's descriptor
+        local -n descriptor_ref="$descriptor"
+        # Get option's name
+        local name="${descriptor_ref[name]}"
+
+        # Check if there is additional information to be included into the help string
+        if is_var_set descriptor_ref[default] || is_var_set descriptor_ref[variants] || is_var_set descriptor_ref[range]; then
+
+            # Open parenthesis for additional info
+            __parse_description_info_helps_ref_["$name"]+=" ("
+
+            # If there is a default value of the argument
+            if is_var_set descriptor_ref[default]; then
+
+                # Append this value
+                __parse_description_info_helps_ref_["$name"]+="default: ${descriptor_ref[default]}"
+                # Put a trailing comma, if valid range/variants are defined
+                if is_var_set descriptor_ref[variants] || is_var_set descriptor_ref[range]; then
+                    __parse_description_info_helps_ref_["$name"]+=", "
+                fi
+
+            fi
+
+            # If there is a variants value of the argument, append them into help
+            if is_var_set descriptor_ref[variants]; then
+
+                local -a variants
+
+                # Parse list of variants
+                parse_vatiants                              \
+                    "${descriptor_ref[variants]}"           \
+                    "$__parse_description_info_parse_mode_" \
+                    variants
+            
+                local var
+
+                # Start variants' listing
+                __parse_description_info_helps_ref_["$name"]+="valid values: {"
+                # Print variants
+                for var in "${variants[@]}"; do
+                    __parse_description_info_helps_ref_["$name"]+="$var, "
+                done
+                # Get help string
+                local help="${__parse_description_info_helps_ref_[$name]}"
+                # Remove trailing comma
+                __parse_description_info_helps_ref_["$name"]="${help::-2}"
+                # End variants' listing
+                __parse_description_info_helps_ref_["$name"]+="}"
+
+            # Else, if there is a valid range of the argument, append it into help
+            elif is_var_set descriptor_ref[range]; then            
+
+                local min
+                local max
+
+                # Parse the range
+                parse_range                                 \
+                    "${descriptor_ref[range]}"              \
+                    "$__parse_description_info_parse_mode_" \
+                    min max
+
+                # Append the range to the help string
+                __parse_description_info_helps_ref_["$name"]+="valid range: [$min:$max]"
+
+            fi
+
+            # Close parenthesis for additional info
+            __parse_description_info_helps_ref_["$name"]+=")"
+
+        fi
 
     done
 
@@ -107,6 +192,20 @@ function compile_description_info() {
 
     local name=""
     
+    # -------------------------------------------------------
+    # @brief Prepare output array. Unfortunatelly, when the
+    #    @p formats array is is iterated, it's keys are
+    #    processed in the reversed order comparing to the
+    #    order of their adding. It results in arguments'
+    #    descriptions being printed in the reverse order
+    #  
+    #    To fix that, the temporary array is created to hold
+    #    description strings of subsequent arguments
+    #    At the end of the function content of this array
+    #    is printed out in the reverse order 
+    # -------------------------------------------------------
+    local -a __compile_description_info_result_=()
+
     # Prepare maximum length of the format string
     local -i max_format_length=$(max_len __compile_description_info_formats_)
     # Print full descriptions
@@ -151,8 +250,13 @@ function compile_description_info() {
         disable_word_splitting
 
         # Print description of the option
-        echo "${description}"
+        __compile_description_info_result_+=( "${description}" )
 
+    done
+
+    # Print result in the reverse order
+    for ((i = ${#__compile_description_info_result_[@]} - 1; i >= 0 ; i--)); do
+        echo "${__compile_description_info_result_[$i]}"
     done
 
 }
@@ -218,12 +322,12 @@ function verify_parsed_integers() {
     local -n __verify_parsed_integers_types_="$2"
 
     local name
-
+    
     # Iterate through parsed options
     for name in "${!__verify_parsed_integers_parsed_[@]}"; do
 
         is_var_set __verify_parsed_integers_types_[$name] || {
-            log_error "$__parseargs_bug_msg_"
+            log_error "$__lib_bug_msg_"
             return 1
         }
 
@@ -308,18 +412,52 @@ function verify_variants_and_ranges() {
     
     # Iterate through parsed arguments
     for name in "${!__verify_variants_and_ranges_parsed_[@]}"; do
+
+        # Get type string for the argument
+        local type_str=""
+        # Check just te name of the argument
+        if is_var_set __verify_variants_and_ranges_types_["$name"]; then
+            type_str="${__verify_variants_and_ranges_types_[$name]}"
+        # Check also name with trailing digits removed for case of multipack/variaidic arguments
+        elif is_var_set __verify_variants_and_ranges_types_["${name%*([[:digit:]])}"]; then
+            local trailed_name="${name%*([[:digit:]])}"
+            type_str="${__verify_variants_and_ranges_types_[$trailed_name]}"
+        fi
+        
         # Skip flag arguments
-        if ! is_ubad_arg_flag "${__verify_variants_and_ranges_types_[$name]}"; then
+        if ! is_ubad_arg_flag "$type_str"; then
+
+            # Get variants string for the argument
+            local variants_str=""
+            # Check just te name of the argument
+            if is_var_set __verify_variants_and_ranges_variants_["$name"]; then
+                variants_str="${__verify_variants_and_ranges_variants_[$name]}"
+            # Check also name with trailing digits removed for case of multipack/variaidic arguments
+            elif is_var_set __verify_variants_and_ranges_variants_["${name%*([[:digit:]])}"]; then
+                local trailed_name="${name%*([[:digit:]])}"
+                variants_str="${__verify_variants_and_ranges_variants_[$trailed_name]}"
+            fi
+
+            # Get ranges string for the argument
+            local range_str=""
+            # Check just te name of the argument
+            if is_var_set __verify_variants_and_ranges_ranges_["$name"]; then
+                range_str="${__verify_variants_and_ranges_ranges_[$name]}"
+            # Check also name with trailing digits removed for case of multipack/variaidic arguments
+            elif is_var_set __verify_variants_and_ranges_ranges_["${name%*([[:digit:]])}"]; then
+                local trailed_name="${name%*([[:digit:]])}"
+                range_str="${__verify_variants_and_ranges_ranges_[$trailed_name]}"
+            fi
 
             # If variants are defined for the option
-            if is_var_set __verify_variants_and_ranges_variants_["$name"]; then
+            if is_var_set_non_empty variants_str; then
                 
                 # Array holding valid variants of the option
                 local -a variants=()
                 # Parse variants
-                parse_vatiants                                         \
-                    "${__verify_variants_and_ranges_variants_[$name]}" \
-                    "${__verify_variants_and_ranges_raw_}"             \
+                parse_vatiants                             \
+                    "$variants_str"                        \
+                    "${__verify_variants_and_ranges_raw_}" \
                     variants
                 
                 # Check whether option's value meet valid variants
@@ -333,15 +471,15 @@ function verify_variants_and_ranges() {
                 }
 
             # Else, if range is defined for the option
-            elif is_var_set __verify_variants_and_ranges_ranges_["$name"]; then
+            elif is_var_set_non_empty range_str; then
 
                 # Limits of the valid range
                 local min
                 local max
                 # Parse variants
-                parse_range                                          \
-                    "${__verify_variants_and_ranges_ranges_[$name]}" \
-                    "${__verify_variants_and_ranges_raw_}"           \
+                parse_range                                \
+                    "$range_str"                           \
+                    "${__verify_variants_and_ranges_raw_}" \
                     min max
 
                 local min_valid

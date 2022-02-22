@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -19,8 +19,8 @@
 #    name of the package to be exmained
 # 
 # @returns
-#    @c 0 if @p package is installed \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p package is installed 
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_pip_package_installed() {
     
@@ -38,8 +38,8 @@ function is_pip_package_installed() {
 #    name of the package to be exmained
 # 
 # @returns
-#    @c 0 if @p package is installed and version was printed \n
-#    @c 1 if @p package is not installed
+#    @retval @c 0 if @p package is installed and version was printed 
+#    @retval @c 1 if @p package is not installed
 # -------------------------------------------------------------------
 function get_pip_package_version() {
     
@@ -61,8 +61,8 @@ function get_pip_package_version() {
 #    name of list holding names of packages to be installed
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error 
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
 #
 # @options
 #    
@@ -171,8 +171,8 @@ function pip_install_list() {
 #    names of packages to be installed
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 on error 
+#    @retval @c 0 on success 
+#    @retval @c 1 on error 
 #
 # @options
 #    

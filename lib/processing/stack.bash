@@ -3,7 +3,7 @@
 # @file     stack.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 8th November 2021 9:00:58 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -58,8 +58,8 @@ stack_name_="${STACK_PREFIX}${stack_name_}${STACK_SUFFIXFIX}"
 #    element to be pushed to the stack
 #
 # @returns
-#    @c 0 on success \n
-#    @c 1 if no argument was given or on error
+#    @retval @c 0 on success 
+#    @retval @c 1 if no argument was given or on error
 #
 # @options
 #
@@ -122,9 +122,9 @@ function push_stack() {
 #    return status is not @c 0, @p result variable is not modified
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if string stack doesn't exist \n
-#    @c 2 if string stack is empty
+#    @retval @c 0 on success 
+#    @retval @c 1 if string stack doesn't exist 
+#    @retval @c 2 if string stack is empty
 #
 # @options
 #
@@ -186,8 +186,8 @@ function pop_stack() {
 # @brief Resets a stack removing it's all elements
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if stack does not exist
+#    @retval @c 0 on success 
+#    @retval @c 1 if stack does not exist
 #
 # @options
 #
@@ -235,8 +235,8 @@ function reset_stack() {
 # @brief Removes stack
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if the stack doesn't exists
+#    @retval @c 0 on success 
+#    @retval @c 1 if the stack doesn't exists
 #
 # @options
 #
@@ -280,8 +280,8 @@ function destroy_stack() {
 # @brief Prints content of the stack
 #
 # @returns 
-#    @c 0 on success \n
-#    @c 1 if the stack doesn't exists
+#    @retval @c 0 on success 
+#    @retval @c 1 if the stack doesn't exists
 #
 # @options
 #
@@ -325,8 +325,8 @@ function print_stack() {
 # @brief Checks if the stack exists
 #
 # @returns 
-#    @c 0 if stack named @p stack_name exists \n
-#    @c 1 if no stack named @p stack_name exists
+#    @retval @c 0 if stack named @p stack_name exists 
+#    @retval @c 1 if no stack named @p stack_name exists
 #
 # @options
 #
@@ -367,8 +367,8 @@ function is_stack() {
 # @brief Writes current size of the stack to the stdout if it exists
 #
 # @returns 
-#    @c 0 if stack exists \n
-#    @c 1 if stack doesn't exist
+#    @retval @c 0 if stack exists 
+#    @retval @c 1 if stack doesn't exist
 #
 # @options
 #

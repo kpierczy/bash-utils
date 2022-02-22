@@ -3,7 +3,7 @@
 # @file     ubad_format.sh
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 2:24:35 pm
-# @modified Friday, 18th February 2022 7:40:21 pm
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -20,8 +20,8 @@
 # @param string
 #    string to be inspected
 # @returns 
-#    @c 0 if @p string is a valid argument's format
-#    @c 1 otherwise
+#    @retval @c 0 if @p string is a valid argument's format
+#    @retval @c 1 otherwise
 # ---------------------------------------------------------------------------------------
 function is_ubad_positional_arg_format() {
 
@@ -44,8 +44,8 @@ function is_ubad_positional_arg_format() {
 # @param string
 #    string to be inspected
 # @returns 
-#    @c 0 if @p string is a valid argument's format
-#    @c 1 otherwise
+#    @retval @c 0 if @p string is a valid argument's format
+#    @retval @c 1 otherwise
 # ---------------------------------------------------------------------------------------
 function is_ubad_optional_arg_format() {
 
@@ -77,8 +77,8 @@ function is_ubad_optional_arg_format() {
 # @param string
 #    string to be inspected
 # @returns 
-#    @c 0 if @p string is a valid argument's type \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p string is a valid argument's type 
+#    @retval @c 1 otherwise
 # ---------------------------------------------------------------------------------------
 function is_ubad_arg_type() {
 
@@ -163,8 +163,8 @@ function is_ubad_arg_path() {
 # @param string
 #    string to be inspected
 # @returns 
-#    @c 0 if @p string is a valid integer \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p string is a valid integer 
+#    @retval @c 1 otherwise
 # ---------------------------------------------------------------------------------------
 function is_ubad_integer() {
 
@@ -188,8 +188,8 @@ function is_ubad_integer() {
 #    string to be evaluated
 #
 # @returns 
-#    @c 0 if @p string is a valid identifier \n
-#    @c 1 otherwise
+#    @retval @c 0 if @p string is a valid identifier 
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_ubad_identifier() {
 

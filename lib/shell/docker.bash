@@ -2,7 +2,7 @@
 # @file     docker.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:31:34 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 21st February 2022 6:58:11 pm
 # @project  bash-utils
 # @brief
 #    
@@ -27,8 +27,8 @@ DOCKER_STD_ARGS=(
 # @brief Runs the docker container with standard arguments
 #
 # @returns 
-#    @c 0 if container was run succesfully \n
-#    @c 1 if either no argument was given and @var DEFULT_DOCKER_IMG
+#    @retval @c 0 if container was run succesfully 
+#    @retval @c 1 if either no argument was given and @var DEFULT_DOCKER_IMG
 #       is not set, or container failed to run
 #
 # @options
@@ -74,8 +74,8 @@ function drun() {
 #    additional volume mounted
 #
 # @returns 
-#    @c 0 if container was run succesfully \n
-#    @c 1 if either no argument was given and @var DEFULT_DOCKER_IMG
+#    @retval @c 0 if container was run succesfully 
+#    @retval @c 1 if either no argument was given and @var DEFULT_DOCKER_IMG
 #       is not set, or container failed to run
 #
 # @options
