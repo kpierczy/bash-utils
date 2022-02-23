@@ -3,7 +3,7 @@
 # @file     cli_v2.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 8:34:01 pm
-# @modified Wednesday, 23rd February 2022 12:10:04 am
+# @modified Wednesday, 23rd February 2022 1:32:41 am
 # @project  bash-utils
 # @brief
 #    
@@ -12,7 +12,7 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Source BashUitils library
+# Source bash-utils library
 source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #

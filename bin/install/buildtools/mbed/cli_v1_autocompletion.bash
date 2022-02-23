@@ -3,7 +3,7 @@
 # @file     cli_v1_autocompletion.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 5:01:29 pm
-# @modified Wednesday, 23rd February 2022 12:15:37 am
+# @modified Wednesday, 23rd February 2022 1:32:41 am
 # @project  bash-utils
 # @brief
 #    
@@ -13,7 +13,7 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Source BashUitils library
+# Source bash-utils library
 source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #

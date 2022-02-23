@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Wednesday, 23rd February 2022 12:06:24 am
+# @modified Wednesday, 23rd February 2022 1:32:41 am
 # @project  bash-utils
 # @source   https://docs.ros.org/en/$distro/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$distro/Installation/Ubuntu-Install-Debians.html
@@ -16,7 +16,7 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Source BashUitils library
+# Source bash-utils library
 source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     arm-embedded.bash
+# @file     arm-embedded-gcc.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 1:51:48 pm
-# @modified Wednesday, 23rd February 2022 12:32:36 am
+# @modified Wednesday, 23rd February 2022 1:32:41 am
 # @project  bash-utils
 # @brief
 #    
@@ -12,7 +12,7 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Source BashUitils library
+# Source bash-utils library
 source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #

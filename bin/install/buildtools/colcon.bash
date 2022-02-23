@@ -3,7 +3,7 @@
 # @file     colcon.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 14th February 2022 3:08:56 pm
-# @modified Wednesday, 23rd February 2022 12:06:12 am
+# @modified Wednesday, 23rd February 2022 1:32:41 am
 # @project  bash-utils
 # @brief
 #    
@@ -13,7 +13,7 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# Source BashUitils library
+# Source bash-utils library
 source $BASH_UTILS_HOME/source_me.bash
 
 # ============================================================== Usage ============================================================= #
