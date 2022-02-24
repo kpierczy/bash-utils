@@ -3,7 +3,7 @@
 # @file     parseargs.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 2:37:47 pm
-# @modified Tuesday, 22nd February 2022 11:08:48 pm
+# @modified Thursday, 24th February 2022 2:43:11 am
 # @project  bash-utils
 # @brief
 #    
@@ -366,7 +366,7 @@ function parseargs() {
                     
                     # Output the string
                     echo 
-                    echo "$prepend_description"
+                    echo -e "$prepend_description"
 
                 }
 
@@ -391,7 +391,7 @@ function parseargs() {
                     
                     # Output the string
                     echo 
-                    echo "$pargs_append_description"
+                    echo -e "$pargs_append_description"
 
                 }
 
@@ -435,7 +435,7 @@ function parseargs() {
                     
                     # Output the string
                     echo 
-                    echo "$opts_append_description"
+                    echo -e "$opts_append_description"
 
                 }
 
@@ -459,7 +459,7 @@ function parseargs() {
                     
                     # Output the string
                     echo 
-                    echo "$envs_append_description"
+                    echo -e "$envs_append_description"
 
                 }
 
@@ -471,7 +471,7 @@ function parseargs() {
                     
                     # Output the string
                     echo 
-                    echo "$appended_description"
+                    echo -e "$appended_description"
 
                 }
 

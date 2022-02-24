@@ -3,7 +3,7 @@
 # @file     settings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
-# @modified Monday, 14th February 2022 8:15:00 pm
+# @modified Wednesday, 23rd February 2022 8:20:13 pm
 # @project  bash-utils
 # @brief
 #    
@@ -13,6 +13,80 @@
 # ====================================================================================================================================
 
 # ============================================================ Functions =========================================================== #
+
+# -------------------------------------------------------------------
+# @outputs shell options
+# -------------------------------------------------------------------
+function get_shell_options() {
+    echo $-
+}
+
+# -------------------------------------------------------------------
+# @brief Converts shell option to the short one
+#
+# @param option
+#    option string to be converted
+# @returns
+#   @retval @c 0 on success
+#   @retval @c 1 on failure
+# -------------------------------------------------------------------
+function shell_options_to_short() {
+
+    # Arguments
+    local option="$1"
+
+    # If long option given, associate it with a letter
+    if [[ "${#option}" != "1" ]]; then
+        case "$option" in
+            'allexport'   | 'a' ) echo 'a' ;;
+            'braceexpand' | 'B' ) echo 'B' ;;
+            'errexit'     | 'e' ) echo 'e' ;;
+            'errtrace'    | 'E' ) echo 'E' ;;
+            'functrace'   | 'T' ) echo 'T' ;;
+            'hashall'     | 'h' ) echo 'h' ;;
+            'histexpand'  | 'H' ) echo 'H' ;;
+            'keyword'     | 'k' ) echo 'k' ;;
+            'monitor'     | 'm' ) echo 'm' ;;
+            'noclobber'   | 'C' ) echo 'C' ;;
+            'noexec'      | 'n' ) echo 'n' ;;
+            'noglob'      | 'f' ) echo 'f' ;;
+            'notify'      | 'b' ) echo 'b' ;;
+            'nounset'     | 'u' ) echo 'u' ;;
+            'onecmd'      | 't' ) echo 't' ;;
+            'physical'    | 'P' ) echo 'P' ;;
+            'privileged'  | 'p' ) echo 'p' ;;
+            'verbose'     | 'v' ) echo 'v' ;;
+            'xtrace'      | 'x' ) echo 'x' ;;
+            * )
+                return 1
+        esac
+    fi
+
+    return 0
+}
+
+
+
+# -------------------------------------------------------------------
+# @brief Check whether shell option is set
+#
+# @param option
+#    letter associated with the option
+# @returns
+#   @retval @c 0 if @p option is set
+#   @retval @c 1 otherwise
+# -------------------------------------------------------------------
+function is_shell_option_set() {
+
+    # Arguments
+    local option="$1"
+
+    # If long option given, associate it with a letter
+    option=$(shell_options_to_short "$option") || return 1
+
+    # Check if option set
+    [[ "$-" == *$option* ]]
+}
 
 # -------------------------------------------------------------------
 # @brief Enables/disables macros' expansion

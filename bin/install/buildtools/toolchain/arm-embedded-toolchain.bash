@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     arm-embedded-gcc.bash
+# @file     arm-embedded-toolchain.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 1:51:48 pm
-# @modified Wednesday, 23rd February 2022 1:32:41 am
+# @modified Thursday, 24th February 2022 5:18:40 am
 # @project  bash-utils
 # @brief
 #    
