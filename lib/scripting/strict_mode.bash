@@ -3,7 +3,7 @@
 # @file     strict_mode.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 1:51:42 am
-# @modified Wednesday, 10th November 2021 7:10:26 pm
+# @modified Thursday, 24th February 2022 6:39:14 pm
 # @project  bash-utils
 # @brief
 #    
@@ -26,9 +26,9 @@ function strict_mode() {
     # Enable/disable strict-mode depending on the query
     case "$query" in
         on )
-            set -o errexit
-            set -o nounset
-            set -o pipefail
+            set -o errexit;
+            set -o nounset;
+            set -o pipefail;
             ;;
         off )
             set +o errexit

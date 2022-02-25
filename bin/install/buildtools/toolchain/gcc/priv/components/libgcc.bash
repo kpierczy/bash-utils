@@ -1,23 +1,29 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     gcc.bash
+# @file     libgcc.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Thursday, 24th February 2022 3:18:21 am
+# @modified Friday, 25th February 2022 9:52:46 am
 # @project  bash-utils
 # @brief
 #    
-#    Installation routines for gcc tool
+#    Installation routines for libgcc tool
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-function build_gcc() {
+function build_libgcc() {
+
+    # ------------------------------- Prepare environment -------------------------------
+
+    # Replace <prefix>/<toolchain-id>/usr with symbolic link to <basedir>/src [?]
+    rm -f "${dirs[prefix]}/${names[toolchain_id]}/usr"
+    ln -s "${dirs[src]}" "${dirs[prefix]}/${names[toolchain_id]}/usr"
 
     # ---------------------------- Prepare predefined flags -----------------------------
 
     local -a CONFIG_FLAGS=()
-    local -a COMPILE_FLAGS=()
+    local -a BUILD_FLAGS=()
 
     # Prepare config flags
     CONFIG_FLAGS+=( "--build=${opts[build]}"                                                  )
@@ -40,21 +46,55 @@ function build_gcc() {
         CONFIG_FLAGS+=( "--pdfdir=${dirs[prefix_doc]}/pdf"   )
     }
 
-    # Change build target
-    local BUILD_TOOL="make all-gcc"
-    # Change install target
-    local INSTALL_TOOL="make install-gcc"
-
     # -------------------------------------- Build --------------------------------------
 
     # Build the library
-    build_component 'gcc'
+    build_component 'gcc' 'gcc-lib' || return 1
+
+    # ------------------------------- Build documentation -------------------------------
+
+    local build_dir="${dirs[build]}/gcc-lib-${versions[gcc]}"
+
+    # If documentation is requrested
+    if is_var_set opts[with_doc]; then
+        # If documentation has not been already built (or if rebuilding is forced)
+        if ! is_directory_marked $build_dir 'install' 'libgcc-doc' || is_var_set opts[force]; then
+        
+            log_info "Installing libgcc documentation..."
+
+            # Enter build directory
+            pushd $build_dir > /dev/null
+
+            # Remove target marker
+            remove_directory_marker $build_dir 'install' 'libgcc-doc'
+            # Build documentation
+            make install-html install-pdf
+            # Mark build directory with the coresponding marker
+            mark_directory $build_dir 'install' 'libgcc-doc'
+            
+            # Back to the previous location
+            popd > /dev/null
+
+            log_info "Libgcc documentation installed"
+
+        # Otherwise, skip building
+        else
+            log_info "Skipping ${names[gcc]} libgcc documentation installation"
+        fi
+    fi
 
     # ------------------------------------- Cleanup -------------------------------------
     
-    # Remove useless parts of the compilation result
-    rm -rf ${dirs[prefix]}/bin/${names[toolchain_id]}-gccbug
+    # Remove unused binaries
+    rm -rf ${dirs[prefix]}/bin/arm-none-eabi-gccbug
+    # Remove unused libiberty binaries
     rm -rf ${dirs[prefix]}/lib/libiberty.a
+    for lib in $(find ${dirs[prefix]}/${names[toolchain_id]}/lib -name libiberty.a); do
+        rm -rf $lib
+    done
+    # Remove unused include directory
     rm -rf ${dirs[prefix]}/include
-    
+    # Remove unused 'usr' directory
+    rm -rf ${dirs[prefix]}/arm-none-eabi/usr
+
 }

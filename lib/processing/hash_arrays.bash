@@ -3,7 +3,7 @@
 # @file     hash_arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Monday, 21st February 2022 6:58:11 pm
+# @modified Friday, 25th February 2022 1:17:15 am
 # @project  bash-utils
 # @brief
 #    
@@ -28,31 +28,115 @@
 function print_hash_array() {
 
     # Arguments
-    local -n arr_
+    local -n __print_hash_array_arr_
+
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a __print_hash_array_opt_definitions_=(
+        '-n|--name',name,f
+    )
+    
+    # Parse arguments to a named array
+    local -a __print_hash_array_args_=( "$@" )
+
+    # Prepare names hash arrays for positional arguments and parsed options
+    local -a __print_hash_array_posargs_=()
+    local -A __print_hash_array_options_=()
+
+    # Parse options
+    parseopts_s                             \
+        __print_hash_array_args_            \
+        __print_hash_array_opt_definitions_ \
+        __print_hash_array_options_         \
+        __print_hash_array_posargs_         \
+    || return 1
+
+    # Parse arguments
+    __print_hash_array_arr_="${__print_hash_array_posargs_[0]}"
+
+    # ------------------------------------------------- 
+
+    # Print name of the array
+    is_var_set __print_hash_array_options_[name] && echo "${__print_hash_array_posargs_[0]}:"
+    
+    local __print_hash_array_key_
+
+    # Print array
+    for __print_hash_array_key_ in "${!__print_hash_array_arr_[@]}"; do 
+        printf "[%s]=%s\n" "$__print_hash_array_key_" "${__print_hash_array_arr_[$__print_hash_array_key_]}"
+    done
+
+}
+
+# -------------------------------------------------------------------
+# @brief Prints string defining an hash array with the given name
+#
+# @param array
+#    name fo the array to be printed
+# @options
+#    -l|--local if set, definition will be printed with `local`
+#               keyword ; otherwise, the `declare` keyword will be
+#               used
+# -------------------------------------------------------------------
+function print_hash_array_def() {
+
+    # Arguments
+    local array_name
 
     # ---------------- Parse arguments ----------------
 
     # Function's options
     local -a opt_definitions=(
-        '-n|--name',name,f
+        '-l|--local',local,f
+        '-s|--separator',separator
     )
     
     # Parse arguments to a named array
-    parse_options_s
+    local -a args=( "$@" )
 
+    # Prepare names hash arrays for positional arguments and parsed options
+    local -a posargs=()
+    local -A options=()
+
+    # Parse options
+    parseopts_s         \
+        args            \
+        opt_definitions \
+        options         \
+        posargs         \
+    || return 1
+    
     # Parse arguments
-    arr_="${posargs[0]}"
-
+    local array_name="${posargs[0]}"
+    
     # ------------------------------------------------- 
 
+    local result=""
+
+    # Get refernce to the array 
+    local -n array="$array_name"
+
     # Print name of the array
-    is_var_set options[name] && echo "${posargs[0]}:"
+    is_var_set opts[local] &&
+        result+="local   -A $array_name=" ||
+        result+="declare -A $array_name="
     
+    # Open bracket
+    result+="( "
+    
+    local key
+
     # Print array
-    for key in "${!arr_[@]}"; do 
-        printf "[%s]=%s\n" "$key" "${arr_[$key]}"
+    for key in "${!array[@]}"; do 
+        result+="[$key]=\"${array[$key]}\" "
     done
 
+    # Close bracket
+    result+=");"
+
+    # Print result
+    echo "$result"
 }
 
 # -------------------------------------------------------------------

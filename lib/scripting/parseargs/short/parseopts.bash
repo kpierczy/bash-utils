@@ -3,7 +3,7 @@
 # @file     parseopts.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 7:55:41 pm
-# @modified Monday, 21st February 2022 6:58:11 pm
+# @modified Thursday, 24th February 2022 5:05:21 pm
 # @project  bash-utils
 # @brief
 #    
@@ -500,8 +500,8 @@ alias parse_options_s='
 local -a args=( "$@" )
 
 # Prepare names hash arrays for positional arguments and parsed options
-local -a posargs
-local -A options
+local -a posargs=()
+local -A options=()
 
 # Parse options
 parseopts_s args opt_definitions options posargs || return 1

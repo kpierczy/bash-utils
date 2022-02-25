@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Tuesday, 22nd February 2022 8:54:52 pm
+# @modified Friday, 25th February 2022 2:57:18 am
 # @project  bash-utils
 # @brief
 #    
@@ -49,12 +49,18 @@ function get_marker_name() {
     local action_="$2"
     local target_="${3:-}"
     
+    # If targetted action given, resolve the marker pattern
+    if [[ "${target_:-}" != "" ]]; then
+        case "$action_" in
+            'build'   ) action_="target_build"   ;;
+            'install' ) action_="target_install" ;;
+        esac
+    fi
+
     # Get marker pattern from the markers table
     local marker_="$build_dir_/${TARGET_MARKERS[$action_]}"
-    # If targetted action given, resolve the marker pattern
-    if [[ "$action_" == "built" || "$action_" == "installed" ]]; then
-        marker_="$(printf "$marker_" "$target_")"
-    fi
+    # Resolve marker pattern
+    marker_=$(printf "$marker_" "${target_:-}")
 
     # Print the marker's name
     echo $marker_
@@ -122,6 +128,10 @@ function remove_directory_marker() {
 #    action corresponding to the marker
 # @param target (optional) 
 #    build target corresponding to the marker
+#
+# @returns
+#    @retval @c 0 if directory is marked
+#    @retval @c 1 otherwise
 # -------------------------------------------------------------------
 function is_directory_marked() {
 
@@ -328,11 +338,29 @@ function perform_build_action() {
     esac
 
     # Get action flags
-    local action_flags_=''
     case "$action_" in
-        configure ) action_flags_="${CONFIG_FLAGS[@]:-}";;
-        build     ) action_flags_="${BUILD_FLAGS[@]:-}";;
-        install   ) action_flags_="${INSTALL_FLAGS[@]:-}";;
+    
+        'configure' ) 
+            
+            # Get reference to the flags' array
+            if is_var_set CONFIG_FLAGS; then
+                local -n action_flags_ref=CONFIG_FLAGS
+            fi;;
+
+        'build' ) 
+            
+            # Get reference to the flags' array
+            if is_var_set BUILD_FLAGS; then
+                local -n action_flags_ref=BUILD_FLAGS
+            fi;;
+
+        'install' ) 
+            
+            # Get reference to the flags' array
+            if is_var_set INSTALL_FLAGS; then
+                local -n action_flags_ref=INSTALL_FLAGS
+            fi;;
+
     esac
     
     # ------ Check if action need to be performed -----
@@ -402,11 +430,34 @@ function perform_build_action() {
     
     # Perform action on the build directory
     if is_var_set options[verbose_tools]; then
-    pwd
-        echo "$action_tool_ $target_ $action_flags_"
-        $action_tool_ $target_ $action_flags_ && ret_=$? || ret_=$?
+
+        local op
+
+        # Compile command to be run
+        local cmd=$(trimm_string "$action_tool_ $target_")
+        
+        # Log action with the whole list of flags
+        if is_var_set action_flags_ref; then
+            log_info "$(set_bold)Running '$(set_fgreen)$cmd$(reset_colors)'$(set_bold) with following options:$(reset_colors)"
+            for op in "${action_flags_ref[@]}"; do
+                log_info "  $(set_bold)$op$(reset_colors)"
+            done
+        # Skip flags, if not given
+        else
+            log_info "Running '$(set_bold)$(set_fgreen)$cmd$(reset_colors)'"
+        fi
+
+        # Echo raw command to be run
+        echo
+        echo "Running: $action_tool_ $target_ ${action_flags_ref[@]}"
+        echo
+
+        # Run action without output's redirection
+        $action_tool_ $target_ "${action_flags_ref[@]}" && ret_=$? || ret_=$?
+    
+    # On silent actione retarget output 
     else
-        $action_tool_ $target_ $action_flags_ &> /dev/null && ret_=$? || ret_=$?
+        $action_tool_ $target_ "${action_flags_ref[@]}" &> /dev/null && ret_=$? || ret_=$?
     fi
     
     # Check action's result
@@ -516,7 +567,7 @@ function configure_source() {
     local -A TARGETTED_LOG_TABLE=(
            [INIT]="Configuring ${options[log_target]:-} ..."
         [SUCCESS]="Sucesfully configured ${options[log_target]:-}"
-           [SKIP]="Skipping ${options[log_target]:-} build"
+           [SKIP]="Skipping configuration of the ${options[log_target]:-}"
           [ERROR]="Failed to configure ${options[log_target]:-}"
     )
 
@@ -982,8 +1033,8 @@ function build_and_install() {
 #
 # @returns 
 #    @retval @c 0 on success 
-#    @retval @c 1 if all steps were skipped 
-#    @retval @c 2 on error
+#    @retval @c 1 on error
+#    @retval @c 2 if all steps were skipped 
 #
 # @options
 #     
@@ -1077,7 +1128,7 @@ function download_build_and_install() {
         '--log-target',log_target
         '--up-to',up_to
     )
-    
+
     # Parse arguments to a named array
     parse_options_s
 
@@ -1088,7 +1139,7 @@ function download_build_and_install() {
     local all_skipped_=1
     # Return status
     local ret_
-    
+
     # ---------------------- Prepare common environment -----------------------
 
     # Prepare flags
@@ -1113,7 +1164,7 @@ function download_build_and_install() {
     is_var_set options[extract_dir] && download_extract_flags+=( "--extract-dir=${options[extract_dir]}" )
 
     # ------------------------ Prepare build environment ---------------------- 
-
+    
     # Prepare flags
     local -a build_flags=()
     # Establish whether verbose tools' logs should be displayed
@@ -1161,7 +1212,7 @@ function download_build_and_install() {
     fi
 
     # ---------------------------- Build sources ------------------------------ 
-
+    
     # Try to build and install sources
     build_and_install ${common_flags[@]} ${build_flags[@]} && ret_=$? || ret_=$?
     

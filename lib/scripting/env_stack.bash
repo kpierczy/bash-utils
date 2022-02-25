@@ -3,7 +3,7 @@
 # @file     env_stack.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 23rd February 2022 8:04:01 pm
-# @modified Wednesday, 23rd February 2022 9:05:47 pm
+# @modified Friday, 25th February 2022 9:09:11 am
 # @project  bash-utils
 # @brief
 #    
@@ -18,7 +18,7 @@
 # @brief Removes all environmental variables exept of these for those @p predicate
 #    returns @false
 #
-# @param predicate ( optional, default: keeps PATH )
+# @param predicate ( optional, default: keeps nothing )
 #    predicate stating whether variable should be unset
 # ---------------------------------------------------------------------------------------
 function clean_env () {
@@ -31,25 +31,27 @@ function clean_env () {
     local nounset_set="$?"
     # Treat unsets as error
     set +o nounset
-    
+
+    # Enable word splitting
+    localize_word_splitting
+    enable_word_splitting
+
     # Get list of variables
-    local var_list=$(export | grep "^declare -x" | sed -e "s/declare -x //" | cut -d"=" -f1 | grep -E '[[:upper:]]+\b')
+    local var_list=( $(export | grep "^declare -x" | sed -e "s/declare -x //" | cut -d"=" -f1 | grep -E '[[:upper:]]+\b') )
 
     local var
 
     # Iterate over vriable and unset if predicate given
     if is_var_set predicate; then
-        for var in $var_list ; do
-            if predicate $var; then
+        for var in ${var_list[@]} ; do
+            if $predicate "$var"; then
                 unset "$var"
             fi
         done
-    # Otherwise, keep only [PATH]
+    # Otherwise, keep nothing
     else
-        for var in $var_list ; do
-            if [[ "$var" != PATH ]]; then
-                unset "$var"
-            fi
+        for var in ${var_list[@]} ; do
+            unset "$var"
         done
     fi
 
@@ -119,6 +121,10 @@ function push_env_stack () {
         
     fi
 
+    # Enable automatic word splitting in case it is diabled
+    localize_word_splitting
+    enable_word_splitting
+
     # Get current value of the variable
     eval local _oldval=\"\${$_name}\"
     # Check if value is saved on the stack
@@ -126,7 +132,7 @@ function push_env_stack () {
 
     # If value not saved, save it
     if [ "x$_saved" = "x" ]; then
-
+    
         # Get current stack
         eval local _temp=\"\${ENV_STACK_LIST_$ENV_STACK_LEVEL}\"
         # Save stack with a new variable name on it
@@ -179,6 +185,10 @@ function restore_env_stack () {
         
     fi
 
+    # Enable automatic word splitting in case it is diabled
+    localize_word_splitting
+    enable_word_splitting
+
     # Get current stack
     eval local _list=\"\${ENV_STACK_LIST_$ENV_STACK_LEVEL}\"
     
@@ -199,7 +209,7 @@ function restore_env_stack () {
         fi
 
         # Mark a variable as non-saved on the stack
-        eval level_saved_${ENV_STACK_LEVEL}_$_varname=
+        eval ENV_STACK_SAVE_LEVEL_${ENV_STACK_LEVEL}_$_varname=
 
     done
     
@@ -272,7 +282,7 @@ function prepend_path_env_stack() {
     set +o nounset
     
     # Get current path
-    eval local _old_path="\"\$PATH\""
+    eval local old_path="\"\$PATH\""
 
     # If path is empty, assign only the new value
     if [ x"$old_path" == "x" ]; then

@@ -3,7 +3,7 @@
 # @file     install.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:28:20 pm
-# @modified Thursday, 24th February 2022 5:26:10 am
+# @modified Friday, 25th February 2022 12:55:32 am
 # @project  bash-utils
 # @brief
 #    
@@ -20,29 +20,7 @@ source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/defaults.bash
 # Source helper functions
 source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/helpers.bash
 # Source installation routine
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/install.bash
-
-# ============================================================ Constants =========================================================== #
-
-# List of flags sets taken by the script
-declare -A FLAGS_SETS=(
-    [common]="all components"
-    [binutils]="binutils"
-    [gcc]="GCC compiler"
-    [libc]="libc library"
-    [libc_aux]="auxiliary libc library"
-    [libgcc]="libgcc library"
-    [libcpp]="libc++ library"
-    [gdb]="GDB debugger"
-    [zlib]="Zlib library"
-    [gmp]="GMP library"
-    [mpfr]="MPFR library"
-    [mpc]="MPC library"
-    [isl]="ISL library"
-    [libelf]="Libelf library"
-    [expat]="Expat library"
-    [cloog]="Cloog library"
-)
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/install.bash
 
 # ============================================================== Usage ============================================================= #
 
@@ -76,6 +54,7 @@ declare -A opts_description=(
     [autocontinue]="if set, the script will not ask user before building each next stage of toolchain"
     [with_doc]="if set, the additional documentation will be genrated"
     [with_package]="if set, the <prefix> dir will be packaged into [tar.bz] package named [STR] placed in the <basedir>/package"
+    [verbose_tools]="f set, the building process will be run with verbose output of building tools"
     [force]=$(echo \
         "If set to non-empty valule, COMPONENTS will be rebuilt even if " \
         "it was marked as already built in TOOLCHAIN_BASEDIR directory"
@@ -109,14 +88,14 @@ declare -A opts_description=(
         "$TOOLCHAIN_NEWLIB_VERSION [newlib/newlib-nano] / $TOOLCHAIN_ULIBC_VERSION [ulibc] )"
     )
     # Utilities versions
-    [zlib_version]="version of ZLIB library"
+    [zlib_version]="version of Zlib library"
     [gmp_version]="version of GMP library"
     [mpfr_version]="version of MPFR library"
     [mpc_version]="version of MPC library"
     [isl_version]="version of ISL library"
-    [libelf_version]="version of LIBELF library"
-    [expat_version]="version of EXPAT library"
-    [cloog_version]="version of CLOOG library"
+    [elfutils_version]="version of Elfutils (libelf library)"
+    [expat_version]="version of Expat library"
+    [cloog_version]="version of Cloog library"
     # Download URLs
     [binutils_url]="download URL of Binutils [not implemented - only default URL available]"
     [gcc_url]="download URL of GCC compiler [not implemented - only default URL available]"
@@ -127,24 +106,31 @@ declare -A opts_description=(
         "[not implemented - only default URL available]"
     )
     # Download URLs (utilities)
-    [zlib_url]="download URL of ZLIB library [not implemented - only default URL available]"
+    [zlib_url]="download URL of Zlib library [not implemented - only default URL available]"
     [gmp_url]="download URL of GMP library [not implemented - only default URL available]"
     [mpfr_url]="download URL of MPFR library [not implemented - only default URL available]"
     [mpc_url]="download URL of MPC library [not implemented - only default URL available]"
     [isl_url]="download URL of ISL library [not implemented - only default URL available]"
-    [libelf_url]="download URL of LIBELF library [not implemented - only default URL available]"
-    [expat_url]="download URL of EXPAT library [not implemented - only default URL available]"
-    [cloog_url]="download URL of CLOOG library [not implemented - only default URL available]"
+    [elfutils_url]="download URL of Elfutils (elflib library) [not implemented - only default URL available]"
+    [expat_url]="download URL of Expat library [not implemented - only default URL available]"
+    [cloog_url]="download URL of Cloog library [not implemented - only default URL available]"
     
 )
 
 # Envs' descriptions
-declare -A envs_description=()
+declare -A envs_description=(
+    [eval_string]=$(echo \
+        "this variabla shall contain a string that should be evaluated by the build script before parsing build flags. " \
+        "This mechanism provides a workaround to inject entities like array/hash arrays that are no passable by Linux " \
+        "environment. It is desired specifically to pass hash arrays whose names are passed in the TOOLCHAIN_*_BUILD_ENV " \
+        "and TOOLCHAIN_*_FLAGS variables to define custom environment for components' builds" \
+    )
+)
 
 # Add envs' descriptions for all components
 for set in ${!FLAGS_SETS[@]}; do
-    envs_description[${set}_config_flags]="string containing additional flags to be passed at configuration time of all ${FLAGS_SETS[$set]}"
-    envs_description[${set}_compile_flags]="string containing additional flags to be passed at compilation time of all ${FLAGS_SETS[$set]}"
+    envs_description[${set}_config_flags]="name of the hash array containing additional flags to be passed at configuration time of all ${FLAGS_SETS[$set]}"
+    envs_description[${set}_compile_flags]="name of the hash array containing additional flags to be passed at compilation time of all ${FLAGS_SETS[$set]}"
     envs_description[${set}_build_env]="name of the hash array containing required environment to be set at build time of all ${FLAGS_SETS[$set]}"
 done
 
@@ -165,6 +151,9 @@ get_heredoc source_description <<END
             │   ├────── host
             │   └────── target
             └── \u001b[34;1mpackage \033[0m
+
+    Source $(set_bold)$BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/helpers.bash$(reset_colors) to get 
+    additional functions and aliases that may help you implementing toolchain-building tools based on this script
 END
 
 # ====================================================== Default configuration ===================================================== #
@@ -191,6 +180,7 @@ declare -A           b_target_opt_def=( [format]='--target'           [type]='s'
 declare -A     c_autocontinue_opt_def=( [format]='-y|--autocontinue'  [type]='f' [name]='autocontinue'                                                                        )
 declare -A         c_with_doc_opt_def=( [format]='--with-doc'         [type]='f' [name]='with_doc'                                                                            )
 declare -A     c_with_package_opt_def=( [format]='--with-package'     [type]='p' [name]='with_package'                                                                        )
+declare -A    c_verbose_tools_opt_def=( [format]='--verbose-tools'    [type]='f' [name]='verbose_tools'                                                                       )
 declare -A            c_force_opt_def=( [format]='--force'            [type]='f' [name]='force'                                                                               )
 declare -A         d_basename_opt_def=( [format]='--basename'         [type]='s' [name]='basename'         [default]="gcc"                                                    )
 declare -A           e_prefix_opt_def=( [format]='--prefix'           [type]='s' [name]='prefix'           [default]="."                                                      )
@@ -204,7 +194,7 @@ declare -A      g_gmp_version_opt_def=( [format]='--gmp-version'      [type]='s'
 declare -A     g_mpfr_version_opt_def=( [format]='--mpfr-version'     [type]='s' [name]='mpfr_version'     [default]="$TOOLCHAIN_MPFR_VERSION"                                )
 declare -A      g_mpc_version_opt_def=( [format]='--mpc-version'      [type]='s' [name]='mpc_version'      [default]="$TOOLCHAIN_MPC_VERSION"                                 )
 declare -A      g_isl_version_opt_def=( [format]='--isl-version'      [type]='s' [name]='isl_version'      [default]="$TOOLCHAIN_ISL_VERSION"                                 )
-declare -A   g_libelf_version_opt_def=( [format]='--libelf-version'   [type]='s' [name]='libelf_version'   [default]="$TOOLCHAIN_LIBELF_VERSION"                              )
+declare -A g_elfutils_version_opt_def=( [format]='--elfutils-version' [type]='s' [name]='elfutils_version' [default]="$TOOLCHAIN_ELFUTILS_VERSION"                            )
 declare -A    g_expat_version_opt_def=( [format]='--expat-version'    [type]='s' [name]='expat_version'    [default]="$TOOLCHAIN_EXPAT_VERSION"                               )
 declare -A    g_cloog_version_opt_def=( [format]='--cloog-version'    [type]='s' [name]='cloog_version'    [default]="$TOOLCHAIN_CLOOG_VERSION"                               )
 declare -A     h_binutils_url_opt_def=( [format]='--binutils-url'     [type]='s' [name]='binutils_url'     [default]="$TOOLCHAIN_BINUTILS_URL_SCHEME"                         )
@@ -216,11 +206,14 @@ declare -A          i_gmp_url_opt_def=( [format]='--gmp-url'          [type]='s'
 declare -A         i_mpfr_url_opt_def=( [format]='--mpfr-url'         [type]='s' [name]='mpfr_url'         [default]="$TOOLCHAIN_MPFR_URL_SCHEME"                             )
 declare -A          i_mpc_url_opt_def=( [format]='--mpc-url'          [type]='s' [name]='mpc_url'          [default]="$TOOLCHAIN_MPC_URL_SCHEME"                              )
 declare -A          i_isl_url_opt_def=( [format]='--isl-url'          [type]='s' [name]='isl_url'          [default]="$TOOLCHAIN_ISL_URL_SCHEME"                              )
-declare -A       i_libelf_url_opt_def=( [format]='--libelf-url'       [type]='s' [name]='libelf_url'       [default]="$TOOLCHAIN_LIBELF_URL_SCHEME"                           )
+declare -A     i_elfutils_url_opt_def=( [format]='--elfutils-url'     [type]='s' [name]='elfutils_url'     [default]="$TOOLCHAIN_ELFUTILS_URL_SCHEME"                         )
 declare -A        i_expat_url_opt_def=( [format]='--expat-url'        [type]='s' [name]='expat_url'        [default]="$TOOLCHAIN_EXPAT_URL_SCHEME"                            )
 declare -A        i_cloog_url_opt_def=( [format]='--cloog-url'        [type]='s' [name]='cloog_url'        [default]="$TOOLCHAIN_CLOOG_URL_SCHEME"                            )
 
 # =========================================================== Environment ========================================================== #
+
+# Define standard envs' descriptors
+declare -A eval_string_env_def=( [format]="TOOLCHAIN_EVAL_STRING" [name]="eval_string" [default]="" )
 
 # Helper iterators
 declare -a __alphabet=( {a..z} )
@@ -231,8 +224,8 @@ for set in ${!FLAGS_SETS[@]}; do
     # Compute current letter
     declare __p=${__alphabet[$__i]}
     # Define descriptors
-    eval declare -A  ${__p}_${set}_config_flags_env_def=\( [format]="TOOLCHAIN_${set^^}_CONFIG_FLAGS"  [name]="${set}_config_flags"  [default]=""          \)
-    eval declare -A ${__p}_${set}_compile_flags_env_def=\( [format]="TOOLCHAIN_${set^^}_COMPILE_FLAGS" [name]="${set}_compile_flags" [default]=""          \)
+    eval declare -A  ${__p}_${set}_config_flags_env_def=\( [format]="TOOLCHAIN_${set^^}_CONFIG_FLAGS"  [name]="${set}_config_flags"  [default]="EMPTY_ENV" \)
+    eval declare -A ${__p}_${set}_compile_flags_env_def=\( [format]="TOOLCHAIN_${set^^}_COMPILE_FLAGS" [name]="${set}_compile_flags" [default]="EMPTY_ENV" \)
     eval declare -A     ${__p}_${set}_build_env_env_def=\( [format]="TOOLCHAIN_${set^^}_BUILD_ENV"     [name]="${set}_build_env"     [default]="EMPTY_ENV" \)
     # Increment letter
     ((__i = $__i + 1))
@@ -259,6 +252,10 @@ function main() {
     elif [[ $ret != '0' ]]; then
         return $ret
     fi
+
+    # Log entry message
+    log_info "$(set_bold)$(set_fblue)Running GCC toolchain builder...$(reset_colors)"
+    log_info
 
     # Proceede installation
     install

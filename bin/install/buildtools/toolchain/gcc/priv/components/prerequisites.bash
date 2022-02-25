@@ -3,7 +3,7 @@
 # @file     prerequisites.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Thursday, 24th February 2022 6:22:01 am
+# @modified Friday, 25th February 2022 12:55:54 am
 # @project  bash-utils
 # @brief
 #    
@@ -13,14 +13,14 @@
 # ====================================================================================================================================
 
 # Source prerequisites builders
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites/zlib.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites/gmp.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites/mpfr.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites/mpc.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites/isl.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites/libelf.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites/expat.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites/cloog.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites/zlib.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites/gmp.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites/mpfr.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites/mpc.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites/isl.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites/elfutils.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites/expat.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites/cloog.bash
 
 # =========================================================== Dispatcher =========================================================== #
 
@@ -33,9 +33,9 @@ function build_prerequisites() {
         mpfr
         mpc
         isl
-        libelf
+        elfutils
         expat
-        cloog
+        # cloog 
     )
 
     # Prepare array of prerequisites's names
@@ -45,7 +45,7 @@ function build_prerequisites() {
         [mpfr]="MPFR"
         [mpc]="MPC"
         [isl]="ISL"
-        [libelf]="libelf"
+        [elfutils]="elfutils"
         [expat]="Expat"
         [cloog]="Cloog"
     )
@@ -59,7 +59,7 @@ function build_prerequisites() {
 
         # Wait for user's confirmation to build the next component
         is_var_set opts[autocontinue] || {
-            log_info "Press a key to start building the $libname library"; read
+            log_info "$(set_bold)Press a key to start building the $(set_fblue)$libname$(set_fdefault) library$(reset_colors)"; read -s
         }
 
         log_info "Building $libname library..."
@@ -74,7 +74,7 @@ function build_prerequisites() {
             log_error "Failed to build $libname library"
             return 1
         else
-            log_info "${libname^} library built"
+            log_info "$(set_bold)$(set_fblue)${libname^}$(set_fdefault) library built$(reset_colors)"
         fi
         
     done

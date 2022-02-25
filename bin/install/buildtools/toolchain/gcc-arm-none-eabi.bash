@@ -3,7 +3,7 @@
 # @file     gcc-arm-none-eabi.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 6:16:17 pm
-# @modified Thursday, 24th February 2022 6:11:19 am
+# @modified Friday, 25th February 2022 8:45:39 am
 # @project  bash-utils
 # @brief
 #    
@@ -15,7 +15,8 @@
 
 # Source bash-utils library
 source $BASH_UTILS_HOME/source_me.bash
-# Source defaults of the toolchain's builder
+# Source helpers and defaults of the toolchain's builder
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/helpers.bash
 source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/defaults.bash
 
 # ============================================================== Usage ============================================================= #
@@ -27,7 +28,9 @@ declare cmd_description="Installs arm-none-eabi toolchain form source"
 declare -A opts_description=(
     [prefix]="installation directory"
     [basedir]="basedire directory for toolchain's builder"
+    [verbose_tools]="if set, the building process will be run with verbose output of building tools"
     [debug]="if set, the debug build will be used"
+    [autocontinue]="if set, the script will not ask user before building each next stage of toolchain"
 )
 
 # ====================================================== Common configruation ====================================================== #
@@ -86,203 +89,237 @@ function copy_multi_libs() {
 
 function install() {
 
+    # Build version string
+    declare PKG_VERSION="GNU ARM Embedded Toolchain $TOOLCHAIN_GCC_VERSION"
+
     # ------------------------- Prepare helper configuration ----------------------------
 
-    # Multilib list
-    declare MULTILIB_LIST
-    MULTILIB_LIST+=" --with-multilib-list=rmprofile"
-
-    # Common GCC flags
-    declare GCC_CONFIG
-    GCC_CONFIG+=" --with-host-libstdcxx=-static-libgcc"
-    GCC_CONFIG+=" -Wl,-Bstatic,-lstdc++,-Bdynamic"
-    GCC_CONFIG+=" -lm"
-    
-    # Build version string
-    declare PKG_VERSION="GNU Arm Embedded Toolchain $TOOLCHAIN_GCC_VERSION"
-
     # Build options
-    declare BUILD_OPTIONS=
+    declare -a BUILD_OPTIONS=(
+        "-g"
+        "-O2"
+    )
     # Debug build options
     is_var_set opts[debug] && {
-        BUILD_OPTIONS+=" -g"
-        BUILD_OPTIONS+=" -O0"
+        BUILD_OPTIONS+=( "-g"  )
+        BUILD_OPTIONS+=( "-O0" )
     }
-    
     # Additional build options (unused at the moment)
-    declare AUX_BUILD_OPTIONS
-    AUX_BUILD_OPTIONS+=" -fbracket-depth=512"
+    false && { 
+        BUILD_OPTIONS+=( "-fbracket-depth=512" )
+    }
 
     # Helper C flags
-    declare ENV_CFLAGS
-    ENV_CFLAGS+=" -I${opts[basedir]}/install/host/zlib/include"
-    ENV_CFLAGS+=" $BUILD_OPTIONS"
+    declare -a ENV_CFLAGS=(
+        "-I${opts[basedir]}/install/host/zlib/include"
+        "${BUILD_OPTIONS[@]}"
+    )
     # Helper C flags
-    declare ENV_CPPFLAGS
-    ENV_CPPFLAGS+=" -I${opts[basedir]}/install/host/zlib/include"
-    # Helper linker flags
-    declare ENV_LDFLAGS
-    ENV_LDFLAGS+=" -L${opts[basedir]}/install/host/zlib/lib"
-    ENV_LDFLAGS+=" -L${opts[basedir]}/install/host/usr/lib"
+    declare -a ENV_CPPFLAGS=(
+        "-I${opts[basedir]}/install/host/zlib/include"
+    )
+    # Helper linker flags (@note these are crucial flags passed to binutils' built;
+    # thanks to them, the ld that will be used by the future build of GCC will know
+    # where to look for dependecies libraries like ISL)
+    declare -a ENV_LDFLAGS=(
+        "-L${opts[basedir]}/install/host/zlib/lib"
+        "-L${opts[basedir]}/install/host/usr/lib"
+    )
+    
+    # Common GCC flags
+    declare -a GCC_CONFIG=(
+        "--with-host-libstdcxx=-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm"
+    )
+    # Multilib list
+    declare -a MULTILIB_LIST=(
+        "--with-multilib-list=rmprofile"
+    )
 
     # ------------------------- Prepare common configuration ----------------------------
-
+    
     # Common compile flags
-    declare TOOLCHAIN_COMPILE_FLAGS="-j 8"
+    declare -a TOOLCHAIN_COMMON_COMPILE_FLAGS=(
+        "-j8"
+    )
 
     # --------------------------- Libraries' configuration ------------------------------
 
     # Zlib configruation
-    declare TOOLCHAIN_ZLIB_CONFIG_FLAGS
-    TOOLCHAIN_ZLIB_CONFIG_FLAGS+="--static"
+    declare -a TOOLCHAIN_ZLIB_CONFIG_FLAGS=(
+        "--static"
+    )
     
     # GMP configuration
-    declare TOOLCHAIN_GMP_CONFIG_FLAGS
-    TOOLCHAIN_GMP_CONFIG_FLAGS+=" --enable-cxx"
-    TOOLCHAIN_GMP_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_GMP_CONFIG_FLAGS+=" --disable-nls"
-    declare -A GMP_BUILD_ENV
-    GMP_BUILD_ENV['CPPFLAGS']="-fexceptions"
-    declare TOOLCHAIN_GMP_BUILD_ENV='GMP_BUILD_ENV'
+    declare -a TOOLCHAIN_GMP_CONFIG_FLAGS=(
+        "--enable-cxx"
+        "--disable-shared"
+        "--disable-nls"
+    )
+    # GMP build environment
+    declare -A TOOLCHAIN_GMP_BUILD_ENV=(
+        ['CPPFLAGS']="-fexceptions"
+    )
 
     # MPFR configuration
-    declare TOOLCHAIN_MPFR_CONFIG_FLAGS
-    TOOLCHAIN_MPFR_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_MPFR_CONFIG_FLAGS+=" --disable-nls"
+    declare -a TOOLCHAIN_MPFR_CONFIG_FLAGS=(
+        "--disable-shared"
+        "--disable-nls"
+    )
 
     # MPC configuration
-    declare TOOLCHAIN_MPC_CONFIG_FLAGS
-    TOOLCHAIN_MPC_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_MPC_CONFIG_FLAGS+=" --disable-nls"
+    declare -a TOOLCHAIN_MPC_CONFIG_FLAGS=(
+        "--disable-shared"
+        "--disable-nls"
+    )
 
     # ISL configuration
-    declare TOOLCHAIN_ISL_CONFIG_FLAGS
-    TOOLCHAIN_ISL_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_ISL_CONFIG_FLAGS+=" --disable-nls"
+    declare -a TOOLCHAIN_ISL_CONFIG_FLAGS=(
+        "--disable-shared"
+        "--disable-nls"
+    )
 
     # Libelf configruation
-    declare TOOLCHAIN_LIBELF_CONFIG_FLAGS
-    TOOLCHAIN_LIBELF_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_LIBELF_CONFIG_FLAGS+=" --disable-nls"
+    declare -a TOOLCHAIN_LIBELF_CONFIG_FLAGS=(
+        "--disable-shared"
+        "--disable-nls"
+    )
 
     # Expat configruation
-    declare TOOLCHAIN_EXPAT_CONFIG_FLAGS
-    TOOLCHAIN_EXPAT_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_EXPAT_CONFIG_FLAGS+=" --disable-nls"
+    declare -a TOOLCHAIN_EXPAT_CONFIG_FLAGS=(
+        "--disable-shared"
+        "--disable-nls"
+    )
 
     # Cloog configruation
-    declare TOOLCHAIN_CLOOG_CONFIG_FLAGS
-    TOOLCHAIN_CLOOG_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_CLOOG_CONFIG_FLAGS+=" --disable-nls"
+    declare -a TOOLCHAIN_CLOOG_CONFIG_FLAGS=(
+        "--disable-shared"
+        "--disable-nls"
+    )
 
     # --------------------------- Components configuration ------------------------------
 
     # Configuration of the binutils
-    declare TOOLCHAIN_BINUTILS_CONFIG_FLAGS
-    CONFIG_BINUTILS_FLAGS+=" --disable-nls"
-    CONFIG_BINUTILS_FLAGS+=" --disable-werror"
-    CONFIG_BINUTILS_FLAGS+=" --disable-sim"
-    CONFIG_BINUTILS_FLAGS+=" --disable-gdb"
-    CONFIG_BINUTILS_FLAGS+=" --enable-interwork"
-    CONFIG_BINUTILS_FLAGS+=" --enable-plugins"
-    CONFIG_BINUTILS_FLAGS+=" --with-pkgversion=$PKG_VERSION"
-    declare -A BINUTILS_BUILD_ENV
-    BINUTILS_BUILD_ENV['CFLAGS']="$ENV_CFLAGS"
-    BINUTILS_BUILD_ENV['CPPFLAGS']="$ENV_CPPFLAGS"
-    BINUTILS_BUILD_ENV['DFLAGS']="$ENV_LDFLAGS"
-    declare TOOLCHAIN_BINUTILS_BUILD_ENV='BINUTILS_BUILD_ENV'
+    declare -a TOOLCHAIN_BINUTILS_CONFIG_FLAGS=(
+        "--disable-nls"
+        "--disable-werror"
+        "--disable-sim"
+        "--disable-gdb"
+        "--enable-interwork"
+        "--enable-plugins"
+        "--with-pkgversion=$PKG_VERSION"
+    )
+    # Build environment of binutils
+    declare -A TOOLCHAIN_BINUTILS_BUILD_ENV=(
+        ['CFLAGS']="${ENV_CFLAGS[@]}"
+        ['CPPFLAGS']="${ENV_CPPFLAGS[@]}"
+        ['LDFLAGS']="${ENV_LDFLAGS[@]}"
+    )
 
     # Configuration of the gcc
-    declare TOOLCHAIN_GCC_CONFIG_FLAGS
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --enable-languages=c"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-decimal-float"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-libffi"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-libgomp"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-libmudflap"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-libquadmath"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-libssp"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-libstdcxx-pch"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-nls"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-threads"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --disable-tls"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --with-newlib"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --without-headers"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --with-gnu-as"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" --with-gnu-ld"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" -with-pkgversion=$PKG_VERSION"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" $GCC_CONFIG"
-    TOOLCHAIN_GCC_CONFIG_FLAGS+=" $MULTILIB_LIST"
+    declare -a TOOLCHAIN_GCC_CONFIG_FLAGS=(
+        "--enable-languages=c"
+        "--disable-decimal-float"
+        "--disable-libffi"
+        "--disable-libgomp"
+        "--disable-libmudflap"
+        "--disable-libquadmath"
+        "--disable-libssp"
+        "--disable-libstdcxx-pch"
+        "--disable-nls"
+        "--disable-shared"
+        "--disable-threads"
+        "--disable-tls"
+        "--with-newlib"
+        "--without-headers"
+        "--with-gnu-as"
+        "--with-gnu-ld"
+        "--with-pkgversion=$PKG_VERSION"
+        "${GCC_CONFIG[@]}"
+        "${MULTILIB_LIST[@]}"
+    )
+    # Build environment of the gcc
+    declare -A TOOLCHAIN_GCC_BUILD_ENV=(
+        ['CXXFLAGS']="${BUILD_OPTIONS[@]}"
+    )
 
     # Configuration of the libc (newlib)
-    declare TOOLCHAIN_LIBC_CONFIG_FLAGS
-    TOOLCHAIN_LIBC_CONFIG_FLAGS+=" --enable-newlib-io-long-long"
-    TOOLCHAIN_LIBC_CONFIG_FLAGS+=" --enable-newlib-io-c99-formats"
-    TOOLCHAIN_LIBC_CONFIG_FLAGS+=" --enable-newlib-reent-check-verify"
-    TOOLCHAIN_LIBC_CONFIG_FLAGS+=" --enable-newlib-register-fini"
-    TOOLCHAIN_LIBC_CONFIG_FLAGS+=" --enable-newlib-retargetable-locking"
-    TOOLCHAIN_LIBC_CONFIG_FLAGS+=" --disable-newlib-supplied-syscalls"
-    TOOLCHAIN_LIBC_CONFIG_FLAGS+=" --disable-nls"
-    declare -A LIBC_BUILD_ENV
-    LIBC_BUILD_ENV['CFLAGS_FOR_TARGET']=""
-    LIBC_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -ffunction-sections"
-    LIBC_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -fdata-sections"
-    LIBC_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -O2"
+    declare -a TOOLCHAIN_LIBC_CONFIG_FLAGS=(
+        "--enable-newlib-io-long-long"
+        "--enable-newlib-io-c99-formats"
+        "--enable-newlib-reent-check-verify"
+        "--enable-newlib-register-fini"
+        "--enable-newlib-retargetable-locking"
+        "--disable-newlib-supplied-syscalls"
+        "--disable-nls"
+    )
+    # Build environment of libc (newlib)
+    declare -A TOOLCHAIN_LIBC_BUILD_ENV=(
+        ['CFLAGS_FOR_TARGET']="
+            -ffunction-sections
+            -fdata-sections
+            -O2
+        "
+    )
+    # Build environment of libc (newlib) [DEBUG]
     is_var_set opts[debug] &&
-        LIBC_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -g"
-    declare TOOLCHAIN_LIBC_BUILD_ENV='LIBC_BUILD_ENV'
+        TOOLCHAIN_LIBC_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -g"
 
     # Configuration of the auxiliary libc (newlib nano)
-    declare TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --disable-newlib-supplied-syscalls"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --enable-newlib-reent-check-verify"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --enable-newlib-reent-small"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --enable-newlib-retargetable-locking"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --disable-newlib-fvwrite-in-streamio"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --disable-newlib-fseek-optimization"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --disable-newlib-wide-orient"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --enable-newlib-nano-malloc"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --disable-newlib-unbuf-stream-opt"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --enable-lite-exit"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --enable-newlib-global-atexit"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --enable-newlib-nano-formatted-io"
-    TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS+=" --disable-nls"
-    declare -A LIBC_AUX_BUILD_ENV
-    LIBC_AUX_BUILD_ENV['CFLAGS_FOR_TARGET']=""
-    LIBC_AUX_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -ffunction-sections"
-    LIBC_AUX_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -fdata-sections"
-    LIBC_AUX_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -O2"
+    declare -a TOOLCHAIN_LIBC_AUX_CONFIG_FLAGS=(
+        "--disable-newlib-supplied-syscalls"
+        "--enable-newlib-reent-check-verify"
+        "--enable-newlib-reent-small"
+        "--enable-newlib-retargetable-locking"
+        "--disable-newlib-fvwrite-in-streamio"
+        "--disable-newlib-fseek-optimization"
+        "--disable-newlib-wide-orient"
+        "--enable-newlib-nano-malloc"
+        "--disable-newlib-unbuf-stream-opt"
+        "--enable-lite-exit"
+        "--enable-newlib-global-atexit"
+        "--enable-newlib-nano-formatted-io"
+        "--disable-nls"
+    )
+    # Build environment of libc (newlib-nano)
+    declare -A TOOLCHAIN_LIBC_AUX_BUILD_ENV=(
+        ['CFLAGS_FOR_TARGET']="
+            -ffunction-sections
+            -fdata-sections
+            -O2
+        "
+    )
+    # Build environment of libc (newlib-nano) [DEBUG]
     is_var_set opts[debug] &&
-        LIBC_AUX_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -g"
-    declare TOOLCHAIN_LIBC_AUX_BUILD_ENV='LIBC_AUX_BUILD_ENV'
+        TOOLCHAIN_LIBC_AUX_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -g"
 
     # Configuration of the libgcc
-    declare TOOLCHAIN_LIBGCC_CONFIG_FLAGS
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --enable-languages=c,c++"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --enable-plugins"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-decimal-float"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-libffi"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-libgomp"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-libmudflap"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-libquadmath"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-libssp"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-libstdcxx-pch"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-nls"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-threads"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --disable-tls"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --with-gnu-as"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --with-gnu-ld"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --with-newlib"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --with-headers=yes"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" $GCC_CONFIG"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" --with-pkgversion=$PKG_VERSION"
-    TOOLCHAIN_LIBGCC_CONFIG_FLAGS+=" $MULTILIB_LIST"
-    # @note Originally these flags was passed directly to `make`
-    declare -A LIBGCC_BUILD_ENV
-    LIBGCC_BUILD_ENV['CXXFLAGS']="$BUILD_OPTIONS"
-    LIBGCC_BUILD_ENV['INHIBIT_LIBC_CFLAGS']="-DUSE_TM_CLONE_REGISTRY=0"
-    declare TOOLCHAIN_LIBGCC_BUILD_ENV='LIBGCC_BUILD_ENV'
+    declare -a TOOLCHAIN_LIBGCC_CONFIG_FLAGS=(
+        "--enable-languages=c,c++"
+        "--enable-plugins"
+        "--disable-decimal-float"
+        "--disable-libffi"
+        "--disable-libgomp"
+        "--disable-libmudflap"
+        "--disable-libquadmath"
+        "--disable-libssp"
+        "--disable-libstdcxx-pch"
+        "--disable-nls"
+        "--disable-shared"
+        "--disable-threads"
+        "--disable-tls"
+        "--with-gnu-as"
+        "--with-gnu-ld"
+        "--with-newlib"
+        "--with-headers=yes"
+        "${GCC_CONFIG[@]}"
+        "--with-pkgversion=$PKG_VERSION"
+        "${MULTILIB_LIST[@]}"
+    )
+    # Build environment of libc (newlib-nano) [@note Originally these flags was passed directly to `make`]
+    declare -A TOOLCHAIN_LIBGCC_BUILD_ENV=(
+        ['CXXFLAGS']="${BUILD_OPTIONS[@]}"
+        ['INHIBIT_LIBC_CFLAGS']="-DUSE_TM_CLONE_REGISTRY=0"
+    )
 
     # ----------------------------------------------------------------------
     # @note [INHIBIT_LIBC_CFLAGS] variable is set to disable transactional 
@@ -291,60 +328,80 @@ function install() {
     # ----------------------------------------------------------------------
 
     # Configuration of the libcpp
-    declare TOOLCHAIN_LIBCPP_CONFIG_FLAGS
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --enable-languages=c,c++"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-decimal-float"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-libffi"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-libgomp"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-libmudflap"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-libquadmath"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-libssp"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-libstdcxx-pch"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-libstdcxx-verbose"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-nls"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-shared"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-threads"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --disable-tls"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --with-gnu-as"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --with-gnu-ld"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --with-newlib"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --with-headers=yes"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" $GCC_CONFIG"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" --with-pkgversion=$PKG_VERSION"
-    TOOLCHAIN_LIBCPP_CONFIG_FLAGS+=" $MULTILIB_LIST"
-    # @note Originally these flags was passed directly to `make`
-    declare -A LIBCPP_BUILD_ENV
-    LIBCPP_BUILD_ENV['CXXFLAGS']="$BUILD_OPTIONS"
-    LIBCPP_BUILD_ENV['CXXFLAGS_FOR_TARGET']=""
-    LIBCPP_BUILD_ENV['CXXFLAGS_FOR_TARGET']+=" -g"
-    LIBCPP_BUILD_ENV['CXXFLAGS_FOR_TARGET']+=" -Os"
-    LIBCPP_BUILD_ENV['CXXFLAGS_FOR_TARGET']+=" -ffunction-sections"
-    LIBCPP_BUILD_ENV['CXXFLAGS_FOR_TARGET']+=" -fdata-sections"
-    LIBCPP_BUILD_ENV['CXXFLAGS_FOR_TARGET']+=" -fno-exceptions"
-    declare TOOLCHAIN_LIBCPP_BUILD_ENV='LIBCPP_BUILD_ENV'
-
-    # Configuration of the binutils
-    declare TOOLCHAIN_GDB_CONFIG_FLAGS
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --disable-nls"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --disable-sim"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --disable-gas"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --disable-binutils"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --disable-ld"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --disable-gprof"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --with-libexpat"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --with-lzma=no"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --with-gdb-datadir='\''\${prefix}'\''/arm-none-eabi/share/gdb'"
-    TOOLCHAIN_GDB_CONFIG_FLAGS+=" --with-pkgversion=$PKG_VERSION"
+    declare -a TOOLCHAIN_LIBCPP_CONFIG_FLAGS=(
+        "--enable-languages=c,c++"
+        "--disable-decimal-float"
+        "--disable-libffi"
+        "--disable-libgomp"
+        "--disable-libmudflap"
+        "--disable-libquadmath"
+        "--disable-libssp"
+        "--disable-libstdcxx-pch"
+        "--disable-libstdcxx-verbose"
+        "--disable-nls"
+        "--disable-shared"
+        "--disable-threads"
+        "--disable-tls"
+        "--with-gnu-as"
+        "--with-gnu-ld"
+        "--with-newlib"
+        "--with-headers=yes"
+        "${GCC_CONFIG[@]}"
+        "--with-pkgversion=$PKG_VERSION"
+        "${MULTILIB_LIST[@]}"
+    )
+    # Build environment of libcpp [@note Originally these flags was passed directly to `make`]
+    declare -A TOOLCHAIN_LIBCPP_BUILD_ENV=(
+        ['CXXFLAGS']="${BUILD_OPTIONS[@]}"
+        ['CXXFLAGS_FOR_TARGET']="
+            -g
+            -Os
+            -ffunction-sections
+            -fdata-sections
+            -fno-exceptions
+        "
+    )
+    
+    # Configuration of the binutils (@note '\\\$' in --with-gdb-datadir to safely pass $ when the string is passed to `eval`)
+    declare -a TOOLCHAIN_GDB_CONFIG_FLAGS=(
+        "--disable-nls"
+        "--disable-sim"
+        "--disable-gas"
+        "--disable-binutils"
+        "--disable-ld"
+        "--disable-gprof"
+        "--with-libexpat"
+        "--with-lzma=no"
+        "--with-gdb-datadir='\''\\\${prefix}'\''/arm-none-eabi/share/gdb'"
+        "--with-pkgversion=$PKG_VERSION"
+    )
 
     # ----------------------------------- Building --------------------------------------
-    
+
+    # Parse all flags
+    gcc_parse_env
+
+    local -a build_script_flags=()
+
+    # Parse --force flag
+    is_var_set opts[force] && build_script_flags+=( "--force" )
+    # Parse --verbose-tools flag
+    is_var_set opts[verbose_tools] && build_script_flags+=( "--verbose-tools" )
+    # Parse --autocontinue flag
+    is_var_set opts[autocontinue] && build_script_flags+=( "--autocontinue" )
+
     # Install toolchain
-    bin/install/buildtools/toolchain/gcc.bash \
-        --with-libc='newlib-nano'             \
-        --target='arm-none-eabi'              \
-        --with-doc                            \
-        --prefix=${opts[prefix]}              \
-        --basedir=${opts[basedir]}
+    $BASH_UTILS_BIN_HOME/install/buildtools/toolchain/gcc.bash \
+        --with-libc='newlib-nano'                              \
+        --target='arm-none-eabi'                               \
+        --with-doc                                             \
+        --prefix=${opts[prefix]}                               \
+        --basedir=${opts[basedir]}                             \
+        ${build_script_flags[@]}                               ||
+    {
+        log_error "Failed to build the toolchain"
+        return 1
+    }
         
     # ----------------------------------- Finalize --------------------------------------
 
@@ -370,9 +427,11 @@ function main() {
 
 
     # Options
-    local -A  a_prefix_opt_def=( [format]="--prefix"  [name]="prefix"  [type]="p" [default]="." )
-    local -A b_basedir_opt_def=( [format]="--basedir" [name]="basedir" [type]="p" [default]="." )
-    local -A   c_debug_opt_def=( [format]="--debug"   [name]="debug"   [type]="f"               )
+    local -A         a_prefix_opt_def=( [format]="--prefix"           [name]="prefix"        [type]="p" [default]="." )
+    local -A        b_basedir_opt_def=( [format]="--basedir"          [name]="basedir"       [type]="p" [default]="." )
+    local -A  c_verbose_tools_opt_def=( [format]='--verbose-tools'    [name]='verbose_tools' [type]='f'               )
+    local -A          d_debug_opt_def=( [format]="--debug"            [name]="debug"         [type]="f"               )
+    declare -A e_autocontinue_opt_def=( [format]='-y|--autocontinue'  [name]='autocontinue'  [type]='f'               )
 
     # Set help generator's configuration
     ARGUMENTS_DESCRIPTION_LENGTH_MAX=120

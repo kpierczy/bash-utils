@@ -3,7 +3,7 @@
 # @file     newlib.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Thursday, 24th February 2022 3:06:14 am
+# @modified Friday, 25th February 2022 9:59:37 am
 # @project  bash-utils
 # @brief
 #    
@@ -17,7 +17,7 @@ function build_newlib() {
     # ---------------------------- Prepare predefined flags -----------------------------
 
     local -a CONFIG_FLAGS=()
-    local -a COMPILE_FLAGS=()
+    local -a BUILD_FLAGS=()
 
     # Prepare config flags
     CONFIG_FLAGS+=( "--build=${opts[build]}"                         )
@@ -38,52 +38,60 @@ function build_newlib() {
     clear_env_stack
     # Add compiled GCC's binaries to path
     prepend_path_env_stack ${dirs[prefix]}/bin
-
+    
     # -------------------------------------- Build --------------------------------------
 
     # Build the library
-    build_component 'libc'
+    build_component 'libc' 'newlib' 'newlib' || return 1
 
     # ------------------------------- Build documentation -------------------------------
 
-    is_var_set opts[with_doc] && {
+    local build_dir=${dirs[build]}/newlib-${versions[libc]}
 
-        log_info "Installing newlib documentation..."
+    # If documentation is requrested
+    if is_var_set opts[with_doc]; then
+        # If documentation has not been already built (or if rebuilding is forced)
+        if ! is_directory_marked $build_dir 'install' 'doc' || is_var_set opts[force]; then
 
-        # Enter build directory
-        pushd ${dirs[build]}/${names[libc]}
+            log_info "Installing newlib documentation..."
 
-        # Build PDF documentation
-        make pdf
-        # Install documentation
-        mkdir -p "${dirs[prefix_doc]}/pdf"
-        cp "./${names[toolchain_id]}/newlib/libc/libc.pdf" "${dirs[prefix_doc]}/pdf/libc.pdf"
-        cp "./${names[toolchain_id]}/newlib/libm/libm.pdf" "${dirs[prefix_doc]}/pdf/libm.pdf"
+            # Enter build directory
+            pushd $build_dir > /dev/null
 
-        # Build HTML documentation
-        make html
-        # Install documentation
-        mkdir -p "${dirs[prefix_doc]}/html"
-        copy_dir "./${names[toolchain_id]}/newlib/libc/libc.html" "${dirs[prefix_doc]}/html/libc"
-        copy_dir "./${names[toolchain_id]}/newlib/libm/libm.html" "${dirs[prefix_doc]}/html/libm"
+            # Remove target marker
+            remove_directory_marker $build_dir 'install' 'doc'
+            
+            # Build PDF documentation
+            make pdf
+            # Install documentation
+            mkdir -p "${dirs[prefix_doc]}/pdf"
+            cp "./${names[toolchain_id]}/newlib/libc/libc.pdf" "${dirs[prefix_doc]}/pdf/libc.pdf"
+            cp "./${names[toolchain_id]}/newlib/libm/libm.pdf" "${dirs[prefix_doc]}/pdf/libm.pdf"
 
-        # Back to the previous location
-        popd
+            # Build HTML documentation
+            make html
+            # Install documentation
+            mkdir -p "${dirs[prefix_doc]}/html"
+            deep_copy_dir "./${names[toolchain_id]}/newlib/libc/libc.html" "${dirs[prefix_doc]}/html/libc"
+            deep_copy_dir "./${names[toolchain_id]}/newlib/libm/libm.html" "${dirs[prefix_doc]}/html/libm"
 
-        log_info "Newlib documentation installed"
+            # Mark build directory with the coresponding marker
+            mark_directory $build_dir 'install' 'doc'
+                
+            # Back to the previous location
+            popd > /dev/null
 
-    }
+            log_info "Newlib documentation installed"
 
-    # ------------------------------------ Finalize -------------------------------------
-
-    # Copy <prefix> content to target's installation directory for future use
-    cp -rf ${dirs[prefix]}/* ${dirs[install_target]}/
+        # Otherwise, skip building
+        else
+            log_info "Skipping ${names[libc]} documentation installation"
+        fi
+    fi
 
     # ------------------------------------- Cleanup -------------------------------------
     
     # Restore environment
     restore_env_stack
-    # Remove library folder from prefix directory (useless)
-    rm -rf ${dirs[prefix]}/lib
     
 }

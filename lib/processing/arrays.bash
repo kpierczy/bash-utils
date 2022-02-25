@@ -3,7 +3,7 @@
 # @file     arrays.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 9th November 2021 2:36:24 pm
-# @modified Monday, 21st February 2022 11:45:45 pm
+# @modified Friday, 25th February 2022 1:50:31 am
 # @project  bash-utils
 # @brief
 #    
@@ -42,6 +42,25 @@
 # -------------------------------------------------------------------
 
 # ============================================================ Functions =========================================================== #
+
+# -------------------------------------------------------------------
+# @brief Checks whether @p array is empty
+# 
+# @param array
+#    name of the array to be checked
+#
+# @returns 
+#    @retval @c 0 if @p array is empty
+#    @retval @c 1 otherwise
+# -------------------------------------------------------------------
+function is_array_empty() {
+
+    # Arguments
+    local -n array="$1"
+    
+    # Check if array is empty
+    [[ "${#array[@]}" == "0" ]]
+}
 
 # -------------------------------------------------------------------
 # @brief Checks whether @p array contains an @p element
@@ -165,62 +184,144 @@ function print_array() {
     # ---------------- Parse arguments ----------------
 
     # Function's options
-    local -a opt_definitions=(
+    local -a __print_array_opt_definitions_=(
         '-n|--name',name,f
         '-s|--separator',separator
     )
     
     # Parse arguments to a named array
-    parse_options_s
+    local -a __print_array_args_=( "$@" )
+
+    # Prepare names hash arrays for positional arguments and parsed options
+    local -a __print_array_posargs_=()
+    local -A __print_array_options_=()
+
+    # Parse options
+    parseopts_s                        \
+        __print_array_args_            \
+        __print_array_opt_definitions_ \
+        __print_array_options_         \
+        __print_array_posargs_         \
+    || return 1
     
     # Parse arguments
-    local -n arr_="${posargs[0]}"
+    local -n __print_array_arr_="${__print_array_posargs_[0]}"
 
     # Parse elements' separator
-    local separator_=$'\n'
-    is_var_set options[separator] && 
-        separator_="${options[separator]}"
+    local __print_array_separator_=$'\n'
+    is_var_set __print_array_options_[separator] && 
+        __print_array_separator_="${__print_array_options_[separator]}"
 
     # ------------------------------------------------- 
 
-    local out_=''
+    local __print_array_out_=''
 
     # Print name of the array, if requested
-    is_var_set options[name] && {
+    is_var_set __print_array_options_[name] && {
         
         # If separator was given, end name with either space or a new line, depending on it
-        if is_var_set options[separator]; then
-            is_substring "${options[separator]}" $'\n' &&
-                out_="${posargs[0]}:\n" ||
-                out_="${posargs[0]}: "
+        if is_var_set __print_array_options_[separator]; then
+            is_substring "${__print_array_options_[separator]}" $'\n' &&
+                __print_array_out_="${__print_array_posargs_[0]}:\n" ||
+                __print_array_out_="${__print_array_posargs_[0]}: "
         # Else, use a newline (default) after the name
         else
-            out_="${posargs[0]}:\n"
+            __print_array_out_="${__print_array_posargs_[0]}:\n"
         fi
     }
 
     # If an array is empty, return
-    (( ${#arr_[@]} > 0 )) || {
+    (( ${#__print_array_arr_[@]} > 0 )) || {
 
         # Print name, if requested (without additional newline)
-        is_var_set options[name] && echo -e "${out_:0:-2}"
+        is_var_set __print_array_options_[name] && echo -e "${__print_array_out_:0:-2}"
 
         return
     } 
 
-    local elem_
+    local __print_array_elem_
 
     # Concatenate output string's elements
-    for elem_ in "${arr_[@]}"; do
-        out_="${out_}${elem_}${separator_}"
+    for __print_array_elem_ in "${__print_array_arr_[@]}"; do
+        __print_array_out_="${__print_array_out_}${__print_array_elem_}${__print_array_separator_}"
     done
 
     # Remove the last one separator
-    out_="${out_%%$separator_}"
+    __print_array_out_="${__print_array_out_%%$__print_array_separator_}"
 
     # Print result
-    echo -e "${out_}"
+    echo -e "${__print_array_out_}"
 
+}
+
+# -------------------------------------------------------------------
+# @brief Prints string defining an array with the given name
+#
+# @param array
+#    name fo the array to be printed
+# @options
+#    -l|--local if set, definition will be printed with `local`
+#               keyword ; otherwise, the `declare` keyword will be
+#               used
+# -------------------------------------------------------------------
+function print_array_def() {
+
+    # Arguments
+    local array_name
+
+    # ---------------- Parse arguments ----------------
+
+    # Function's options
+    local -a opt_definitions=(
+        '-l|--local',local,f
+        '-s|--separator',separator
+    )
+    
+    # Parse arguments to a named array
+    local -a args=( "$@" )
+
+    # Prepare names hash arrays for positional arguments and parsed options
+    local -a posargs=()
+    local -A options=()
+
+    # Parse options
+    parseopts_s         \
+        args            \
+        opt_definitions \
+        options         \
+        posargs         \
+    || return 1
+    
+    # Parse arguments
+    local array_name="${posargs[0]}"
+    
+    # ------------------------------------------------- 
+
+    local result=""
+
+    # Get refernce to the array 
+    local -n array="$array_name"
+
+    # Print name of the array
+    is_var_set opts[local] &&
+        result+="local   -a $array_name=" ||
+        result+="declare -a $array_name="
+    
+    # Open bracket
+    result+="( "
+    
+    local elem
+
+    # Print array
+    for elem in "${array[@]}"; do 
+        result+="\"$elem\" "
+    done
+
+    # Close bracket
+    result+=");"
+
+    # Print result
+    echo "$result"
 }
 
 # -------------------------------------------------------------------

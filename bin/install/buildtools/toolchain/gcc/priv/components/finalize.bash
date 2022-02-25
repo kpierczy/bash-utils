@@ -3,7 +3,7 @@
 # @file     finalize.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Thursday, 24th February 2022 5:17:49 am
+# @modified Friday, 25th February 2022 9:57:41 am
 # @project  bash-utils
 # @brief
 #    
@@ -17,12 +17,8 @@
 # ---------------------------------------------------------------------------------------
 # @brief Strip binary files as in "strip binary" form
 # 
-# @param name
-#    name of the library (lower case)
-# @environment
-#
-#   CONFIG_FLAGS  array containing configuration options for the build
-#   COMPILE_FLAGS array containing compilation options for the build
+# @param bin
+#    name of the binary
 # ---------------------------------------------------------------------------------------
 function strip_binary() {
     
@@ -135,21 +131,26 @@ function build_finalize() {
     is_var_set opts[with_package] || {
 
         # Remove package if already exists
-        rm -f ${opts[with_package]}
+        rm -f ${dirs[package]}/${opts[with_package]}
 
         # Enter build directory
-        pushd ${dirs[build]}
+        pushd ${dirs[build]} > /dev/null
         # Create symbolic link to installation dir
         mkdir -p ${dirs[package]}
         ln -s ${dirs[prefix]} ${dirs[package]}/$(basename ${dirs[prefix]})
         
         # Make the package tarball
-        tar cjf ${dirs[package]}/${opts[with_package]}                   \
-            --exclude="host-${opts[host]}"                               \
-            "${dirs[package]}/$(basename ${dirs[prefix]})/arm-none-eabi" \
-            "${dirs[package]}/$(basename ${dirs[prefix]})/bin"           \
-            "${dirs[package]}/$(basename ${dirs[prefix]})/lib"           \
+        tar cjf ${dirs[package]}/${opts[with_package]}                            \
+            --exclude="host-${opts[host]}"                                        \
+            "${dirs[package]}/$(basename ${dirs[prefix]})/${names[toolchain_id]}" \
+            "${dirs[package]}/$(basename ${dirs[prefix]})/bin"                    \
+            "${dirs[package]}/$(basename ${dirs[prefix]})/lib"                    \
             "${dirs[package]}/$(basename ${dirs[prefix]})/share"
 
+        # Remove symlink
+        rm -f ${dirs[package]}/$(basename ${dirs[prefix]})
+        # Restore directory
+        popd
+        
     }
 }

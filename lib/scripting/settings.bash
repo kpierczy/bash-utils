@@ -3,7 +3,7 @@
 # @file     settings.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 3:19:43 am
-# @modified Wednesday, 23rd February 2022 8:20:13 pm
+# @modified Thursday, 24th February 2022 6:39:37 pm
 # @project  bash-utils
 # @brief
 #    
@@ -18,7 +18,7 @@
 # @outputs shell options
 # -------------------------------------------------------------------
 function get_shell_options() {
-    echo $-
+    echo "$-"
 }
 
 # -------------------------------------------------------------------

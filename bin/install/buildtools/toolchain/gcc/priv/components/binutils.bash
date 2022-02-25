@@ -3,7 +3,7 @@
 # @file     binutils.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Thursday, 24th February 2022 6:01:06 am
+# @modified Friday, 25th February 2022 9:51:06 am
 # @project  bash-utils
 # @brief
 #    
@@ -17,7 +17,7 @@ function build_binutils() {
     # ---------------------------- Prepare predefined flags -----------------------------
 
     local -a CONFIG_FLAGS=()
-    local -a COMPILE_FLAGS=()
+    local -a BUILD_FLAGS=()
 
     # Prepare config flags
     CONFIG_FLAGS+=( "--build=${opts[build]}"                                )
@@ -36,31 +36,46 @@ function build_binutils() {
     # -------------------------------------- Build --------------------------------------
 
     # Build the library
-    build_component 'binutils'
+    build_component 'binutils' || return 1
 
     # ------------------------------- Build documentation -------------------------------
 
-    is_var_set opts[with_doc] && {
+    local build_dir=${dirs[build]}/${names[binutils]}
 
-        log_info "Installing binutils documentation..."
+    # If documentation is requrested
+    if is_var_set opts[with_doc]; then
+        # If documentation has not been already built (or if rebuilding is forced)
+        if ! is_directory_marked $build_dir 'install' 'doc' || is_var_set opts[force]; then
 
-        # Enter build directory
-        pushd ${dirs[build]}/${names[binutils]}
+            log_info "Installing binutils documentation..."
 
-        # Build documentation
-        make install-html install-pdf
+            # Enter build directory
+            pushd $build_dir > /dev/null
 
-        # Back to the previous location
-        popd
+            # Remove target marker
+            remove_directory_marker $build_dir 'install' 'doc'
+            # Build documentation
+            make install-html install-pdf
+            # Mark build directory with the coresponding marker
+            mark_directory $build_dir 'install' 'doc'
 
-        log_info "Binutils documentation installed"
+            # Back to the previous location
+            popd > /dev/null
 
-    }
+            log_info "Binutils documentation installed"
+
+        # Otherwise, skip building
+        else
+            log_info "Skipping ${names[binutils]} documentation installation"
+        fi
+    fi
 
     # ------------------------------------ Finalize -------------------------------------
 
     # Copy <prefix> content to target's installation directory for future use
-    cp -rf ${dirs[prefix]}/* ${dirs[install_target]}/
+    # (these binutils will be used by mid-stage-GCC that is built with --with-sysroot
+    # pointing to the target's installation directory)
+    deep_copy_dir ${dirs[prefix]} ${dirs[install_target]}
 
     # ------------------------------------- Cleanup -------------------------------------
     

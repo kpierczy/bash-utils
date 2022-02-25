@@ -3,7 +3,7 @@
 # @file     config.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 21st July 2021 10:50:38 pm
-# @modified Thursday, 22nd July 2021 10:54:29 pm
+# @modified Thursday, 24th February 2022 5:26:51 pm
 # @project  Winder
 # @brief
 #    

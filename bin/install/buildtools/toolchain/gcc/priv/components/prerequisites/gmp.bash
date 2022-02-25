@@ -1,40 +1,37 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     newlib-nano.bash
+# @file     gmp.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Thursday, 24th February 2022 3:12:39 am
+# @modified Friday, 25th February 2022 4:51:36 am
 # @project  bash-utils
 # @brief
 #    
-#    Installation routines for newlib-nano tool
+#    Installation routines for gmp library
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-function build_newlib_nano() {
+# Source common function
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/common.bash
+
+# ============================================================ Functions =========================================================== #
+
+function build_gmp() {
 
     # ---------------------------- Prepare predefined flags -----------------------------
 
     local -a CONFIG_FLAGS=()
-    local -a COMPILE_FLAGS=()
+    local -a BUILD_FLAGS=()
 
     # Prepare config flags
-    CONFIG_FLAGS+=( "--build=${opts[build]}"                         )
-    CONFIG_FLAGS+=( "--host=${opts[host]}"                           )
-    CONFIG_FLAGS+=( "--target=${opts[target]}"                       )
-    CONFIG_FLAGS+=( "--prefix=${dirs[prefix]}"                       )
-
-    # ------------------------------- Prepare environment -------------------------------
-
-    # Clear helper stack to put envs on
-    clear_env_stack
-    # Add compiled GCC's binaries to path
-    prepend_path_env_stack ${dirs[prefix]}/bin
+    CONFIG_FLAGS+=( "--build=${opts[build]}"               )
+    CONFIG_FLAGS+=( "--host=${opts[host]}"                 )
+    CONFIG_FLAGS+=( "--prefix=${dirs[install_host]}/usr"   )
 
     # -------------------------------------- Build --------------------------------------
 
     # Build the library
-    build_component 'libc'
-    
+    build_component 'gmp'
+
 }

@@ -3,7 +3,7 @@
 # @file     base.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 4:14:44 pm
-# @modified Friday, 5th November 2021 2:20:35 pm
+# @modified Thursday, 24th February 2022 6:40:59 pm
 # @project  bash-utils
 # @brief
 #    
@@ -20,6 +20,5 @@ disable_word_splitting
 is_sourced 1 && return
 # Enable strict mode
 strict_mode on
-
 # Run script
 main $@ 

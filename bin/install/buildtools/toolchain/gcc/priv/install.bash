@@ -3,7 +3,7 @@
 # @file     defaults.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 7th November 2021 3:08:11 pm
-# @modified Thursday, 24th February 2022 6:19:46 am
+# @modified Friday, 25th February 2022 8:16:45 am
 # @project  bash-utils
 # @brief
 #    
@@ -15,15 +15,15 @@
 # Source helper functions
 source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/helpers.bash
 # Source prerequisites-builders
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/prerequisites.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/prerequisites.bash
 # Source components-builders
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/binutils.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/gcc.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/libc.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/libgcc.bash
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/gdb.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/binutils.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/gcc.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/libc.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/libgcc.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/gdb.bash
 # Source build finalizer
-source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/components/finalize.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/finalize.bash
 
 # ============================================================ Constants =========================================================== #
 
@@ -41,7 +41,7 @@ declare -a TARGETS=(
     mpfr
     mpc
     isl
-    libelf
+    elfutils
     expat
     cloog
 )
@@ -114,6 +114,8 @@ function install_dependencies() {
 
     # Dependencies
     local -a dependencies=(
+
+        # Copied from ARM Embedded toolchain
         software-properties-common
         build-essential
         autoconf
@@ -141,6 +143,10 @@ function install_dependencies() {
         texlive
         texlive-extra-utils
         libncurses5-dev
+        # Dependcies of 'elfutils'
+        libarchive-dev
+        libmicrohttpd-dev
+        zstd
     )
 
     # Install dependencies
@@ -305,10 +311,16 @@ function prepare_names() {
     # Prepare targets' names
     for target in ${TARGETS[@]}; do
 
-        # Skip implicit targets
-        case $target in "libc_aux" | "libgcc" | "libcpp" ) continue;; esac
-        # Get target's name with given version
-        names[$target]="${target}-${versions[$target]}"
+        # Depending ont he target
+        case $target in 
+            
+            # Skip implicit targets
+            "libc_aux" | "libgcc" | "libcpp" ) continue;; 
+
+            # For other targets get target's name with given version
+            *) names[$target]="${target}-${versions[$target]}" ;;
+
+        esac
 
     done
 
@@ -335,6 +347,7 @@ function prepare_dirs() {
     # Prepare documentation folder
     dirs[prefix_doc]="${dirs[prefix]}/share/doc/${opts[basename]}-${opts[target]}"
     # Prepare paths to helper directories
+    dirs[basedir]="${opts[basedir]}"
     dirs[download]="${opts[basedir]}/download"
     dirs[package]="${opts[basedir]}/package"
     dirs[src]="${opts[basedir]}/src"
@@ -392,6 +405,130 @@ function prepare_flags() {
     
 }
 
+# ---------------------------------------------------------------------------------------
+# @brief Compiles comma-separated list of components to be build by the script
+#
+# @requires components
+#    hash array containing names of components associated with either '1' or '0'
+#    depending on whether the component needs to be built or not respectively
+# @requires components_list
+#    array containing names of components IN ORDER
+#
+# @outputs
+#     compiled list
+# ---------------------------------------------------------------------------------------
+function get_components_list() {
+
+    # Initialize output
+    local result=""
+
+    local comp
+
+    # Iterate over components
+    for comp in ${components_list[@]}; do
+        if [[ ${components[$comp]} == '1' ]]; then
+            result+="$comp, "
+        fi
+    done
+    
+    # Remove trailing comma
+    if [[ ${#result} != "0" ]]; then
+        result=${result::-2}
+    fi
+
+    # Output result
+    echo $result
+}
+
+
+# ---------------------------------------------------------------------------------------
+# @brief Prints summary of the build to be conducted to the user
+# ---------------------------------------------------------------------------------------
+function print_build_info() {
+
+    local comp
+
+    # Print list of components to be built
+    log_info "Building: $(set_bold)$(get_components_list)$(reset_colors)"
+    # Print folders info
+    log_info "Installation directory: $(set_bold)${dirs[prefix]}$(reset_colors)"
+    log_info "Working directory: $(set_bold)${dirs[basedir]}$(reset_colors)"
+
+    # Print versions info
+    log info "Versions:"
+    # Print dependencies' versions
+    [[ ${components[prerequisites]} == '1' ]] && {
+        log info "    - dependencies:"
+        log info "        - zlib: $(set_bold)$(set_fblue)${versions[zlib]}$(reset_colors)"
+        log info "        - gmp: $(set_bold)$(set_fblue)${versions[gmp]}$(reset_colors)"
+        log info "        - mpfr: $(set_bold)$(set_fblue)${versions[mpfr]}$(reset_colors)"
+        log info "        - mpc: $(set_bold)$(set_fblue)${versions[mpc]}$(reset_colors)"
+        log info "        - isl: $(set_bold)$(set_fblue)${versions[isl]}$(reset_colors)"
+        log info "        - elfutils: $(set_bold)$(set_fblue)${versions[elfutils]}$(reset_colors)"
+        log info "        - expat: $(set_bold)$(set_fblue)${versions[expat]}$(reset_colors)"
+        log info "        - cloog: $(set_bold)$(set_fblue)${versions[cloog]}$(reset_colors)"
+    }
+    # Print components versions
+    for comp in ${components_list[@]}; do
+        if [[ ${components[$comp]} == '1' ]]; then
+
+            local comp_name
+
+            # For libc, add implementation
+            [[ $comp == 'libc' ]] &&
+                comp_name="$comp (${opts[with_libc]})" ||
+                comp_name="$comp"
+            # Print components' versions
+            case $comp in
+                'prerequisites' | 'libgcc' | 'libcpp' ) ;;
+                * ) log info "    - $comp_name: $(set_bold)$(set_fgreen)${versions[$comp]}$(reset_colors)" ;;
+            esac
+        fi
+    done
+
+    # Prin whether build is forced
+    is_var_set opts[force] &&
+        log_info "Build type: $(set_bold)$(set_blue)forced$(reset_colors)" ||
+        log_info "Build type: $(set_bold)default$(reset_colors)"
+    # Prin whether documentation is built
+    is_var_set opts[with_doc] &&
+        log_info "Building documentation: $(set_bold)$(set_fblue)yes$(reset_colors)" ||
+        log_info "Building documentation: $(set_bold)no$(reset_colors)"
+
+    log_info
+}
+
+# ---------------------------------------------------------------------------------------
+# @brief Helper predicate function selecting environmental variables required for the 
+#    build
+# 
+# @returns
+#   @retval @c 0 if variable is not needed
+#   @retval @c 1 otherwise
+# ---------------------------------------------------------------------------------------
+function is_variable_useless_for_build() {
+
+    # Arguments
+    local var="$1"
+
+    # Choose variables to keep
+    case "$var" in
+
+        # 1st category [2]
+        WORKSPACE | SRC_VERSION ) return 1 ;;
+        # 2nd category [2]
+        DEJAGNU | DISPLAY | HOME | LD_LIBRARY_PATH | LOGNAME | PATH | PWD | SHELL | SHLVL | TERM | USER | USERNAME | XAUTHORITY ) return 1 ;;
+        # 3rd category [2]
+        com.apple.* ) return 1 ;;
+        # 4th category [2]
+        LSB_* | LSF_* | LS_* | EGO_* | HOSTTYPE | TMPDIR ) return 1 ;;
+        # Others (discard)
+        * ) return 0 ;;
+        
+    esac
+
+}
+
 # ========================================================= Implementation ========================================================= #
 
 function install() {
@@ -415,6 +552,9 @@ function install() {
     # Parse list of components to be built
     parse_components
 
+    # Evaluate `eval` string to possibly inject some entities into the script's namespace
+    eval "${envs[eval_string]}"
+
     # Parse versions strings
     prepare_versions
     # Parse download URLs
@@ -426,8 +566,13 @@ function install() {
     # Parse custom compilation/ocnfiguration flags
     prepare_flags
 
+    # Print build informations
+    print_build_info
+    # Clear environment
+    clean_env 'is_variable_useless_for_build'
+    export LANG=C
     local component
-
+    
     # Build subsequent components
     for component in ${components_list[@]}; do
 
@@ -436,10 +581,10 @@ function install() {
 
             # Wait for user's confirmation to build the next component
             is_var_set opts[autocontinue] || {
-                log_info "Press a key to start building of the $component"; read
+                log_info "$(set_bold)Press a key to start building of the $(set_fgreen)$component$(reset_colors)"; read -s
             }
 
-            log_info "Building $component ..."
+            log_info "Building $component..."
 
             # Get name of the corresponding function
             local build_cmd="build_$component"
@@ -451,7 +596,7 @@ function install() {
                 log_error "Failed to build $component"
                 return 1
             else
-                log_info "${component^} built"
+                log_info "$(set_bold)$(set_fgreen)${component^}$(set_fdefault) built$(reset_colors)"
             fi
         
         fi
@@ -460,7 +605,7 @@ function install() {
 
     # Wait for user's confirmation to build the next component
     is_var_set opts[autocontinue] || {
-        log_info "Press a key to start build's finalizing"; read
+        log_info "$(set_bold)Press a key to start build's finalizing$(reset_colors)"; read -s
     }
 
     log_info "Finalizing toolchain build..."

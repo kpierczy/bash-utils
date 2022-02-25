@@ -9,7 +9,7 @@
 8. [Debian SourceList](https://wiki.debian.org/SourcesList)
 9. [Repositories (Ubuntu)](https://help.ubuntu.com/community/Repositories)
 10. [Bash pattern matching](https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Pattern-Matching)
-
+11. [Advanced bash arrays usage](https://tldp.org/LDP/abs/html/arrays.html)
 # Libraries
 1. [bash-lib (cyberark)](https://github.com/cyberark/bash-lib)
 3. [bash-lib (aks)](https://github.com/aks/bash-lib)
