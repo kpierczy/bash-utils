@@ -3,7 +3,7 @@
 # @file     libgcc.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 9:52:46 am
+# @modified Friday, 25th February 2022 5:15:53 pm
 # @project  bash-utils
 # @brief
 #    
@@ -16,9 +16,9 @@ function build_libgcc() {
 
     # ------------------------------- Prepare environment -------------------------------
 
-    # Replace <prefix>/<toolchain-id>/usr with symbolic link to <basedir>/src [?]
+    # Replace <prefix>/<toolchain-id>/usr with symbolic link to <prefix>/<toolchain-id>
     rm -f "${dirs[prefix]}/${names[toolchain_id]}/usr"
-    ln -s "${dirs[src]}" "${dirs[prefix]}/${names[toolchain_id]}/usr"
+    ln -s . "${dirs[prefix]}/${names[toolchain_id]}/usr"
 
     # ---------------------------- Prepare predefined flags -----------------------------
 
@@ -36,7 +36,7 @@ function build_libgcc() {
     CONFIG_FLAGS+=( "--with-mpc=${dirs[install_host]}/usr"                                    )
     CONFIG_FLAGS+=( "--with-isl=${dirs[install_host]}/usr"                                    )
     CONFIG_FLAGS+=( "--with-libelf=${dirs[install_host]}/usr"                                 )
-    CONFIG_FLAGS+=( "--with-sysroot=${dirs[prefix]}/${dirs[target]}"                          )
+    CONFIG_FLAGS+=( "--with-sysroot=${dirs[prefix]}/${names[toolchain_id]}"                   )
     CONFIG_FLAGS+=( "--with-python-dir=share/${names[toolchain_base]}-${names[toolchain_id]}" )
     # Add documentation flags
     is_var_set opts[with_doc] && {
@@ -68,7 +68,11 @@ function build_libgcc() {
             # Remove target marker
             remove_directory_marker $build_dir 'install' 'libgcc-doc'
             # Build documentation
-            make install-html install-pdf
+            if is_var_set opts[verbose_tools]; then
+                make install-html install-pdf
+            else
+                make install-html install-pdf > /dev/null
+            fi
             # Mark build directory with the coresponding marker
             mark_directory $build_dir 'install' 'libgcc-doc'
             
@@ -94,7 +98,7 @@ function build_libgcc() {
     done
     # Remove unused include directory
     rm -rf ${dirs[prefix]}/include
-    # Remove unused 'usr' directory
+    # Remove symlink created before build
     rm -rf ${dirs[prefix]}/arm-none-eabi/usr
 
 }

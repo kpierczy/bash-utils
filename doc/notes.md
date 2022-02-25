@@ -10,10 +10,13 @@
 9. [Repositories (Ubuntu)](https://help.ubuntu.com/community/Repositories)
 10. [Bash pattern matching](https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#Pattern-Matching)
 11. [Advanced bash arrays usage](https://tldp.org/LDP/abs/html/arrays.html)
+12. [About Newlib](https://hackaday.com/2021/07/19/the-newlib-embedded-c-standard-library-and-how-to-use-it/)
+13. [GCC documentation](https://gcc.gnu.org/onlinedocs/)
+
 # Libraries
 1. [bash-lib (cyberark)](https://github.com/cyberark/bash-lib)
 3. [bash-lib (aks)](https://github.com/aks/bash-lib)
-2. [bashlog](https://github.com/Zordrak/bashlog)
+3. [bashlog](https://github.com/Zordrak/bashlog)
 
 # Others
 1. [diffoscope](https://diffoscope.org/)

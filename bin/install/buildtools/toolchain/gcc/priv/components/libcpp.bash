@@ -3,7 +3,7 @@
 # @file     libcpp.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 9:54:28 am
+# @modified Friday, 25th February 2022 5:15:56 pm
 # @project  bash-utils
 # @brief
 #    
@@ -12,16 +12,13 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-
-# ========================================================= Implementation ========================================================= #
-
 function build_libcpp() {
 
     # ------------------------------- Prepare environment -------------------------------
 
-    # Replace <prefix>/<toolchain-id>/usr with symbolic link to <basedir>/src [?]
+    # Replace <install>/target/<toolchain-id>/usr with symbolic link to <install>/target/<toolchain-id>
     rm -f "${dirs[install_target]}/${names[toolchain_id]}/usr"
-    ln -s "${dirs[src]}" "${dirs[install_target]}/${names[toolchain_id]}/usr"
+    ln -s . "${dirs[install_target]}/${names[toolchain_id]}/usr"
 
     # ---------------------------- Prepare predefined flags -----------------------------
 
@@ -32,14 +29,14 @@ function build_libcpp() {
     CONFIG_FLAGS+=( "--build=${opts[build]}"                                                  )
     CONFIG_FLAGS+=( "--host=${opts[host]}"                                                    )
     CONFIG_FLAGS+=( "--target=${opts[target]}"                                                )
-    CONFIG_FLAGS+=( "--prefix=${dirs[prefix]}"                                                )
+    CONFIG_FLAGS+=( "--prefix=${dirs[install_target]}"                                        )
     CONFIG_FLAGS+=( "--libexecdir=${dirs[prefix]}/lib"                                        )
     CONFIG_FLAGS+=( "--with-gmp=${dirs[install_host]}/usr"                                    )
     CONFIG_FLAGS+=( "--with-mpfr=${dirs[install_host]}/usr"                                   )
     CONFIG_FLAGS+=( "--with-mpc=${dirs[install_host]}/usr"                                    )
     CONFIG_FLAGS+=( "--with-isl=${dirs[install_host]}/usr"                                    )
     CONFIG_FLAGS+=( "--with-libelf=${dirs[install_host]}/usr"                                 )
-    CONFIG_FLAGS+=( "--with-sysroot=${dirs[install_host]}/${names[toolchain_id]}"             )
+    CONFIG_FLAGS+=( "--with-sysroot=${dirs[install_target]}/${names[toolchain_id]}"           )
     CONFIG_FLAGS+=( "--with-python-dir=share/${names[toolchain_base]}-${names[toolchain_id]}" )
     # Add documentation flags
     is_var_set opts[with_doc] && {
@@ -71,7 +68,11 @@ function build_libcpp() {
             # Remove target marker
             remove_directory_marker $build_dir 'install' 'libcpp-doc'
             # Build documentation
-            make install-html install-pdf
+            if is_var_set opts[verbose_tools]; then
+                make install-html install-pdf
+            else
+                make install-html install-pdf > /dev/null
+            fi
             # Mark build directory with the coresponding marker
             mark_directory $build_dir 'install' 'libcpp-doc'
             

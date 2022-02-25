@@ -3,7 +3,7 @@
 # @file     install.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:28:20 pm
-# @modified Friday, 25th February 2022 12:55:32 am
+# @modified Friday, 25th February 2022 1:26:49 pm
 # @project  bash-utils
 # @brief
 #    
@@ -53,7 +53,7 @@ declare -A opts_description=(
     [target]="toolchain's target machine"
     [autocontinue]="if set, the script will not ask user before building each next stage of toolchain"
     [with_doc]="if set, the additional documentation will be genrated"
-    [with_package]="if set, the <prefix> dir will be packaged into [tar.bz] package named [STR] placed in the <basedir>/package"
+    [with_package]="if set, the <prefix> dir will be packaged into [tar.bz] placed under [PATH]"
     [verbose_tools]="f set, the building process will be run with verbose output of building tools"
     [force]=$(echo \
         "If set to non-empty valule, COMPONENTS will be rebuilt even if " \

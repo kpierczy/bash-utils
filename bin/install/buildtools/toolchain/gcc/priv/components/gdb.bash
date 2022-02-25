@@ -3,7 +3,7 @@
 # @file     gdb.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 4:51:27 am
+# @modified Friday, 25th February 2022 5:16:01 pm
 # @project  bash-utils
 # @brief
 #    
@@ -17,7 +17,7 @@
 function build_gdb_impl() {
 
     # Arguments
-    local extra_config="$1"
+    local -n extra_config="$1"
 
     # ---------------------------- Prepare predefined flags -----------------------------
 
@@ -25,12 +25,13 @@ function build_gdb_impl() {
     local -a BUILD_FLAGS=()
 
     # Prepare config flags
-    CONFIG_FLAGS+=( "--build=${opts[build]}"                                                         )
-    CONFIG_FLAGS+=( "--host=${opts[host]}"                                                           )
-    CONFIG_FLAGS+=( "--target=${opts[target]}"                                                       )
-    CONFIG_FLAGS+=( "--prefix=${dirs[prefix]}"                                                       )
-    CONFIG_FLAGS+=( "--with-libexpat-prefix=${opts[basedir]}/install/host/usr"                       )
-    CONFIG_FLAGS+=( "--with-system-gdbinit=${opts[install_host]}/${names[toolchain_id]}/lib/gdbinit" )
+    CONFIG_FLAGS+=( "--build=${opts[build]}"                                                                 )
+    CONFIG_FLAGS+=( "--host=${opts[host]}"                                                                   )
+    CONFIG_FLAGS+=( "--target=${opts[target]}"                                                               )
+    CONFIG_FLAGS+=( "--prefix=${dirs[prefix]}"                                                               )
+    CONFIG_FLAGS+=( "--with-libexpat"                                                                        )
+    CONFIG_FLAGS+=( "--with-libexpat-prefix=${dirs[install_host]}/usr"                                       )
+    CONFIG_FLAGS+=( "--with-system-gdbinit=${dirs[prefix]}/${opts[host]}/${names[toolchain_id]}/lib/gdbinit" )
     # Add documentation flags
     is_var_set opts[with_doc] && {
         CONFIG_FLAGS+=( "--infodir=${dirs[prefix_doc]}/info" )
@@ -38,6 +39,8 @@ function build_gdb_impl() {
         CONFIG_FLAGS+=( "--htmldir=${dirs[prefix_doc]}/html" )
         CONFIG_FLAGS+=( "--pdfdir=${dirs[prefix_doc]}/pdf"   )
     }
+    # Add extra config
+    CONFIG_FLAGS+=( ${extra_config[@]} )
 
     # -------------------------------------- Build --------------------------------------
 
@@ -61,7 +64,11 @@ function build_gdb_impl() {
             # Remove target marker
             remove_directory_marker $build_dir 'install' 'doc'
             # Build documentation
-            make install-html install-pdf
+            if is_var_set opts[verbose_tools]; then
+                make install-html install-pdf
+            else
+                make install-html install-pdf > /dev/null
+            fi
             # Mark build directory with the coresponding marker
             mark_directory $build_dir 'install' 'doc'        
 
@@ -82,10 +89,20 @@ function build_gdb_impl() {
 
 function build_gdb() {
 
+    local -a gdb_extra_config=(
+        "--with-python=no"
+    )
+
     # First we build GDB without python support
-    build_gdb_impl "--with-python=no"
+    build_gdb_impl gdb_extra_config
+
+    local -a gdb_extra_config=(
+        "--with-python=yes"
+        "--program-prefix=${names[toolchain_id]}-"
+        "--program-suffix=-py"
+    )
 
     # Then build gdb with python support
-    build_gdb_impl "--with-python=yes --program-prefix=${names[toolchain_id]}-  --program-suffix=-py"
+    build_gdb_impl gdb_extra_config
 
 }

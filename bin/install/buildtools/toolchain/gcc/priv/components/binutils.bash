@@ -3,7 +3,7 @@
 # @file     binutils.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 9:51:06 am
+# @modified Friday, 25th February 2022 5:16:08 pm
 # @project  bash-utils
 # @brief
 #    
@@ -55,7 +55,11 @@ function build_binutils() {
             # Remove target marker
             remove_directory_marker $build_dir 'install' 'doc'
             # Build documentation
-            make install-html install-pdf
+            if is_var_set opts[verbose_tools]; then
+                make install-html install-pdf
+            else
+                make install-html install-pdf > /dev/null
+            fi
             # Mark build directory with the coresponding marker
             mark_directory $build_dir 'install' 'doc'
 
@@ -81,6 +85,22 @@ function build_binutils() {
     
     # Remove library folder from prefix directory (useless)
     rm -rf ${dirs[prefix]}/lib
+
+    # @note At the moment, every run of the binutils' building script results in
+    # deleting <prefix>/lib folder. This results in need of reinstalling further
+    # components. This can be fixed by providing --shoft-archieve-extraction
+    # flag to the `download_build_and_install` function that stops re-extraction
+    # when one with the target name already exists so that binutil's archieve is
+    # not re-extracted every time. Then `download_build_and_install` could return
+    # @c 2 status code when skipping all actions and only on @c <prefix>/lib dir
+    # directory would be deleted. As a temproary workaround remove .installed
+    # markers of other components on every run ( @fixme )
+    rm -f ${dirs[build]}/gcc-base-${versions[gcc]}/.installed
+    rm -f ${dirs[build]}/newlib-${versions[libc]}/.installed
+    rm -f ${dirs[build]}/newlib-nano-${versions[libc]}/.installed
+    rm -f ${dirs[build]}/gcc-lib-${versions[gcc]}/.installed
+    rm -f ${dirs[build]}/gcc-libcpp-${versions[gcc]}/.installed
+    rm -f ${dirs[build]}/gdb-${versions[gdb]}/.installed
 
 }
 

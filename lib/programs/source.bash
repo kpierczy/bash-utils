@@ -3,7 +3,7 @@
 # @file     source.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 10th November 2021 9:36:34 pm
-# @modified Friday, 25th February 2022 2:57:18 am
+# @modified Friday, 25th February 2022 4:05:56 pm
 # @project  bash-utils
 # @brief
 #    
@@ -426,26 +426,26 @@ function perform_build_action() {
 
     is_var_set LOG_TABLE[INIT] && log_info "${LOG_TABLE[INIT]}"
 
-    local ret_
+    # Compile command to be run
+    local cmd=$(trimm_string "$action_tool_ $target_")
     
+    local op
+    
+    # Log action with the whole list of flags
+    if is_var_set action_flags_ref; then
+        log_info "$(set_bold)Running '$(set_fgreen)$cmd$(reset_colors)'$(set_bold) with following options:$(reset_colors)"
+        for op in "${action_flags_ref[@]}"; do
+            log_info "  $(set_bold)$op$(reset_colors)"
+        done
+    # Skip flags, if not given
+    else
+        log_info "Running '$(set_bold)$(set_fgreen)$cmd$(reset_colors)'"
+    fi
+
+    local ret_
+
     # Perform action on the build directory
     if is_var_set options[verbose_tools]; then
-
-        local op
-
-        # Compile command to be run
-        local cmd=$(trimm_string "$action_tool_ $target_")
-        
-        # Log action with the whole list of flags
-        if is_var_set action_flags_ref; then
-            log_info "$(set_bold)Running '$(set_fgreen)$cmd$(reset_colors)'$(set_bold) with following options:$(reset_colors)"
-            for op in "${action_flags_ref[@]}"; do
-                log_info "  $(set_bold)$op$(reset_colors)"
-            done
-        # Skip flags, if not given
-        else
-            log_info "Running '$(set_bold)$(set_fgreen)$cmd$(reset_colors)'"
-        fi
 
         # Echo raw command to be run
         echo

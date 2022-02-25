@@ -3,7 +3,7 @@
 # @file     gcc-arm-none-eabi.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 6:16:17 pm
-# @modified Friday, 25th February 2022 8:45:39 am
+# @modified Friday, 25th February 2022 4:37:32 pm
 # @project  bash-utils
 # @brief
 #    
@@ -362,7 +362,7 @@ function install() {
         "
     )
     
-    # Configuration of the binutils (@note '\\\$' in --with-gdb-datadir to safely pass $ when the string is passed to `eval`)
+    # Configuration of the gdb (@note '\\\$' in --with-gdb-datadir to safely pass $ when the string is passed to `eval`)
     declare -a TOOLCHAIN_GDB_CONFIG_FLAGS=(
         "--disable-nls"
         "--disable-sim"
@@ -370,10 +370,15 @@ function install() {
         "--disable-binutils"
         "--disable-ld"
         "--disable-gprof"
-        "--with-libexpat"
         "--with-lzma=no"
         "--with-gdb-datadir='\''\\\${prefix}'\''/arm-none-eabi/share/gdb'"
         "--with-pkgversion=$PKG_VERSION"
+    )
+    # Build environment of gdb
+    declare -A TOOLCHAIN_GDB_BUILD_ENV=(
+        ['CFLAGS']="${ENV_CFLAGS[@]}"
+        ['CPPFLAGS']="${ENV_CPPFLAGS[@]}"
+        ['LDFLAGS']="${ENV_LDFLAGS[@]}"
     )
 
     # ----------------------------------- Building --------------------------------------
@@ -391,13 +396,14 @@ function install() {
     is_var_set opts[autocontinue] && build_script_flags+=( "--autocontinue" )
 
     # Install toolchain
-    $BASH_UTILS_BIN_HOME/install/buildtools/toolchain/gcc.bash \
-        --with-libc='newlib-nano'                              \
-        --target='arm-none-eabi'                               \
-        --with-doc                                             \
-        --prefix=${opts[prefix]}                               \
-        --basedir=${opts[basedir]}                             \
-        ${build_script_flags[@]}                               ||
+    $BASH_UTILS_BIN_HOME/install/buildtools/toolchain/gcc.bash                                   \
+        --with-libc='newlib-nano'                                                                \
+        --target='arm-none-eabi'                                                                 \
+        --with-doc                                                                               \
+        --prefix=${opts[prefix]}                                                                 \
+        --basedir=${opts[basedir]}                                                               \
+        --with-package=${opts[basedir]}/package/gcc-arm-none-eabi-$TOOLCHAIN_GCC_VERSION.tar.bz2 \
+        ${build_script_flags[@]}                                                                 ||
     {
         log_error "Failed to build the toolchain"
         return 1

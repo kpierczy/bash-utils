@@ -3,7 +3,7 @@
 # @file     common.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 8:43:58 am
+# @modified Friday, 25th February 2022 5:07:44 pm
 # @project  bash-utils
 # @brief
 #    
@@ -76,25 +76,21 @@ function build_component() {
     local -n specific_build_env_ref=${build_env[$name]}
 
     # Write down a common log when custom building environment is set
-    if is_var_set opts[verbose_tools]; then
-        if ! is_array_empty 'common_build_env_ref' || ! is_array_empty 'specific_build_env_ref'; then
-            log_info "$(set_bold)Setting build environment...$(reset_colors)"
-        fi
+    if ! is_array_empty 'common_build_env_ref' || ! is_array_empty 'specific_build_env_ref'; then
+        log_info "$(set_bold)Setting build environment...$(reset_colors)"
     fi
     
     # Iterate over common build environment variables and set it
     if ! is_array_empty 'common_build_env_ref'; then
         for env_name in ${!common_build_env_ref[@]}; do
-            is_var_set opts[verbose_tools] &&
-                log_info "  $(set_bold)[$(set_fcolor 208)$env_name$(reset_colors)]$(set_bold)='${common_build_env_ref[$env_name]}'$(reset_colors)"
+            log_info "  $(set_bold)[$(set_fcolor 208)$env_name$(reset_colors)]$(set_bold)='${common_build_env_ref[$env_name]}'$(reset_colors)"
             push_env_stack $env_name ${common_build_env_ref[$env_name]}
         done
     fi
     # Iterate over specific build environment variables and set it
     if ! is_array_empty 'specific_build_env_ref'; then
         for env_name in ${!specific_build_env_ref[@]}; do
-            is_var_set opts[verbose_tools] &&
-                log_info "  $(set_bold)[$(set_fcolor 208)$env_name$(reset_colors)]$(set_bold)='${specific_build_env_ref[$env_name]}'$(reset_colors)"
+            log_info "  $(set_bold)[$(set_fcolor 208)$env_name$(reset_colors)]$(set_bold)='${specific_build_env_ref[$env_name]}'$(reset_colors)"
             push_env_stack $env_name ${specific_build_env_ref[$env_name]}
         done
     fi

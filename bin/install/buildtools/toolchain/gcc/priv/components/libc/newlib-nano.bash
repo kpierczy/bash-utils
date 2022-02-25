@@ -3,7 +3,7 @@
 # @file     newlib-nano.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 8:36:29 am
+# @modified Friday, 25th February 2022 4:24:08 pm
 # @project  bash-utils
 # @brief
 #    
@@ -20,10 +20,10 @@ function build_newlib_nano() {
     local -a BUILD_FLAGS=()
 
     # Prepare config flags
-    CONFIG_FLAGS+=( "--build=${opts[build]}"                         )
-    CONFIG_FLAGS+=( "--host=${opts[host]}"                           )
-    CONFIG_FLAGS+=( "--target=${opts[target]}"                       )
-    CONFIG_FLAGS+=( "--prefix=${dirs[prefix]}"                       )
+    CONFIG_FLAGS+=( "--build=${opts[build]}"           )
+    CONFIG_FLAGS+=( "--host=${opts[host]}"             )
+    CONFIG_FLAGS+=( "--target=${opts[target]}"         )
+    CONFIG_FLAGS+=( "--prefix=${dirs[install_target]}" )
 
     # ------------------------------- Prepare environment -------------------------------
 

@@ -3,7 +3,7 @@
 # @file     defaults.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 7th November 2021 3:08:11 pm
-# @modified Friday, 25th February 2022 8:16:45 am
+# @modified Friday, 25th February 2022 1:31:32 pm
 # @project  bash-utils
 # @brief
 #    
@@ -21,6 +21,7 @@ source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/bin
 source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/gcc.bash
 source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/libc.bash
 source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/libgcc.bash
+source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/libcpp.bash
 source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/gdb.bash
 # Source build finalizer
 source $BASH_UTILS_HOME/bin/install/buildtools/toolchain/gcc/priv/components/finalize.bash
@@ -611,7 +612,7 @@ function install() {
     log_info "Finalizing toolchain build..."
     
     # Finalize build
-    build_finalize
+    build_finalize && ret=$? || ret=$?
 
     # Verify result of building
     if [[ "$ret" != "0" ]]; then
