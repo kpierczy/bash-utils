@@ -3,7 +3,7 @@
 # @file     gdb.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 5:16:01 pm
+# @modified Saturday, 26th February 2022 4:24:08 pm
 # @project  bash-utils
 # @brief
 #    
@@ -87,6 +87,11 @@ function build_gdb_impl() {
 
 # ========================================================= Implementation ========================================================= #
 
+# ---------------------------------------------------------------------------------------
+# @brief Builds GDB debugger and installs into the <prefix> directory. `gdbinit` system
+#   files are written into the <prefix>/<host>/<toolchain_id>/lib/gdbinit directory.
+#   GDB is built twice - with and without support for Python GDB
+# ---------------------------------------------------------------------------------------
 function build_gdb() {
 
     local -a gdb_extra_config=(

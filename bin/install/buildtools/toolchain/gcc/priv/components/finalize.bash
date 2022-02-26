@@ -3,7 +3,7 @@
 # @file     finalize.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 1:47:23 pm
+# @modified Saturday, 26th February 2022 4:28:04 pm
 # @project  bash-utils
 # @brief
 #    
@@ -36,6 +36,15 @@ function strip_binary() {
 
 # ========================================================= Implementation ========================================================= #
 
+# ---------------------------------------------------------------------------------------
+# @brief Finalizes build of the GCC toolchain by:
+#
+#     - cleaning up the installation directory  
+#     - stripping host's binary objects (on non-debug builds)
+#     - stripping target's binary objects (on non-debug builds)
+#     - packaging buitl toolchain into the archieve (if requested)
+# 
+# ---------------------------------------------------------------------------------------
 function build_finalize() {
 
     # ------------------------------------- Cleanup -------------------------------------
@@ -114,7 +123,6 @@ function build_finalize() {
                     $target_lib                \
                 || true
             done
-
             # Strip objects
             for target_obj in $(find ${dirs[prefix]}/${names[toolchain_id]}/lib -name \*.o); do
                 ${names[toolchain_id]}-objcopy \
@@ -122,17 +130,15 @@ function build_finalize() {
                     $target_lib                \
                 || true
             done
-
             # Strip libgcc static libraries
-            for target_lib in $(find ${dirs[prefix]}/${names[toolchain_id]}-none-eabi/$GCC_VER -name \*.a); do
+            for target_lib in $(find ${dirs[prefix]}/lib/gcc/${names[toolchain_id]}/${versions[gcc]} -name \*.a); do
                 ${names[toolchain_id]}-objcopy \
                     $sym_to_strip              \
                     $target_lib                \
                 || true
             done
-
             # Strip libgcc objects
-            for target_obj in $(find ${dirs[prefix]}/${names[toolchain_id]}-none-eabi/$GCC_VER -name \*.o); do
+            for target_obj in $(find ${dirs[prefix]}/lib/gcc/${names[toolchain_id]}/${versions[gcc]} -name \*.o); do
                 ${names[toolchain_id]}-objcopy \
                     $sym_to_strip              \
                     $target_lib                \

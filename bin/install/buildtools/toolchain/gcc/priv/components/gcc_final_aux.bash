@@ -1,18 +1,28 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     libcpp.bash
+# @file     gcc_final_aux.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 5:15:56 pm
+# @modified Saturday, 26th February 2022 7:15:08 pm
 # @project  bash-utils
 # @brief
 #    
-#    Installation routines for libcpp tool
+#    Installation routines for final GCC toolchain (auxiliary build)
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-function build_libcpp() {
+# ---------------------------------------------------------------------------------------
+# @brief Builds second part of the GCC compiler including support for C++ compilation
+#    and gcc support library. Built files are installed into the 
+#    <basedir>/install/target location. Sysroot of the
+#    compiled package is set to <basedir>/install/target<toolchain_id> 
+#    (e.g. <basedir>/install/target/arm-none-eabi). This way, the and c++ std library
+#    are built with the `nano` version of the upstream script. Next, the upstream script
+#    can copy these compiled files into the <prefix> directory and mark them as 
+#    'nano-version'. 
+# ---------------------------------------------------------------------------------------
+function build_gcc_final_aux() {
 
     # ------------------------------- Prepare environment -------------------------------
 
@@ -49,42 +59,6 @@ function build_libcpp() {
     # -------------------------------------- Build --------------------------------------
 
     # Build the library
-    build_component 'gcc' 'gcc-libcpp' || return 1
-
-    # ------------------------------- Build documentation -------------------------------
-
-    local build_dir="${dirs[build]}/gcc-libcpp-${versions[gcc]}"
-
-    # If documentation is requrested
-    if is_var_set opts[with_doc]; then
-        # If documentation has not been already built (or if rebuilding is forced)
-        if ! is_directory_marked $build_dir 'install' 'libcpp-doc' || is_var_set opts[force]; then
-
-            log_info "Installing libgcc documentation..."
-
-            # Enter build directory
-            pushd $build_dir > /dev/null
-
-            # Remove target marker
-            remove_directory_marker $build_dir 'install' 'libcpp-doc'
-            # Build documentation
-            if is_var_set opts[verbose_tools]; then
-                make install-html install-pdf
-            else
-                make install-html install-pdf > /dev/null
-            fi
-            # Mark build directory with the coresponding marker
-            mark_directory $build_dir 'install' 'libcpp-doc'
-            
-            # Back to the previous location
-            popd > /dev/null
-
-            log_info "Libgcc documentation installed"
-
-        # Otherwise, skip building
-        else
-            log_info "Skipping ${names[gcc]} libc++ documentation installation"
-        fi
-    fi
+    build_component 'gcc_final_aux' || return 1
 
 }

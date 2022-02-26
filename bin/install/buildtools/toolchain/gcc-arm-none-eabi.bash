@@ -3,7 +3,7 @@
 # @file     gcc-arm-none-eabi.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 6:16:17 pm
-# @modified Friday, 25th February 2022 4:37:32 pm
+# @modified Saturday, 26th February 2022 6:01:15 pm
 # @project  bash-utils
 # @brief
 #    
@@ -90,7 +90,7 @@ function copy_multi_libs() {
 function install() {
 
     # Build version string
-    declare PKG_VERSION="GNU ARM Embedded Toolchain $TOOLCHAIN_GCC_VERSION"
+    declare PKG_VERSION="GNU ARM Embedded Toolchain $TOOLCHAIN_GCC_DEFAULT_VERSION"
 
     # ------------------------- Prepare helper configuration ----------------------------
 
@@ -178,8 +178,8 @@ function install() {
         "--disable-nls"
     )
 
-    # Libelf configruation
-    declare -a TOOLCHAIN_LIBELF_CONFIG_FLAGS=(
+    # Elfutils (libelf) configruation
+    declare -a TOOLCHAIN_ELFUTILS_CONFIG_FLAGS=(
         "--disable-shared"
         "--disable-nls"
     )
@@ -215,8 +215,8 @@ function install() {
         ['LDFLAGS']="${ENV_LDFLAGS[@]}"
     )
 
-    # Configuration of the gcc
-    declare -a TOOLCHAIN_GCC_CONFIG_FLAGS=(
+    # Configuration of the gcc (base build)
+    declare -a TOOLCHAIN_GCC_BASE_CONFIG_FLAGS=(
         "--enable-languages=c"
         "--disable-decimal-float"
         "--disable-libffi"
@@ -238,7 +238,7 @@ function install() {
         "${MULTILIB_LIST[@]}"
     )
     # Build environment of the gcc
-    declare -A TOOLCHAIN_GCC_BUILD_ENV=(
+    declare -A TOOLCHAIN_GCC_BASE_BUILD_ENV=(
         ['CXXFLAGS']="${BUILD_OPTIONS[@]}"
     )
 
@@ -292,8 +292,8 @@ function install() {
     is_var_set opts[debug] &&
         TOOLCHAIN_LIBC_AUX_BUILD_ENV['CFLAGS_FOR_TARGET']+=" -g"
 
-    # Configuration of the libgcc
-    declare -a TOOLCHAIN_LIBGCC_CONFIG_FLAGS=(
+    # Configuration of the GCC final build (with newlib)
+    declare -a TOOLCHAIN_GCC_FINAL_CONFIG_FLAGS=(
         "--enable-languages=c,c++"
         "--enable-plugins"
         "--disable-decimal-float"
@@ -315,8 +315,8 @@ function install() {
         "--with-pkgversion=$PKG_VERSION"
         "${MULTILIB_LIST[@]}"
     )
-    # Build environment of libc (newlib-nano) [@note Originally these flags was passed directly to `make`]
-    declare -A TOOLCHAIN_LIBGCC_BUILD_ENV=(
+    # Build environment of GCC final build (with newlib) [@note Originally these flags was passed directly to `make`]
+    declare -A TOOLCHAIN_GCC_FINAL_BUILD_ENV=(
         ['CXXFLAGS']="${BUILD_OPTIONS[@]}"
         ['INHIBIT_LIBC_CFLAGS']="-DUSE_TM_CLONE_REGISTRY=0"
     )
@@ -327,8 +327,8 @@ function install() {
     #     approach is have a t-* to set this flag via CRTSTUFF_T_CFLAGS
     # ----------------------------------------------------------------------
 
-    # Configuration of the libcpp
-    declare -a TOOLCHAIN_LIBCPP_CONFIG_FLAGS=(
+    # Configuration of the GCC final build (with newlib-nano)
+    declare -a TOOLCHAIN_GCC_FINAL_AUX_CONFIG_FLAGS=(
         "--enable-languages=c,c++"
         "--disable-decimal-float"
         "--disable-libffi"
@@ -350,8 +350,8 @@ function install() {
         "--with-pkgversion=$PKG_VERSION"
         "${MULTILIB_LIST[@]}"
     )
-    # Build environment of libcpp [@note Originally these flags was passed directly to `make`]
-    declare -A TOOLCHAIN_LIBCPP_BUILD_ENV=(
+    # Build environment of GCC final build (with newlib-nano) [@note Originally these flags was passed directly to `make`]
+    declare -A TOOLCHAIN_GCC_FINAL_AUX_BUILD_ENV=(
         ['CXXFLAGS']="${BUILD_OPTIONS[@]}"
         ['CXXFLAGS_FOR_TARGET']="
             -g
@@ -396,14 +396,14 @@ function install() {
     is_var_set opts[autocontinue] && build_script_flags+=( "--autocontinue" )
 
     # Install toolchain
-    $BASH_UTILS_BIN_HOME/install/buildtools/toolchain/gcc.bash                                   \
-        --with-libc='newlib-nano'                                                                \
-        --target='arm-none-eabi'                                                                 \
-        --with-doc                                                                               \
-        --prefix=${opts[prefix]}                                                                 \
-        --basedir=${opts[basedir]}                                                               \
-        --with-package=${opts[basedir]}/package/gcc-arm-none-eabi-$TOOLCHAIN_GCC_VERSION.tar.bz2 \
-        ${build_script_flags[@]}                                                                 ||
+    $BASH_UTILS_BIN_HOME/install/buildtools/toolchain/gcc.bash                                           \
+        --with-libc='newlib'                                                                             \
+        --target='arm-none-eabi'                                                                         \
+        --with-doc                                                                                       \
+        --prefix=${opts[prefix]}                                                                         \
+        --basedir=${opts[basedir]}                                                                       \
+        --with-package=${opts[basedir]}/package/gcc-arm-none-eabi-$TOOLCHAIN_GCC_DEFAULT_VERSION.tar.bz2 \
+        ${build_script_flags[@]}                                                                         ||
     {
         log_error "Failed to build the toolchain"
         return 1
@@ -412,7 +412,7 @@ function install() {
     # ----------------------------------- Finalize --------------------------------------
 
     # Get destination of the build
-    local install_dir="${opts[prefix]}/gcc-arm-none-eabi-$TOOLCHAIN_GCC_VERSION"
+    local install_dir="${opts[prefix]}/gcc-arm-none-eabi-$TOOLCHAIN_GCC_DEFAULT_VERSION"
 
     # Copy nano's multilibs into the destination directory
     copy_multi_libs                                                    \

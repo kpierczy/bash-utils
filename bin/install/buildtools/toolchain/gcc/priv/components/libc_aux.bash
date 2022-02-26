@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     libc.bash
+# @file     libc_aux.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Saturday, 26th February 2022 7:08:46 pm
+# @modified Saturday, 26th February 2022 7:08:38 pm
 # @project  bash-utils
 # @brief
 #    
-#    Installation routines for libc library
+#    Installation routines for libc library (auxiliary build)
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
@@ -23,9 +23,9 @@ function build_libc() {
 
     # Dispatch build depending on the library version
     case ${opts[with_libc]} in
-        'glibc'       ) build_glibc  'base' ;;
-        'newlib'      ) build_newlib 'base' ;;
-        'ulibc'       ) build_ulibc  'base' ;;
+        'glibc'       ) build_glibc  'aux' ;;
+        'newlib'      ) build_newlib 'aux' ;;
+        'ulibc'       ) build_ulibc  'aux' ;;
     esac
 
 }

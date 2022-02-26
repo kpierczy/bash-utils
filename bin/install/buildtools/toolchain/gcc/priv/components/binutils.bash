@@ -3,15 +3,21 @@
 # @file     binutils.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Friday, 25th February 2022 5:16:08 pm
+# @modified Saturday, 26th February 2022 7:03:28 pm
 # @project  bash-utils
 # @brief
 #    
-#    Installation routines for binutils tool
+#    Installation routines for `binutils` toolset
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
+# ---------------------------------------------------------------------------------------
+# @brief Builds `binutils` components of the toolchain and installs into the <prefix>
+#   directory. Optionally builds both PDF and HTML documentation of the `binutils`.
+#   Sysroot of the compiled package is set to <prefix><toolchain_id> (e.g. <prefix>/
+#   arm-none-eabi)
+# ---------------------------------------------------------------------------------------
 function build_binutils() {
 
     # ---------------------------- Prepare predefined flags -----------------------------
@@ -40,20 +46,18 @@ function build_binutils() {
 
     # ------------------------------- Build documentation -------------------------------
 
-    local build_dir=${dirs[build]}/${names[binutils]}
-
     # If documentation is requrested
     if is_var_set opts[with_doc]; then
         # If documentation has not been already built (or if rebuilding is forced)
-        if ! is_directory_marked $build_dir 'install' 'doc' || is_var_set opts[force]; then
+        if ! is_directory_marked ${dirs[binutils_build]} 'install' 'doc' || is_var_set opts[force]; then
 
             log_info "Installing binutils documentation..."
 
             # Enter build directory
-            pushd $build_dir > /dev/null
+            pushd ${dirs[binutils_build]} > /dev/null
 
             # Remove target marker
-            remove_directory_marker $build_dir 'install' 'doc'
+            remove_directory_marker ${dirs[binutils_build]} 'install' 'doc'
             # Build documentation
             if is_var_set opts[verbose_tools]; then
                 make install-html install-pdf
@@ -61,7 +65,7 @@ function build_binutils() {
                 make install-html install-pdf > /dev/null
             fi
             # Mark build directory with the coresponding marker
-            mark_directory $build_dir 'install' 'doc'
+            mark_directory ${dirs[binutils_build]} 'install' 'doc'
 
             # Back to the previous location
             popd > /dev/null
@@ -95,12 +99,12 @@ function build_binutils() {
     # @c 2 status code when skipping all actions and only on @c <prefix>/lib dir
     # directory would be deleted. As a temproary workaround remove .installed
     # markers of other components on every run ( @fixme )
-    rm -f ${dirs[build]}/gcc-base-${versions[gcc]}/.installed
-    rm -f ${dirs[build]}/newlib-${versions[libc]}/.installed
-    rm -f ${dirs[build]}/newlib-nano-${versions[libc]}/.installed
-    rm -f ${dirs[build]}/gcc-lib-${versions[gcc]}/.installed
-    rm -f ${dirs[build]}/gcc-libcpp-${versions[gcc]}/.installed
-    rm -f ${dirs[build]}/gdb-${versions[gdb]}/.installed
+    rm -f ${dirs[gcc_base_build]}/.installed
+    rm -f ${dirs[libc_build]}/.installed
+    rm -f ${dirs[libc_aux_build]}/.installed
+    rm -f ${dirs[gcc_final_build]}/.installed
+    rm -f ${dirs[gcc_final_aux_build]}/.installed
+    rm -f ${dirs[gdb_build]}/.installed
 
 }
 
