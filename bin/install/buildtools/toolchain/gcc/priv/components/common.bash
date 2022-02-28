@@ -3,7 +3,7 @@
 # @file     common.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Saturday, 26th February 2022 6:59:58 pm
+# @modified Monday, 28th February 2022 1:57:16 pm
 # @project  bash-utils
 # @brief
 #    
@@ -68,43 +68,90 @@ function build_component() {
         log_info "$(set_bold)Setting build environment...$(reset_colors)"
     fi
     
-    # Iterate over common build environment variables and set it
-    if ! is_array_empty 'common_build_env_ref'; then
-        for env_name in ${!common_build_env_ref[@]}; do
-            log_info "  $(set_bold)[$(set_fcolor 208)$env_name$(reset_colors)]$(set_bold)='${common_build_env_ref[$env_name]}'$(reset_colors)"
-            push_env_stack $env_name ${common_build_env_ref[$env_name]}
-        done
-    fi
-    # Iterate over specific build environment variables and set it
-    if ! is_array_empty 'specific_build_env_ref'; then
-        for env_name in ${!specific_build_env_ref[@]}; do
-            log_info "  $(set_bold)[$(set_fcolor 208)$env_name$(reset_colors)]$(set_bold)='${specific_build_env_ref[$env_name]}'$(reset_colors)"
-            push_env_stack $env_name ${specific_build_env_ref[$env_name]}
-        done
-    fi
+    local build_env 
+
+    # Iterate over build environments variables and set them
+    for build_env in 'common_build_env_ref' 'specific_build_env_ref'; do
+
+        # Get reference to the array
+        local -n build_env_ref=$build_env
+
+        local env_name
+
+        # Check whether any env is defined
+        if ! is_array_empty "$build_env"; then
+
+            # Iterate over build environment variables and set them
+            for env_name in ${!build_env_ref[@]}; do
+
+                # Enable word splitting by-newline
+                localize_word_splitting
+                push_stack "$IFS"
+                IFS=$'\n'
+
+                # Split environmental variable at newlines
+                local -a env_vars=( ${build_env_ref[$env_name]} )
+
+                # If variable consist of one line, print it just like that
+                if (( ${#env_vars[@]} <= 1 )); then
+
+                    # Print log
+                    log_info "  $(set_bold)[$(set_fcolor 208)$env_name$(reset_colors)]$(set_bold)=$(trimm_string ${env_vars[0]})$(reset_colors)"
+
+                # Otherwise, print subsequent liens one per log line
+                else
+
+                    local env_line
+
+                    # Print log's header
+                    log_info "  $(set_bold)[$(set_fcolor 208)$env_name$(reset_colors)]$(set_bold)=$(reset_colors)"
+
+                    # Iterate ovr vriables
+                    for env_line in "${env_vars[@]}"; do
+
+                        # Trimm the line
+                        env_line=$(trimm_string "$env_line")
+                        # If line is empty, skip it
+                        (( ${#env_line} == 0 )) && continue
+                        # Else, print log
+                        log_info "    $(set_bold)$env_line$(reset_colors)"
+
+                    done
+
+                fi
+
+                # Restore old word splitting 
+                pop_stack IFS
+                # Define the variable
+                push_env_stack $env_name ${build_env_ref[$env_name]}
+
+            done
+        fi
+        
+    done
 
     # -------------------------------------- Build --------------------------------------
     
     local ret
     
     # Download, build and install library
-    download_build_and_install ${urls[$target]} \
-        --verbose                               \
-        --arch-path=${archieves[$target]}       \
-        --extract-dir=${dirs[src]}              \
-        --show-progress                         \
-        --src-dir=${dirs[${target}_src]}        \
-        --build-dir=${dirs[${target}_build]}    \
-        --mark                                  \
-        --log-target=${target//_/-}             \
-        ${build_script_flags[@]}                \
+    download_build_and_install ${urls[$target]}      \
+        --verbose                                    \
+        --arch-path=${archieves[$target]}            \
+        --extract-dir=${dirs[src]}                   \
+        --show-progress                              \
+        --src-dir=$(basename ${dirs[${target}_src]}) \
+        --build-dir=${dirs[${target}_build]}         \
+        --mark                                       \
+        --log-target=${target//_/-}                  \
+        ${build_script_flags[@]}                     \
     && ret=$? || ret=$?
 
     # ------------------------------------- Cleanup -------------------------------------
 
     # Restore environment
     restore_env_stack
-        
+    
     # If error occurred, return error
     if [[ $ret == "1" ]]; then
         return 1

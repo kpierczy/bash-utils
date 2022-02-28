@@ -23,7 +23,7 @@ with dynamic linkage when using a built toolchain. In general approach to depend
 At the moment all dependancies are built in the bulk. It is good idea to provide user with choice between building off-the-tree dependencies 
 (potentially only some of them) and using in-tree dependencies
 
-## Build staging
+## Build staging (partially solved)
 
 At the moment toolchain's build is performed in seven stages:
 
@@ -56,7 +56,7 @@ level of building process' customization. One idea is to provide optional user-d
 component. Such handler could be implemented with bash `functions` and would play nicely with definitions-injecting mechanism provided by
 `TOOLCHAIN_EVAL_STRING` environmental argument. 
 
-## Choice of the libc implementation
+## Choice of the libc implementation (partially solved)
 
 At the moment choice of the libc implementation is limited to `newlib`/`newlib-nano`. It may be potentially extended to other libraries
 but current mechanism of resolving libc's name drastically limtis such a possibility. One of main aims for future development should be

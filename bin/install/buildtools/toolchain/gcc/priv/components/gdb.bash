@@ -3,7 +3,7 @@
 # @file     gdb.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Saturday, 26th February 2022 4:24:08 pm
+# @modified Monday, 28th February 2022 4:40:16 pm
 # @project  bash-utils
 # @brief
 #    
@@ -75,11 +75,11 @@ function build_gdb_impl() {
             # Back to the previous location
             popd > /dev/null
 
-            log_info "GDB documentation installed"
+            log_info "GDB-${versions[gdb]} documentation installed"
 
         # Otherwise, skip building
         else
-            log_info "Skipping ${names[gdb]} documentation installation"
+            log_info "Skipping GDB-${versions[gdb]} documentation installation"
         fi
     fi
 
@@ -99,7 +99,7 @@ function build_gdb() {
     )
 
     # First we build GDB without python support
-    build_gdb_impl gdb_extra_config
+    build_gdb_impl gdb_extra_config || return 1
 
     local -a gdb_extra_config=(
         "--with-python=yes"
@@ -107,7 +107,11 @@ function build_gdb() {
         "--program-suffix=-py"
     )
 
+    # Remove `built` and `installed` markers from the GDB directory
+    remove_directory_marker ${dirs[gdb_build]} 'build'
+    remove_directory_marker ${dirs[gdb_build]} 'install'
+
     # Then build gdb with python support
-    build_gdb_impl gdb_extra_config
+    build_gdb_impl gdb_extra_config || return 1
 
 }

@@ -3,7 +3,7 @@
 # @file     gcc-arm-none-eabi.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 21st November 2021 6:16:17 pm
-# @modified Saturday, 26th February 2022 6:01:15 pm
+# @modified Monday, 28th February 2022 1:11:55 pm
 # @project  bash-utils
 # @brief
 #    
@@ -101,7 +101,6 @@ function install() {
     )
     # Debug build options
     is_var_set opts[debug] && {
-        BUILD_OPTIONS+=( "-g"  )
         BUILD_OPTIONS+=( "-O0" )
     }
     # Additional build options (unused at the moment)
@@ -430,7 +429,6 @@ function install() {
 # ============================================================== Main ============================================================== #
 
 function main() {
-
 
     # Options
     local -A         a_prefix_opt_def=( [format]="--prefix"           [name]="prefix"        [type]="p" [default]="." )

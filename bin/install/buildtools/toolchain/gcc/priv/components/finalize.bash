@@ -3,7 +3,7 @@
 # @file     finalize.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Saturday, 26th February 2022 4:28:04 pm
+# @modified Monday, 28th February 2022 4:34:26 pm
 # @project  bash-utils
 # @brief
 #    
@@ -62,7 +62,7 @@ function build_finalize() {
         # Mark build directory with the coresponding marker
         mark_directory ${dirs[build]} 'build' 'cleanup'
 
-        log_info "Installation dircetory cleaned"
+        log_info "Installation directory cleaned"
 
     fi
 

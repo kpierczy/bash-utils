@@ -3,7 +3,7 @@
 # @file     defaults.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 7th November 2021 3:08:11 pm
-# @modified Saturday, 26th February 2022 7:22:49 pm
+# @modified Monday, 28th February 2022 2:27:03 pm
 # @project  bash-utils
 # @brief
 #    
@@ -299,7 +299,11 @@ function prepare_names() {
 
     # Prepare targets' versions
     for target in ${TARGETS[@]}; do
-        names[$target]="${target//_/-}-${versions[$target]}"
+        case $target in
+            'libc'     ) names[$target]="${opts[with_libc]//_/-}-${versions[$target]}"     ;;
+            'libc_aux' ) names[$target]="${opts[with_libc]//_/-}-aux-${versions[$target]}" ;;
+            *          ) names[$target]="${target//_/-}-${versions[$target]}"              ;;
+        esac
     done
 
     # Prepare toolchain's name
@@ -374,7 +378,11 @@ function prepare_archieves() {
         # Get name of target-associated options identifier
         local target_opt_id=$(target_to_option_id "$target")
         # Get target's archieve's path
-        archieves[$target]="${dirs[download]}/${target_opt_id}-${versions[$target]}"
+        case $target in
+            'libc' | 'libc_aux'                        ) archieves[$target]="${dirs[download]}/${opts[with_libc]}-${versions[$target]}" ;;
+            'gcc_base' | 'gcc_final' | 'gcc_final_aux' ) archieves[$target]="${dirs[download]}/gcc-${versions[$target]}"                ;;            
+            *                                          ) archieves[$target]="${dirs[download]}/${target_opt_id}-${versions[$target]}"   ;;
+        esac
         # Get target's src directory
         dirs[${target}_src]="${dirs[src]}/$(basename ${archieves[$target]})"
 
@@ -572,16 +580,7 @@ function install() {
     print_build_info
     # Clear environment
     clean_env 'is_variable_useless_for_build'
-print_hash_array -n build_components; echo
-print_hash_array -n versions;         echo
-print_hash_array -n urls;             echo
-print_hash_array -n names;            echo
-print_hash_array -n dirs;             echo
-print_hash_array -n archieves;        echo
-print_hash_array -n config_flags;     echo
-print_hash_array -n compile_flags;    echo
-print_hash_array -n build_env;        echo
-exit 1
+    
     local component
     
     # Build subsequent components

@@ -3,7 +3,7 @@
 # @file     helpers.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 7th November 2021 3:08:11 pm
-# @modified Saturday, 26th February 2022 6:42:10 pm
+# @modified Monday, 28th February 2022 1:05:30 pm
 # @project  bash-utils
 # @brief
 #    
@@ -197,9 +197,9 @@ alias gcc_parse_env='
     enable_word_splitting
 
     # Parse envrionment
-    declare -a  gcc_parse_env_config_flags=( $(declare -a | grep -oE -- " TOOLCHAIN_[[:alpha:]]*_CONFIG_FLAGS")  ) || true
-    declare -a gcc_parse_env_compile_flags=( $(declare -a | grep -oE -- " TOOLCHAIN_[[:alpha:]]*_COMPILE_FLAGS") ) || true
-    declare -a    gcc_parse_env_build_envs=( $(declare -A | grep -oE -- " TOOLCHAIN_[[:alpha:]]*_BUILD_ENV")     ) || true
+    declare -a  gcc_parse_env_config_flags=( $(declare -a | grep -oE -- " TOOLCHAIN_[[:alpha:]_]*_CONFIG_FLAGS")  ) || true
+    declare -a gcc_parse_env_compile_flags=( $(declare -a | grep -oE -- " TOOLCHAIN_[[:alpha:]_]*_COMPILE_FLAGS") ) || true
+    declare -a    gcc_parse_env_build_envs=( $(declare -A | grep -oE -- " TOOLCHAIN_[[:alpha:]_]*_BUILD_ENV")     ) || true
 
     # Initialize objects-injecting string
     export TOOLCHAIN_EVAL_STRING=""
@@ -231,6 +231,7 @@ alias gcc_parse_env='
                 local gcc_parse_env_component_name="$gcc_parse_env_entity"
                 gcc_parse_env_component_name="${gcc_parse_env_component_name#TOOLCHAIN_}"
                 gcc_parse_env_component_name="${gcc_parse_env_component_name%$gcc_parse_env_suffix}"
+
                 # If valid comonent name, parse it
                 if is_tolchain_flag_set "$gcc_parse_env_component_name"; then
 
@@ -244,11 +245,10 @@ alias gcc_parse_env='
                     # Export name of the array
                     unset "$gcc_parse_env_entity"
                     eval "export $gcc_parse_env_entity=${gcc_parse_env_entity#TOOLCHAIN_}"
+                    
                 fi
-
             done
         fi
-        
     done
 
     # Restor the prevous word-splitting separator

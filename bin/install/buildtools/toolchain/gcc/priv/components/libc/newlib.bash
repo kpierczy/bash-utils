@@ -3,7 +3,7 @@
 # @file     newlib.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Saturday, 26th February 2022 7:17:29 pm
+# @modified Monday, 28th February 2022 4:27:07 pm
 # @project  bash-utils
 # @brief
 #    
@@ -60,9 +60,9 @@ function build_newlib() {
 
     # Build the library
     if [[ $build_type == 'base' ]]; then
-        build_component 'libc'
+        build_component 'libc' || return 1
     else
-        build_component 'libc_aux'
+        build_component 'libc_aux' || return 1
     fi
 
     # ------------------------------- Build documentation -------------------------------
@@ -117,11 +117,11 @@ function build_newlib() {
                 # Back to the previous location
                 popd > /dev/null
 
-                log_info "Newlib documentation installed"
+                log_info "Newlib-${versions[libc]} documentation installed"
 
             # Otherwise, skip building
             else
-                log_info "Skipping ${names[libc]} documentation installation"
+                log_info "Skipping newlib-${versions[libc]} documentation installation"
             fi
         fi
     fi

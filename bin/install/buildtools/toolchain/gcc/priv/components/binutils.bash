@@ -3,7 +3,7 @@
 # @file     binutils.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Saturday, 26th February 2022 7:03:28 pm
+# @modified Monday, 28th February 2022 4:24:19 pm
 # @project  bash-utils
 # @brief
 #    
@@ -70,7 +70,7 @@ function build_binutils() {
             # Back to the previous location
             popd > /dev/null
 
-            log_info "Binutils documentation installed"
+            log_info "${names[binutils]^} documentation installed"
 
         # Otherwise, skip building
         else

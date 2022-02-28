@@ -3,7 +3,7 @@
 # @file     gcc_final.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Saturday, 26th February 2022 7:14:14 pm
+# @modified Monday, 28th February 2022 4:26:18 pm
 # @project  bash-utils
 # @brief
 #    
@@ -83,11 +83,11 @@ function build_gcc_final() {
             # Back to the previous location
             popd > /dev/null
 
-            log_info "Libgcc documentation installed"
+            log_info "GCC-${versions[gcc_final]} documentation installed"
 
         # Otherwise, skip building
         else
-            log_info "Skipping ${names[gcc]} libgcc documentation installation"
+            log_info "Skipping GCC-${versions[gcc_final]} documentation installation"
         fi
     fi
 

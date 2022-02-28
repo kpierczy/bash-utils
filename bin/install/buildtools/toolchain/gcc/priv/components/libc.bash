@@ -3,7 +3,7 @@
 # @file     libc.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 6th November 2021 5:49:03 pm
-# @modified Saturday, 26th February 2022 7:08:46 pm
+# @modified Monday, 28th February 2022 1:46:09 pm
 # @project  bash-utils
 # @brief
 #    
@@ -23,9 +23,9 @@ function build_libc() {
 
     # Dispatch build depending on the library version
     case ${opts[with_libc]} in
-        'glibc'       ) build_glibc  'base' ;;
-        'newlib'      ) build_newlib 'base' ;;
-        'ulibc'       ) build_ulibc  'base' ;;
+        'glibc'       ) build_glibc  'base' || return 1 ;;
+        'newlib'      ) build_newlib 'base' || return 1 ;;
+        'ulibc'       ) build_ulibc  'base' || return 1 ;;
     esac
 
 }
