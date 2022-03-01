@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Wednesday, 23rd February 2022 1:32:41 am
+# @modified Tuesday, 1st March 2022 2:44:46 pm
 # @project  bash-utils
 # @source   https://docs.ros.org/en/$distro/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$distro/Installation/Ubuntu-Install-Debians.html
@@ -139,6 +139,7 @@ function install_ros() {
     # List of dependencies packages
     local -a dependencies=(
         locales                          # Locales utilities
+        software-properties-common       # Software packages-manipulation pack
         curl                             # Utility to download files from online servers
         gnupg2                           # Implementation of the OpenPGP standard (encryption)
         lsb-release                      # Utilities related to distro-specific informations
@@ -182,6 +183,13 @@ function install_ros() {
             fi
             # Print incompatibile line to the user
             echo $line
+
+            # Print help message
+            log_warn "You may try to fix it with following commands:"
+            echo "sudo apt update && sudo apt install locales"
+            echo "sudo locale-gen en_US en_US.UTF-8"
+            echo "sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8"
+            echo "export LANG=en_US.UTF-8"
 
         fi
 
