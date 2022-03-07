@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Monday, 7th March 2022 7:38:17 pm
 # @project  Winder
 # @brief
 #    
@@ -43,7 +43,7 @@ function colbuild() {
     # ---------------- Parse arguments ----------------
 
     # Function's options
-    declare -a defs=(
+    declare -a opt_definitions=(
         '--up-to',up_to,f
         '-v',verbose,f
         '--fv',full_verbose,f
@@ -101,23 +101,29 @@ function colbuild() {
     # If no packages' names given, build the whole directory
     if [[ $# -eq 0 ]]; then
 
-        colcon build --base-paths "$src_dir_" $build_flags_
+        if ! colcon build --base-paths "$src_dir_" $build_flags_; then
+            log_error "Failed to build source directory"
+            restore_log_config_from_default_stack
+            return 1
+        else
+            log_info "Packages has ben sucesfully built"
+        fi
         
     # Else, build listed packages
     else 
 
         local package_
-
+        
         # Iterate over packages
         for package_ in "$@"; do
             
             # Build package
-            if colcon build --base-paths "$src_dir_" $build_type_ $package_ $build_flags_; then
+            if ! colcon build --base-paths "$src_dir_" $build_type_ $package_ $build_flags_; then
                 log_error "Failed to build \'$package_\' package"
                 restore_log_config_from_default_stack
                 return 1
             else
-                log_info "ros" "\'$package\' package built"
+                log_info "'$package_' package built"
             fi
             
         done
