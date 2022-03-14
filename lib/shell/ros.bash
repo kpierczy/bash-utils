@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified Monday, 7th March 2022 7:38:17 pm
+# @modified Monday, 14th March 2022 5:24:19 pm
 # @project  Winder
 # @brief
 #    
@@ -23,15 +23,17 @@
 # 
 # @options 
 # 
-#    --up-to  build packages with --packages-up-to flag (instead of 
-#             --packages-select)
-#         -v  verbose logs
-#       --fv  full verbosity (logs + compiller commands)
+#       --up-to  build packages with --packages-up-to flag (instead of 
+#                --packages-select)
+#            -v  verbose logs
+#          --fv  full verbosity (logs + compiller commands)
 #
 # @environment
 #
 #    @var COLCON_SOURCE_DIR (path)
 #       source directory of packages to be built (default: .)
+#    @var COLCON_FLAGS
+#       additional flags to be passed to colcon
 #
 # @todo test
 # -------------------------------------------------------------------
@@ -47,6 +49,7 @@ function colbuild() {
         '--up-to',up_to,f
         '-v',verbose,f
         '--fv',full_verbose,f
+        '--with-flags',with_flags
     )
 
     # Parse arguments to a named array
@@ -90,6 +93,10 @@ function colbuild() {
     is_var_set options[full_verbose] &&
         export VERBOSE=1
 
+    # If additional flags given, parse them
+    is_var_set COLCON_FLAGS &&
+        build_flags_+="$COLCON_FLAGS"
+
     # ----------- Prepare build environment -----------
 
     # Check for dependencies
@@ -101,7 +108,7 @@ function colbuild() {
     # If no packages' names given, build the whole directory
     if [[ $# -eq 0 ]]; then
 
-        if ! colcon build --base-paths "$src_dir_" $build_flags_; then
+        if ! colcon build --base-paths $src_dir_ $build_flags_; then
             log_error "Failed to build source directory"
             restore_log_config_from_default_stack
             return 1
@@ -118,7 +125,7 @@ function colbuild() {
         for package_ in "$@"; do
             
             # Build package
-            if ! colcon build --base-paths "$src_dir_" $build_type_ $package_ $build_flags_; then
+            if ! colcon build --base-paths $src_dir_ $build_type_ $package_ $build_flags_; then
                 log_error "Failed to build \'$package_\' package"
                 restore_log_config_from_default_stack
                 return 1
