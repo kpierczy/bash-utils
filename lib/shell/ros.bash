@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified Monday, 14th March 2022 5:24:19 pm
+# @modified Wednesday, 16th March 2022 5:20:17 pm
 # @project  Winder
 # @brief
 #    
@@ -101,7 +101,7 @@ function colbuild() {
 
     # Check for dependencies
     log_info "Checking for dependencies"
-    rosdep install -i --from-path src -y
+    rosdep install -i --from-path $src_dir_ -y
 
     log_info "Building package(s) ..."
 
