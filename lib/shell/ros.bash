@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified Wednesday, 16th March 2022 5:20:17 pm
+# @modified   Tuesday, 12th April 2022 3:16:42 am
 # @project  Winder
 # @brief
 #    
@@ -34,6 +34,8 @@
 #       source directory of packages to be built (default: .)
 #    @var COLCON_FLAGS
 #       additional flags to be passed to colcon
+#    @var COLCON_BUILD_FLAGS
+#       additional flags to be passed to colcon build
 #
 # @todo test
 # -------------------------------------------------------------------
@@ -94,8 +96,8 @@ function colbuild() {
         export VERBOSE=1
 
     # If additional flags given, parse them
-    is_var_set COLCON_FLAGS &&
-        build_flags_+="$COLCON_FLAGS"
+    is_var_set COLCON_BUILD_FLAGS &&
+        build_flags_+="$COLCON_BUILD_FLAGS"
 
     # ----------- Prepare build environment -----------
 
@@ -108,7 +110,7 @@ function colbuild() {
     # If no packages' names given, build the whole directory
     if [[ $# -eq 0 ]]; then
 
-        if ! colcon build --base-paths $src_dir_ $build_flags_; then
+        if ! colcon $COLCON_FLAGS build --base-paths $src_dir_ $build_flags_; then
             log_error "Failed to build source directory"
             restore_log_config_from_default_stack
             return 1
@@ -125,7 +127,7 @@ function colbuild() {
         for package_ in "$@"; do
             
             # Build package
-            if ! colcon build --base-paths $src_dir_ $build_type_ $package_ $build_flags_; then
+            if ! colcon $COLCON_FLAGS build --base-paths $src_dir_ $build_type_ $package_ $build_flags_; then
                 log_error "Failed to build \'$package_\' package"
                 restore_log_config_from_default_stack
                 return 1
@@ -138,7 +140,6 @@ function colbuild() {
 
     # Restore logs state
     restore_log_config_from_default_stack
-    
 }
 
 # -------------------------------------------------------------------
