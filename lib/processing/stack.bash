@@ -12,6 +12,11 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
+# Source dependencies
+source $BASH_UTILS_HOME/lib/logging/logging.bash
+source $BASH_UTILS_HOME/lib/scripting/parseargs/short/parseargs.bash
+source $BASH_UTILS_HOME/lib/scripting/parseargs/short/parseopts.bash
+
 # ========================================================== Configuration ========================================================= #
 
 # Prefix of the stack's variables

@@ -14,6 +14,7 @@
 
 # Source dependencies
 source $BASH_UTILS_HOME/lib/scripting/settings.bash
+source $BASH_UTILS_HOME/lib/logging/logging.bash
 
 # ====================================================== Inspection functions ====================================================== #
 
