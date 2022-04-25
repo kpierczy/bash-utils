@@ -164,7 +164,7 @@ function install_pkg_list() {
             log_info "Installing $package_ ..."
             
             # Install package
-            if "${user_mode_}" apt "${apt_cmd_}" ${apt_flags_} "$package_"; then
+            if ${user_mode_} apt ${apt_cmd_} ${apt_flags_} "$package_"; then
                 log_info "$package_ installed"
             else
                 log_error "$package_ could not be installed"

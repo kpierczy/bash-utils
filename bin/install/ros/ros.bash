@@ -61,25 +61,18 @@ declare ROS2_APT_SOURCE_PATH="/etc/apt/sources.list.d/ros2.list"
 function add_ros_repo() {
 
     # Authorise ROS2 GPG key
-    if [[ ! -f "$ROS2_GPG_PATH" ]]; then
-        sudo curl -sSL "$ROS2_GPG_URL" -o "$ROS2_GPG_PATH"
-    fi
-
-    # Create apt source file pointing to the ROS2 Ubuntu repository
-    if [[ ! -f "$ROS2_APT_SOURCE_PATH" ]]; then
-
-        # Prepare source file's content
-        local APT_SOURCE_CMD="deb [arch=$(dpkg --print-architecture) signed-by=$ROS2_GPG_PATH] $ROS2_REPO_URL $(lsb_release -cs) main"
-        # Write content to the file
-        echo "$APT_SOURCE_CMD" | sudo tee "$ROS2_APT_SOURCE_PATH" > /dev/null
-
-    fi
+    sudo curl -sSL "$ROS2_GPG_URL" -o "$ROS2_GPG_PATH"
+    
+    # Create apt source file pointing to the ROS2 Ubuntu repository - prepare source file's content
+    local APT_SOURCE_CMD="deb [arch=$(dpkg --print-architecture) signed-by=$ROS2_GPG_PATH] $ROS2_REPO_URL $(lsb_release -cs) main"
+    # Write content to the file
+    echo "$APT_SOURCE_CMD" | sudo tee "$ROS2_APT_SOURCE_PATH" > /dev/null
     
 }
 
 
 function install_ros_pkg() {
-    install_pkg ros-${opts[distro]}-desktop
+    install_pkg -yv --su -U ros-${opts[distro]}-desktop
 }
 
 
@@ -129,7 +122,7 @@ function install_ros_bin() {
 
 
 function install_ros() {
-
+    
     # If 'pkg' installation, force default installation path
     [[ ${pargs[src]} == "pkg" ]] && 
         opts[install_path]=$(distro=${opts[distro]} eval "echo $ROS2_DEFAULT_INSTALLATION_PATH_SCHEME")
@@ -210,28 +203,43 @@ function install_ros() {
         prepare_ros_installation
     
     # Add ROS repositories to apt
-    add_ros_repo
+    add_ros_repo || {
+        log_warn "Failed to add ROS2 repository to APT"
+        return 1
+    }
     
     # Install dependencies
-    sudo apt update && install_pkg_list -yv --su dependencies
+    sudo apt update && install_pkg_list -yv --su dependencies || {
+        log_warn "Failed to install ROS2 dependencies"
+        return 1
+    }
 
-    log_info "Installing ROS2 python dependencies..."
+    log_info "Installing ROS2 Python dependencies"
     
     # Install python dependencies
-    PIP_FLAGS='-U' pip_install_list ros_python_dependencies
+    PIP_FLAGS='-U' pip_install_list ros_python_dependencies || {
+        log_warn "Failed to install ROS2 Python dependencies"
+        return 1
+    }
 
     log_info "Dependencies installed"
-    
     
     # -------------------------------- Installation ---------------------------------
 
     log_info "Installing ROS2 to ${opts[install_path]}..."
     
+    local ret
+
     # Install ROS2 package (desktop-version)
     case ${pargs[src]} in
-        'pkg' ) install_ros_pkg ;;
-        'bin' ) install_ros_bin ;;
+        'pkg' ) install_ros_pkg && ret=$? || ret=$? ;;
+        'bin' ) install_ros_bin && ret=$? || ret=$? ;;
     esac
+    # Check if installation succeeded
+    if [[ $ret != 0 ]]; then
+        log_error "Failed to install ROS"
+        return 1
+    fi
     
     log_info "ROS2 installed"
 
