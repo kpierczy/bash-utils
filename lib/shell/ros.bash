@@ -4,7 +4,7 @@
 # @author     Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @maintainer Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date       Wednesday, 3rd November 2021 11:27:25 pm
-# @modified   Wednesday, 27th April 2022 4:57:44 pm
+# @modified   Wednesday, 27th April 2022 7:45:53 pm
 # @project    Winder
 # @brief
 #    
@@ -108,8 +108,9 @@ function colcon_wrapper() {
         build_type_="--packages-select"
 
     # If verbose build requested, export VERBOSE variable for CMake
+    local colcon_verbose=0
     is_var_set options[full_verbose] &&
-        export VERBOSE=1
+        colcon_verbose=1
 
     # If additional flags given, parse them
     is_var_set COLCON_BUILD_FLAGS &&
@@ -126,7 +127,7 @@ function colcon_wrapper() {
     # If no packages' names given, build the whole directory
     if [[ $# -eq 0 ]]; then
 
-        if ! colcon $COLCON_FLAGS $command --base-paths $src_dir_ $build_flags_; then
+        if ! VERBOSE=$colcon_verbose colcon $COLCON_FLAGS $command --base-paths $src_dir_ $build_flags_; then
             log_error "Failed to $failure_msg source directory"
             restore_log_config_from_default_stack
             return 1
@@ -143,7 +144,7 @@ function colcon_wrapper() {
         for package_ in "${packages[@]}"; do
             
             # Build package
-            if ! colcon $COLCON_FLAGS $command --base-paths $src_dir_ $build_type_ $package_ $build_flags_; then
+            if ! VERBOSE=$colcon_verbose colcon $COLCON_FLAGS $command --base-paths $src_dir_ $build_type_ $package_ $build_flags_; then
                 log_error "Failed to $failure_msg \'$package_\' package"
                 restore_log_config_from_default_stack
                 return 1
