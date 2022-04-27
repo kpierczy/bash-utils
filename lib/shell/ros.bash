@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     ros.bash
-# @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
-# @date     Wednesday, 3rd November 2021 11:27:25 pm
-# @modified   Tuesday, 12th April 2022 3:16:42 am
-# @project  Winder
+# @file       ros.bash
+# @author     Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
+# @maintainer Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
+# @date       Wednesday, 3rd November 2021 11:27:25 pm
+# @modified   Wednesday, 27th April 2022 4:57:44 pm
+# @project    Winder
 # @brief
 #    
 #    Set of handy cmd-line-functions  related to the ROS (Robot Operating System)
@@ -12,14 +13,22 @@
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
-# ============================================================ Functions =========================================================== #
+# ======================================================== Helper functions ======================================================== #
 
 # -------------------------------------------------------------------
-# @brief Builds colcon @p packages residing in @var COLCON_SOURCE_DIR
+# @brief Perofrms colcon action on given @p packages residing in
+#    @var COLCON_SOURCE_DIR
 #
-# @param packages...
+# @param command
+#    colcon cmd to be run
+# @param success_msg
+#    verb printed on action success
+# @param failure_msg
+#    verb printed on action failure
+# @param options_and_packages...
 #    list of packages to be built; if no @p packages are given, the 
-#    whole @var COLCON_SOURCE_DIR dirctory is built
+#    whole @var COLCON_SOURCE_DIR dirctory is built as well as list
+#    of options
 # 
 # @options 
 # 
@@ -34,17 +43,22 @@
 #       source directory of packages to be built (default: .)
 #    @var COLCON_FLAGS
 #       additional flags to be passed to colcon
-#    @var COLCON_BUILD_FLAGS
+#    @var COLCON_ACTION_FLAGS
 #       additional flags to be passed to colcon build
 #
 # @todo test
 # -------------------------------------------------------------------
-function colbuild() {
+function colcon_wrapper() {
 
     # Arguments
-    # local packages_
+    local command="$1"
+    local success_msg="$2"
+    local failure_msg="$3"
 
     # ---------------- Parse arguments ----------------
+
+    # Set list of packages as positional arguments
+    set -- "${@:4}"
 
     # Function's options
     declare -a opt_definitions=(
@@ -60,6 +74,8 @@ function colbuild() {
     # Set list of packages as positional arguments
     set -- "${posargs[@]}"
 
+    # Parse positional arguments
+    local packages="$@"
     # Get source directory
     local src_dir_="${COLCON_SOURCE_DIR:-.}"    
 
@@ -105,17 +121,17 @@ function colbuild() {
     log_info "Checking for dependencies"
     rosdep install -i --from-path $src_dir_ -y
 
-    log_info "Building package(s) ..."
+    log_info "Runinng colcon ..."
 
     # If no packages' names given, build the whole directory
     if [[ $# -eq 0 ]]; then
 
-        if ! colcon $COLCON_FLAGS build --base-paths $src_dir_ $build_flags_; then
-            log_error "Failed to build source directory"
+        if ! colcon $COLCON_FLAGS $command --base-paths $src_dir_ $build_flags_; then
+            log_error "Failed to $failure_msg source directory"
             restore_log_config_from_default_stack
             return 1
         else
-            log_info "Packages has ben sucesfully built"
+            log_info "Packages has ben sucesfully $success_msg"
         fi
         
     # Else, build listed packages
@@ -124,15 +140,15 @@ function colbuild() {
         local package_
         
         # Iterate over packages
-        for package_ in "$@"; do
+        for package_ in "${packages[@]}"; do
             
             # Build package
-            if ! colcon $COLCON_FLAGS build --base-paths $src_dir_ $build_type_ $package_ $build_flags_; then
-                log_error "Failed to build \'$package_\' package"
+            if ! colcon $COLCON_FLAGS $command --base-paths $src_dir_ $build_type_ $package_ $build_flags_; then
+                log_error "Failed to $failure_msg \'$package_\' package"
                 restore_log_config_from_default_stack
                 return 1
             else
-                log_info "'$package_' package built"
+                log_info "'$package_' package $success_msg"
             fi
             
         done
@@ -140,6 +156,76 @@ function colbuild() {
 
     # Restore logs state
     restore_log_config_from_default_stack
+}
+
+# ============================================================ Functions =========================================================== #
+
+# -------------------------------------------------------------------
+# @brief Builds colcon @p packages residing in @var COLCON_SOURCE_DIR
+#
+# @param packages...
+#    list of packages to be built; if no @p packages are given, the 
+#    whole @var COLCON_SOURCE_DIR dirctory is built
+# 
+# @options 
+# 
+#       --up-to  build packages with --packages-up-to flag (instead of 
+#                --packages-select)
+#            -v  verbose logs
+#          --fv  full verbosity (logs + compiller commands)
+#
+# @environment
+#
+#    @var COLCON_SOURCE_DIR (path)
+#       source directory of packages to be built (default: .)
+#    @var COLCON_FLAGS
+#       additional flags to be passed to colcon
+#    @var COLCON_BUILD_FLAGS
+#       additional flags to be passed to colcon build
+#
+# @todo test
+# -------------------------------------------------------------------
+function colbuild() {
+    COLCON_ACTION_FLAGS="$COLCON_BUILD_FLAGS" \
+    colcon_wrapper                            \
+        "build"                               \
+        "built"                               \
+        "build"                               \
+        "$@"
+}
+
+# -------------------------------------------------------------------
+# @brief Tests colcon @p packages residing in @var COLCON_SOURCE_DIR
+#
+# @param packages...
+#    list of packages to be tested; if no @p packages are given, the 
+#    whole @var COLCON_SOURCE_DIR dirctory is tested
+# 
+# @options 
+# 
+#       --up-to  test packages with --packages-up-to flag (instead of 
+#                --packages-select)
+#            -v  verbose logs
+#          --fv  full verbosity (logs + compiller commands)
+#
+# @environment
+#
+#    @var COLCON_SOURCE_DIR (path)
+#       source directory of packages to be tested (default: .)
+#    @var COLCON_FLAGS
+#       additional flags to be passed to colcon
+#    @var COLCON_TEST_FLAGS
+#       additional flags to be passed to colcon test
+#
+# @todo test
+# -------------------------------------------------------------------
+function coltest() {
+    COLCON_ACTION_FLAGS="$COLCON_TEST_FLAGS" \
+    colcon_wrapper                           \
+        "test"                               \
+        "tested"                             \
+        "test"                               \
+        "$@"
 }
 
 # -------------------------------------------------------------------
