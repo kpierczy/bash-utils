@@ -3,7 +3,7 @@
 # @file     source_me.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified Monday, 21st February 2022 10:16:44 pm
+# @modified   Thursday, 12th May 2022 7:33:32 pm
 # @project  bash-utils
 # @brief
 #    
@@ -50,17 +50,33 @@ fi
 
 # List of dependencies
 declare dependencies=(
-    pv       # Progress-monitor
-    tar      # Tarball archieves tool
-    zip      # ZIP archieves tool
-    unzip    # ZIP archieves tool (extraction)
-    fuse-zip # Mounting ZIP as filesystem
+    
+    # Python
+    python3
+    python3-pip
+    
+    # Web utilities
+    curl
+
+    # Archieves utilities
+    tar      
+    zip      
+    unzip    
+    fuse-zip 
+
+    # General utilities
+    pv       
+
 )
 
 # List of Python dependencies
 declare pip_dependencies=(
-    tqdm     # Extracting ZIP files
+    
+    # Archieves utilities
+    tqdm
+
 )
+
 # Install dependencies
 install_pkg_list -yv --su dependencies || return 1
 # Install Python dependencies

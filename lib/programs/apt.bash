@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified Monday, 21st February 2022 6:58:11 pm
+# @modified   Thursday, 12th May 2022 10:09:56 pm
 # @project  bash-utils
 # @brief
 #    
@@ -78,6 +78,9 @@ function is_pkg_installed() {
 #  -a, --allow-local-app  if set, before checking whether the package is installed, the
 #                         function will check whether the appllication with the given
 #                         name and if so, it will skip installation
+#   -f, --allow-failures  when one of packages cannot be installed, only error will be 
+#                         printed and installation of further packages in the list will
+#                         proceed
 # 
 # @environment
 #  
@@ -100,6 +103,7 @@ function install_pkg_list() {
         '-y',non_interactive,f
         '-U',upgrade,f
         '-a|--allow-local-app',allow_local,f
+        '-f|--allow-failures',allow_failures,f
     )
     
     # Parse arguments to a named array
@@ -167,9 +171,14 @@ function install_pkg_list() {
             if ${user_mode_} apt ${apt_cmd_} ${apt_flags_} "$package_"; then
                 log_info "$package_ installed"
             else
+
+                # Print error
                 log_error "$package_ could not be installed"
-                restore_log_config_from_default_stack
-                return 1
+                # Return from fucntion, if error supressing has not been requested
+                if ! is_var_set options[allow_failures]; then
+                    restore_log_config_from_default_stack
+                    return 1
+                fi
             fi
             
         # If 'verbose installed' option passed, log info
@@ -200,6 +209,9 @@ function install_pkg_list() {
 #  -a, --allow-local-app  if set, before checking whether the package is installed, the
 #                         function will check whether the appllication with the given
 #                         name and if so, it will skip installation
+#   -f, --allow-failures  when one of packages cannot be installed, only error will be 
+#                         printed and installation of further packages in the list will
+#                         proceed
 #
 # @environment
 #  
@@ -222,6 +234,7 @@ function install_pkg() {
         '-y',non_interactive,f
         '-U',upgrade,f
         '-a|--allow-local-app',allow_local,f
+        '-f|--allow-failures',allow_failures,f
     )
 
     # Parse arguments

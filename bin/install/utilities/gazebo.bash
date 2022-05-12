@@ -2,7 +2,7 @@
 # @file     gazebo.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 6th March 2022 7:30:26 pm
-# @modified Monday, 7th March 2022 5:41:38 pm
+# @modified   Thursday, 12th May 2022 9:47:33 pm
 # @project  engineering-thesis
 # @brief
 #    
@@ -24,65 +24,62 @@ declare cmd_description="Installs Gazebo simulator via apt package"
 # ========================================================== Configruation ========================================================= #
 
 # Logging context of the script
-declare LOG_CONTEXT="webots"
+declare LOG_CONTEXT="gazebo"
 
 # Default apt key URL
-declare APT_KEY='https://packages.osrfoundation.org/gazebo.key'
-# Default apt respository URL
-declare APT_REPO='http://packages.osrfoundation.org/gazebo/ubuntu-stable'
-# Default apt .list file
-declare APT_LIST='/etc/apt/sources.list.d/gazebo-stable.list'
+declare APT_KEY_URL='https://packages.osrfoundation.org/gazebo.gpg'
 
 # ============================================================== Main ============================================================== #
 
 function install() {
+        
+    local package
+
+    # Select target package depending on the Ubuntu version
+    case $(lsb_release -sd) in
+    
+        # OS supported by the script
+        "Ubuntu 20.04 LTS" ) package="gazebo11" ;;
+        "Ubuntu 22.04 LTS" ) package="gazebo"   ;;
+        # OS NOT supported by the script
+        * )
+            log_error "OS version not supported ($(lsb_release -sd))"
+            return 1 ;;
+    esac
 
     # Check if Webots is installed already
-    is_pkg_installed gazebo11 && return 0
+    is_pkg_installed "$package" && return 0
 
     log_info "Adding Gazebo repository to apt..."
 
-    # Setup package server
-    sudo sh -c "echo \"deb $APT_REPO `lsb_release -cs` main\" > $APT_LIST"
+    # Repo string to be palced in apt sources
+    local APT_REPO_STRING="deb [arch=amd64,arm64] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main"
+    # Repo file for APT
+    local APT_REPO_FILE="/etc/apt/sources.list.d/gazebo-stable.list"
+
     # Add apt key
-    wget $APT_KEY -O - | sudo apt-key add -
+    curl -s "$APT_KEY_URL" | sudo tee "/etc/apt/trusted.gpg.d/gazebo.gpg" > /dev/null
+    # Setup package server
+    echo "$APT_REPO_STRING" | sudo tee "$APT_REPO_FILE" > /dev/null
     
     log_info "Updating apt..."
 
     # Update apt
     sudo apt-get update
-        
+    
+    log_info "Instsalling..."
+    
     # Install the simulator
-    install_pkg --su -y -v gazebo11
+    install_pkg --su -y -v "$package" || {
+        log_error "Failed to install $package package"
+        return 1
+    }
     
-}
-
-# ============================================================== Main ============================================================== #
-
-function main() {
-
-    # Set help generator's configuration
-    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
-    # Parsing options
-    declare -a PARSEARGS_OPTS
-    PARSEARGS_OPTS+=( --with-help )
-    PARSEARGS_OPTS+=( --verbose   )
+    log_info "Sucesfully installed"
     
-    # Parsed options
-    parse_arguments
-    # If help requested, return
-    if [[ $ret == '5' ]]; then
-        return
-    elif [[ $ret != '0' ]]; then
-        return $ret
-    fi
-
-    # Run installation routine
-    install
-
 }
 
 # ============================================================= Script ============================================================= #
 
 # Run the script
-source $BASH_UTILS_HOME/lib/scripting/templates/base.bash
+source $BASH_UTILS_HOME/lib/scripting/templates/simple_install.bash

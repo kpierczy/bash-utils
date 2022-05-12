@@ -3,7 +3,7 @@
 # @file     ros.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 12:41:47 am
-# @modified Tuesday, 1st March 2022 2:44:46 pm
+# @modified   Thursday, 12th May 2022 8:42:04 pm
 # @project  bash-utils
 # @source   https://docs.ros.org/en/$distro/Installation/Ubuntu-Install-Binary.html
 # @source   https://docs.ros.org/en/$distro/Installation/Ubuntu-Install-Debians.html
@@ -41,18 +41,20 @@ declare -A opts_description=(
 
 # Script's log context
 declare LOG_CONTEXT="ros2"
+# Default distro of the ROS2
+declare ROS2_DEFAULT_DISTRO="galactic"
+# Supported distros of the ROS2
+declare ROS2_SUPPORTED_DISTRO="foxy | galactic | humble"
 
 # Default destination of the ROS2
 declare ROS2_DEFAULT_INSTALLATION_PATH_SCHEME="/opt/ros/\$distro"
 # Path to the default configuration of the rosdep
-declare ROS2_ROSDEP_DEFAULT_CONFIG_PATH=/etc/ros/rosdep/sources.list.d/20-default.list
+declare ROS2_ROSDEP_DEFAULT_CONFIG_PATH="/etc/ros/rosdep/sources.list.d/20-default.list"
 
 # URL of the ROS2 GPG key
 declare ROS2_GPG_URL="https://raw.githubusercontent.com/ros/rosdistro/master/ros.key"
 # Destination of the PGP key
 declare ROS2_GPG_PATH="/usr/share/keyrings/ros-archive-keyring.gpg"
-# URL of the ROS2 Ubuntu repository
-declare ROS2_REPO_URL="http://packages.ros.org/ros2/ubuntu"
 # Path to the source file of the ROS2 Ubuntu repository
 declare ROS2_APT_SOURCE_PATH="/etc/apt/sources.list.d/ros2.list"
 
@@ -64,10 +66,10 @@ function add_ros_repo() {
     sudo curl -sSL "$ROS2_GPG_URL" -o "$ROS2_GPG_PATH"
     
     # Create apt source file pointing to the ROS2 Ubuntu repository - prepare source file's content
-    local APT_SOURCE_CMD="deb [arch=$(dpkg --print-architecture) signed-by=$ROS2_GPG_PATH] $ROS2_REPO_URL $(lsb_release -cs) main"
+    local APT_SOURCE_CMD="deb [arch=$(dpkg --print-architecture) signed-by=$ROS2_GPG_PATH] $ROS2_REPO_URL $(source /etc/os-release && echo $UBUNTU_CODENAME) main"
     # Write content to the file
     echo "$APT_SOURCE_CMD" | sudo tee "$ROS2_APT_SOURCE_PATH" > /dev/null
-    
+
 }
 
 
@@ -281,9 +283,9 @@ function main() {
     local -A    b_src_parg_def=( [format]="SRC"    [name]="src"    [type]="s" [variants]="bin | pkg"           )
 
     # Opts
-    local -A    a_path_opt_def=( [format]="--installation-path" [name]="install_path" [type]="p" [default]=$ROS2_DEFAULT_INSTALLATION_PATH_SCHEME  )
-    local -A  b_distro_opt_def=( [format]="-d|--distro"         [name]="distro"       [type]="s" [default]="galactic" [variants]="foxy | galactic" )
-    local -A c_cleanup_opt_def=( [format]="-c|--cleanup"        [name]="cleanup"      [type]="f"                                                   )
+    local -A    a_path_opt_def=( [format]="--installation-path" [name]="install_path" [type]="p" [default]=$ROS2_DEFAULT_INSTALLATION_PATH_SCHEME                     )
+    local -A  b_distro_opt_def=( [format]="-d|--distro"         [name]="distro"       [type]="s" [default]="$ROS2_DEFAULT_DISTRO" [variants]="$ROS2_SUPPORTED_DISTRO" )
+    local -A c_cleanup_opt_def=( [format]="-c|--cleanup"        [name]="cleanup"      [type]="f"                                                                      )
 
     # Set help generator's configuration
     ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
@@ -295,9 +297,9 @@ function main() {
     # Parse arguments
     parse_arguments
     # If help requested, return
-    if [[ $ret == '5' ]]; then
+    if [[ $ret == $PARSEARGS_HELP_REQUESTED ]]; then
         return
-    elif [[ $ret != '0' ]]; then
+    elif [[ $ret != $PARSEARGS_SUCCESS ]]; then
         return $ret
     fi
 

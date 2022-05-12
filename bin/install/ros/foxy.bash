@@ -3,7 +3,7 @@
 # @file     foxy.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 8:55:12 pm
-# @modified Tuesday, 22nd February 2022 10:11:17 pm
+# @modified   Thursday, 12th May 2022 8:40:03 pm
 # @project  bash-utils
 # @brief
 #    
@@ -11,6 +11,13 @@
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
+
+# ============================================================ Constants =========================================================== #
+
+# URL of the ROS2 Ubuntu repository
+declare ROS2_REPO_URL="http://packages.ros.org/ros2/ubuntu"
+
+# ============================================================ Functions =========================================================== #
 
 function get_ros_bin_url() {
 

@@ -3,7 +3,7 @@
 # @file     cmake.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Thursday, 4th November 2021 3:14:23 pm
-# @modified Wednesday, 23rd February 2022 1:32:41 am
+# @modified   Thursday, 12th May 2022 9:47:01 pm
 # @project  bash-utils
 # @brief
 #    
@@ -169,9 +169,9 @@ function main() {
     # Parsed options
     parse_arguments
     # If help requested, return
-    if [[ $ret == '5' ]]; then
+    if [[ $ret == $PARSEARGS_HELP_REQUESTED ]]; then
         return
-    elif [[ $ret != '0' ]]; then
+    elif [[ $ret != $PARSEARGS_SUCCESS ]]; then
         return $ret
     fi
 

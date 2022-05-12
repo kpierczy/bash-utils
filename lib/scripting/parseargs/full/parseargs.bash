@@ -3,7 +3,7 @@
 # @file     parseargs.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 2:37:47 pm
-# @modified Thursday, 24th February 2022 2:43:11 am
+# @modified   Thursday, 12th May 2022 7:52:43 pm
 # @project  bash-utils
 # @brief
 #    
@@ -21,6 +21,14 @@ declare __parseargs_bug_msg_=$(echo \
 )
 
 # ============================================================ Function ============================================================ #
+
+# Parseargs return values
+declare PARSEARGS_SUCCESS=0
+declare PARSEARGS_BUG=1
+declare PARSEARGS_INVALID_ARG=2
+declare PARSEARGS_INVALID_TYPE=3
+declare PARSEARGS_INVALID_UBAD_LIST=4
+declare PARSEARGS_HELP_REQUESTED=5
 
 # ---------------------------------------------------------------------------------------
 # @brief Parses comand line arguments in an extensive way

@@ -3,7 +3,7 @@
 # @file     colcon.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Monday, 14th February 2022 3:08:56 pm
-# @modified Wednesday, 23rd February 2022 1:32:41 am
+# @modified   Thursday, 12th May 2022 9:47:26 pm
 # @project  bash-utils
 # @brief
 #    
@@ -38,46 +38,39 @@ function install() {
     # Check if package is already installed
     if ! is_pkg_installed python3-colcon-common-extensions; then
 
+        log_info "Adding colcon repository to apt..."
+
+        # Repo string to be palced in apt sources
+        local APT_REPO_STRING="deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main $(lsb_release -cs) main"
+        # Repo file for APT
+        local APT_REPO_FILE="/etc/apt/sources.list.d/ros2-latest.list"
+
         # Add colcon repository
-        log_info "Adding repository"
-        curl -s "$APT_KEY_URL" | sudo apt-key add -
-        sudo sh -c 'echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
+        curl -s "$APT_KEY_URL" | gpg --dearmor | sudo tee "/etc/apt/trusted.gpg.d/ros.gpg" > /dev/null
+        # Write content to the file
+        echo "$APT_REPO_STRING" | sudo tee "$APT_REPO_FILE" > /dev/null
+
+        log_info "Installing colcon..."
 
         # Install colcon
-        sudo apt update && install_pkg --su -y python3-colcon-common-extensions
+        sudo apt update && install_pkg --su -y python3-colcon-common-extensions || {
+            log_error "Failed to install package 'python3-colcon-common-extensions'"
+            return 1
+        }
+        
         # Install additional package
-        sudo apt update && install_pkg --su -y python3-colcon-mixin
+        sudo apt update && install_pkg --su -y python3-colcon-mixin || {
+            log_error "Failed to install package 'python3-colcon-mixin'"
+            return 1
+        }
+
+        log_info "Package installed"
 
     fi
-
-}
-
-# ============================================================== Main ============================================================== #
-
-function main() {
-
-    # Set help generator's configuration
-    ARGUMENTS_DESCRIPTION_LENGTH_MAX=120
-    # Parsing options
-    declare -a PARSEARGS_OPTS
-    PARSEARGS_OPTS+=( --with-help )
-    PARSEARGS_OPTS+=( --verbose   )
-    
-    # Parsed options
-    parse_arguments
-    # If help requested, return
-    if [[ $ret == '5' ]]; then
-        return
-    elif [[ $ret != '0' ]]; then
-        return $ret
-    fi
-
-    # Run installation script
-    install
 
 }
 
 # ============================================================= Script ============================================================= #
 
 # Run the script
-source $BASH_UTILS_HOME/lib/scripting/templates/base.bash
+source $BASH_UTILS_HOME/lib/scripting/templates/simple_install.bash
