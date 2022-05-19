@@ -3,7 +3,7 @@
 # @file     miktex.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Friday, 5th November 2021 6:40:39 pm
-# @modified Wednesday, 23rd February 2022 1:32:41 am
+# @modified   Thursday, 19th May 2022 10:54:46 am
 # @project  bash-utils
 # @brief
 #    
@@ -79,13 +79,10 @@ function install_miktex() {
     log_info "Finalizing MiKTeX setup"
     
     # Prepare flags for MiKTeX setup
-    local setup_mode=''
     local miktex_flags=''
-    is_var_set opts[user] && 
-        miktex_flags='--shared=yes' ||
-        setup_mode='sudo'
+    is_var_set opts[user] && miktex_flags='--shared=yes'
     # Finish MiKTeX setup
-    $setup_mode miktexsetup finish $miktex_flags || {
+    sudo miktexsetup finish $miktex_flags || {
         log_error "Could not finish MiKTeX setup"
         return 1
     }
