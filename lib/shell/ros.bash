@@ -4,7 +4,7 @@
 # @author     Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @maintainer Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date       Wednesday, 3rd November 2021 11:27:25 pm
-# @modified   Wednesday, 27th April 2022 7:45:53 pm
+# @modified   Tuesday, 24th May 2022 11:30:10 pm
 # @project    Winder
 # @brief
 #    
@@ -75,7 +75,7 @@ function colcon_wrapper() {
     set -- "${posargs[@]}"
 
     # Parse positional arguments
-    local packages="$@"
+    local -a packages=( "$@" )
     # Get source directory
     local src_dir_="${COLCON_SOURCE_DIR:-.}"    
 
@@ -145,7 +145,7 @@ function colcon_wrapper() {
             
             # Build package
             if ! VERBOSE=$colcon_verbose colcon $COLCON_FLAGS $command --base-paths $src_dir_ $build_type_ $package_ $build_flags_; then
-                log_error "Failed to $failure_msg \'$package_\' package"
+                log_error "Failed to $failure_msg '$package_' package"
                 restore_log_config_from_default_stack
                 return 1
             else
