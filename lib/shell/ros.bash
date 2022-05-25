@@ -4,7 +4,7 @@
 # @author     Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @maintainer Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date       Wednesday, 3rd November 2021 11:27:25 pm
-# @modified   Tuesday, 24th May 2022 11:30:10 pm
+# @modified   Wednesday, 25th May 2022 1:19:35 pm
 # @project    Winder
 # @brief
 #    
@@ -32,10 +32,13 @@
 # 
 # @options 
 # 
-#       --up-to  build packages with --packages-up-to flag (instead of 
-#                --packages-select)
-#            -v  verbose logs
-#          --fv  full verbosity (logs + compiller commands)
+#           --up-to  build packages with --packages-up-to flag 
+#                    (instead of --packages-select)
+#                -v  verbose logs
+#              --fv  full verbosity (logs + buildtool commands)
+#  -s|--source-each  if set, function will source local_setup.bash 
+#                    file of each pakcage directly after it is 
+#                    built
 #
 # @environment
 #
@@ -66,6 +69,7 @@ function colcon_wrapper() {
         '-v',verbose,f
         '--fv',full_verbose,f
         '--with-flags',with_flags
+        '-s|--source-each',source_each,f
     )
 
     # Parse arguments to a named array
@@ -148,8 +152,16 @@ function colcon_wrapper() {
                 log_error "Failed to $failure_msg '$package_' package"
                 restore_log_config_from_default_stack
                 return 1
+            # If sucesfully built
             else
+
                 log_info "'$package_' package $success_msg"
+
+                # Source package's settings, if requested
+                if is_var_set options[source_each]; then
+                    source "./install/$package_/share/$package_/local_setup.bash"
+                fi
+
             fi
             
         done
@@ -170,10 +182,13 @@ function colcon_wrapper() {
 # 
 # @options 
 # 
-#       --up-to  build packages with --packages-up-to flag (instead of 
-#                --packages-select)
-#            -v  verbose logs
-#          --fv  full verbosity (logs + compiller commands)
+#            --up-to  build packages with --packages-up-to flag 
+#                     (instead of --packages-select)
+#                 -v  verbose logs
+#               --fv  full verbosity (logs + buildtool commands)
+#  -s|--source-each  if set, function will source local_setup.bash 
+#                    file of each pakcage directly after it is 
+#                    built
 #
 # @environment
 #

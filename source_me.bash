@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 # ====================================================================================================================================
-# @file     source_me.bash
-# @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
-# @date     Tuesday, 2nd November 2021 10:18:45 pm
-# @modified   Thursday, 12th May 2022 7:33:32 pm
-# @project  bash-utils
-# @brief
+# @file       source_me.bash
+# @author     Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
+# @maintainer Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
+# @date       Tuesday, 2nd November 2021 10:18:45 pm
+# @modified   Wednesday, 25th May 2022 1:37:42 pm
+# @project    bash-utils
+# @brief      Script that should be source before starting using the project
+# @details    
+#
+#    Main source script of the `bash-utils`` project. Sourcing it will provide a shell with all functions and aliases defined in the
+#    project's library as well as will exted PATH with directories holding helper scripts and programms.
 #    
-#    Main source script of the bash-utils project. Sourcing it will provide a shell with all functions and aliases defined in the
-#    project's library as well ass will exted PATH with directories holding helper scripts and programms.
-#    
+#    One may source this script with the 'setup' keyword which will make the script to verify project's system dependencies and
+#    install lacking ones. It is required to run update command at least once after cloning the repository. This is provided
+#    to ommit repeating dependencies' check at each sheell using `bash-utils`
+#
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
 
@@ -48,39 +54,44 @@ fi
 
 # ====================================================== Install dependencies ====================================================== #
 
-# List of dependencies
-declare dependencies=(
-    
-    # Python
-    python3
-    python3-pip
-    
-    # Web utilities
-    curl
+# Setup project
+if [[ "$1" == 'setup' ]]; then
 
-    # Archieves utilities
-    tar      
-    zip      
-    unzip    
-    fuse-zip 
+    # List of dependencies
+    declare dependencies=(
+        
+        # Python
+        python3
+        python3-pip
+        
+        # Web utilities
+        curl
 
-    # General utilities
-    pv       
+        # Archieves utilities
+        tar      
+        zip      
+        unzip    
+        fuse-zip 
 
-)
+        # General utilities
+        pv       
 
-# List of Python dependencies
-declare pip_dependencies=(
-    
-    # Archieves utilities
-    tqdm
+    )
 
-)
+    # List of Python dependencies
+    declare pip_dependencies=(
+        
+        # Archieves utilities
+        tqdm
 
-# Install dependencies
-install_pkg_list -yv --su dependencies || return 1
-# Install Python dependencies
-pip_install_list -v pip_dependencies || return 1
+    )
+
+    # Install dependencies
+    install_pkg_list -yv --su dependencies || return 1
+    # Install Python dependencies
+    pip_install_list -v pip_dependencies || return 1
+
+fi
 
 # ========================================================= Set environment ======================================================== #
 

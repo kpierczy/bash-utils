@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified Monday, 21st February 2022 6:58:11 pm
+# @modified   Wednesday, 25th May 2022 1:00:19 pm
 # @project  bash-utils
 # @brief
 #    
@@ -26,9 +26,9 @@ function is_pip_package_installed() {
     
     # Arguments
     local package_="$1"
-     
-    # Check if installed (Change all '-' to '_')
-    python3 -c "import ${package_//-/_}" &> /dev/null && return 0 || return 1
+    
+    # Check if installed
+    python3 -m pip show "$package_" &> /dev/null && return 0 || return 1
     
 }
 
