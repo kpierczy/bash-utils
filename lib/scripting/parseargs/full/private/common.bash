@@ -3,7 +3,7 @@
 # @file     common.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Sunday, 14th November 2021 12:49:58 pm
-# @modified Tuesday, 22nd February 2022 7:26:53 pm
+# @modified   Friday, 10th June 2022 1:29:22 pm
 # @project  bash-utils
 # @brief
 #    
@@ -465,10 +465,15 @@ function verify_variants_and_ranges() {
                 # Check whether option's value meet valid variants
                 is_array_element variants "${__verify_variants_and_ranges_parsed_[$name]}" ||
                 {
+                    # Enable word splitting to properly parse '*_stringifier_*' value
+                    localize_word_splitting
+                    enable_word_splitting
+                    # Log error
                     log_error \
                         "Argument '$($__verify_variants_and_ranges_stringifier_ $__verify_variants_and_ranges_definitions_ $name)' " \
                         "parsed with value (${__verify_variants_and_ranges_parsed_[$name]}) when one of" \
                         "{ ${__verify_variants_and_ranges_variants_[$name]} } is required"
+                    # Return error
                     return 2
                 }
 
@@ -500,9 +505,14 @@ function verify_variants_and_ranges() {
                 # Check whether option's value meet valid variants
                 if [[ "$min_valid" != "0" ]] || [[ "$max_valid" != "0" ]]; then
 
+                    # Enable word splitting to properly parse '*_stringifier_*' value
+                    localize_word_splitting
+                    enable_word_splitting
+                    # Log error
                     log_error \
                         "Argument '$($__verify_variants_and_ranges_stringifier_ $__verify_variants_and_ranges_definitions_ $name)' " \
                         "parsed with value (${__verify_variants_and_ranges_parsed_[$name]}) when it is limited to ( $min : $max ) range"
+                    # Return error
                     return $ret_
 
                 fi
