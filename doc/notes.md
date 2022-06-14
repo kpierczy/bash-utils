@@ -1,4 +1,5 @@
 # Handy sources
+
 1. [Approach bash like a developer](https://www.binaryphile.com/bash/2018/07/26/approach-bash-like-a-developer-part-1-intro.html)
 2. [Bash Conditional Expressions](https://www.gnu.org/software/bash/manual/html_node/Bash-Conditional-Expressions.html)
 3. [Bash cheat-sheet](https://devhints.io/bash)
@@ -14,11 +15,13 @@
 13. [GCC documentation](https://gcc.gnu.org/onlinedocs/)
 
 # Libraries
+
 1. [bash-lib (cyberark)](https://github.com/cyberark/bash-lib)
 3. [bash-lib (aks)](https://github.com/aks/bash-lib)
 3. [bashlog](https://github.com/Zordrak/bashlog)
 
 # Others
+
 1. [diffoscope](https://diffoscope.org/)
 2. [Bash Regex](https://tldp.org/LDP/Bash-Beginners-Guide/html/chap_04.html)
 3. `colourdiff` - colourfull substitute of the `diff`

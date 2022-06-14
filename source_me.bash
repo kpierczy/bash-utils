@@ -4,17 +4,17 @@
 # @author     Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @maintainer Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date       Tuesday, 2nd November 2021 10:18:45 pm
-# @modified   Wednesday, 25th May 2022 1:37:42 pm
+# @modified   Tuesday, 14th June 2022 5:50:06 pm
 # @project    bash-utils
 # @brief      Script that should be source before starting using the project
 # @details    
 #
-#    Main source script of the `bash-utils`` project. Sourcing it will provide a shell with all functions and aliases defined in the
+#    Main source script of the `bash-utils` project. Sourcing it will provide a shell with all functions and aliases defined in the
 #    project's library as well as will exted PATH with directories holding helper scripts and programms.
 #    
 #    One may source this script with the 'setup' keyword which will make the script to verify project's system dependencies and
 #    install lacking ones. It is required to run update command at least once after cloning the repository. This is provided
-#    to ommit repeating dependencies' check at each sheell using `bash-utils`
+#    to ommit repeating dependencies' check at each shell using `bash-utils`
 #
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
