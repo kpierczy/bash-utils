@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified   Wednesday, 25th May 2022 1:00:19 pm
+# @modified   Monday, 20th June 2022 1:17:06 pm
 # @project  bash-utils
 # @brief
 #    
@@ -11,6 +11,9 @@
 #    
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
+
+# Source dependencies
+source $BASH_UTILS_HOME/lib/scripting/settings.bash
 
 # ============================================================ Functions =========================================================== #
 
