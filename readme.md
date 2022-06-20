@@ -1,5 +1,8 @@
 # Welcome to the bash-utils library!
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![version](https://img.shields.io/badge/version-1.0.0-blue)
+
 This project provides a set of simple yet useful tools for developers working in the Linux environment on a regular basis. It consists of two main parts:
 
   - a **library** of functions and aliases designed to speed up process of creation of bash scripts; there is also a set of tools designed to be used directy from the command line - these are mainly related to software used by the author
