@@ -3,7 +3,7 @@
 # @file     parsepargs.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Saturday, 13th November 2021 7:33:06 pm
-# @modified Tuesday, 22nd February 2022 7:26:37 pm
+# @modified   Friday, 24th June 2022 12:56:30 pm
 # @project  bash-utils
 # @brief
 #    
@@ -12,6 +12,9 @@
 # @see parsepargs.bash
 # @copyright Krzysztof Pierczyk © 2021
 # ====================================================================================================================================
+
+# Source dependencies
+source $BASH_UTILS_HOME/lib/logging/logging.bash
 
 # A string reporting a library bug
 declare __parsepargs_bug_msg_=$(echo \
