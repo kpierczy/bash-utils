@@ -3,7 +3,7 @@
 # @file     packages.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 2nd November 2021 10:16:59 pm
-# @modified   Thursday, 12th May 2022 10:09:56 pm
+# @modified   Friday, 24th June 2022 1:55:32 pm
 # @project  bash-utils
 # @brief
 #    
@@ -15,6 +15,7 @@
 # Source dependencies
 source $BASH_UTILS_HOME/lib/scripting/settings.bash
 source $BASH_UTILS_HOME/lib/logging/logging.bash
+source $BASH_UTILS_HOME/lib/scripting/parseargs/short/parseopts.bash
 
 # ====================================================== Inspection functions ====================================================== #
 
