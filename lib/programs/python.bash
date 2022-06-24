@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified   Monday, 20th June 2022 1:17:06 pm
+# @modified   Friday, 24th June 2022 3:19:34 pm
 # @project  bash-utils
 # @brief
 #    
@@ -14,6 +14,8 @@
 
 # Source dependencies
 source $BASH_UTILS_HOME/lib/scripting/settings.bash
+source $BASH_UTILS_HOME/lib/logging/logging.bash
+source $BASH_UTILS_HOME/lib/scripting/parseargs/short/parseopts.bash
 
 # ============================================================ Functions =========================================================== #
 

@@ -4,7 +4,7 @@
 # @author     Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @maintainer Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date       Wednesday, 3rd November 2021 11:27:25 pm
-# @modified   Friday, 24th June 2022 2:33:08 pm
+# @modified   Friday, 24th June 2022 3:51:43 pm
 # @project    Winder
 # @brief
 #    
@@ -126,7 +126,7 @@ function colcon_wrapper() {
     log_info "Checking for dependencies"
     rosdep install -i --from-path $src_dir_ -y > /dev/null &&
         log_info "All required rosdeps installed sucesfully" ||
-        log_error "Failed to install required rosdeps"
+        log_warn "Failed to install required rosdeps"
 
     log_info "Runinng colcon ..."
 
