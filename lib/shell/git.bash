@@ -2,7 +2,7 @@
 # @file     git.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:39:47 pm
-# @modified Thursday, 17th February 2022 11:59:25 am
+# @modified Wednesday, 28th December 2022 11:58:10 pm
 # @project  bash-utils
 # @brief
 #    
@@ -31,7 +31,7 @@
 #       absolute path tot he git project's root (default: .)
 #
 # -------------------------------------------------------------------
-function gitaddm() { 
+function git_add_module() { 
 
     # Arguments
     local url_
@@ -84,7 +84,7 @@ function gitaddm() {
 #       absolute path tot he git project's root (default: .)
 #
 # -------------------------------------------------------------------
-gitrmm() {
+function git_rm_module() {
 
     # Arguments
     local path_="$1"
