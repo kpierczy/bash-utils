@@ -3,7 +3,7 @@
 # @file     variables.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 2:36:03 am
-# @modified Thursday, 24th February 2022 5:16:09 pm
+# @modified Wednesday, 28th December 2022 8:15:09 pm
 # @project  bash-utils
 # @brief
 #    
@@ -36,7 +36,7 @@ function is_var_set() {
 # -------------------------------------------------------------------
 function is_var_set_non_empty() {
     local var=$1
-    return $([[ -n  ${!var:+x} ]])
+    return $([[ -n ${!var:+x} ]])
 }
 
 # -------------------------------------------------------------------
