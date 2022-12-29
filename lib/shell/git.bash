@@ -2,7 +2,7 @@
 # @file     git.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Tuesday, 26th October 2021 12:39:47 pm
-# @modified Wednesday, 28th December 2022 11:58:10 pm
+# @modified Wednesday, 28th December 2022 11:59:05 pm
 # @project  bash-utils
 # @brief
 #    
@@ -28,7 +28,7 @@
 # @environment
 #
 #    @var PROJECT_HOME (path)
-#       absolute path tot he git project's root (default: .)
+#       absolute path to the git project's root (default: .)
 #
 # -------------------------------------------------------------------
 function git_add_module() { 
@@ -81,7 +81,7 @@ function git_add_module() {
 # @environment
 #
 #    @var PROJECT_HOME (path)
-#       absolute path tot he git project's root (default: .)
+#       absolute path to the git project's root (default: .)
 #
 # -------------------------------------------------------------------
 function git_rm_module() {
