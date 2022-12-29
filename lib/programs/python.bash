@@ -3,7 +3,7 @@
 # @file     python.bash
 # @author   Krzysztof Pierczyk (krzysztof.pierczyk@gmail.com)
 # @date     Wednesday, 3rd November 2021 9:59:27 pm
-# @modified   Friday, 24th June 2022 3:19:34 pm
+# @modified   Thursday, 29th December 2022 3:52:15 am
 # @project  bash-utils
 # @brief
 #    
@@ -143,8 +143,8 @@ function pip_install_list() {
             log_info "Installing $package_ ..."
 
             # Install package
-            ! python3 -m pip install $pip_flags_ ${mode_flag_} -- "$package_" | \
-                grep -v 'Requirement already satisfied'                       | \
+            ! python3 -m pip install $pip_flags_ ${mode_flag_} "$package_" | \
+                grep -v 'Requirement already satisfied'                    | \
                 grep -v 'Requirement already up-to-date'
 
             # Install package
