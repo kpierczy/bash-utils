@@ -129,15 +129,15 @@
         {
             "language": "cpp",
             "template": [
-                "@file     <<filename>>",
-                "@author   <<author>> (<<authoremail>>)",
-                "@date     <<filecreated('dddd, Do MMMM YYYY h:mm:ss a')>>",
-                "@modified <<dateformat('dddd, Do MMMM YYYY h:mm:ss a')>>",
-                "@project  <<projectname>>",
-                "@brief",
-                "   ",
-                "   ",
-                "   ",
+                "@file       <<filename>>",
+                "@author     <<author>> (<<authoremail>>)",
+                "@maintainer <<author>> (<<authoremail>>)",
+                "@date       <<filecreated('dddd, Do MMMM YYYY h:mm:ss a')>>",
+                "@modified   <<dateformat('dddd, Do MMMM YYYY h:mm:ss a')>>",
+                "@project    <<projectname>>",
+                "@brief      ",
+                "",
+                "",
                 "@copyright <<author>> © <<year>>"
             ]
         },
